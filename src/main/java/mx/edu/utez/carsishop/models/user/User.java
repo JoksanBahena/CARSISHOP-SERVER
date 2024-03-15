@@ -1,16 +1,17 @@
-package mx.edu.utez.carsishop.User;
+package mx.edu.utez.carsishop.models.user;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import mx.edu.utez.carsishop.models.gender.Gender;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
-import java.util.Date;
 import java.util.List;
 
 @Data
@@ -22,20 +23,29 @@ import java.util.List;
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    Integer id;
-    @Basic
-    @Column(name = "email",unique = true,nullable = false)
-    String username;
-    @Column(name = "password",nullable = false)
-    String password;
+    private Long id;
     @Column(name = "name",nullable = false,length = 40)
-    String name;
+    private String name;
     @Column(name = "surname",nullable = false,length = 60)
-    String surname;
+    private String surname;
+    @Column(name = "email",unique = true,nullable = false)
+    private String username;
     @Column(name = "phone",unique = true,length = 10)
-    String phone;
-    @Column(name = "birthdate",columnDefinition = "datetime(0)")
-    Date birthdate;
+    private String phone;
+
+    @ManyToOne
+    @JoinColumn(name="gender")
+    private Gender gender;
+
+    @Column(name = "password",nullable = false)
+    @JsonIgnore
+    private String password;
+
+    @Column(name = "profilepic")
+    private String profilepic;
+
+
+
     @Enumerated(EnumType.STRING) 
     Role role;
 
