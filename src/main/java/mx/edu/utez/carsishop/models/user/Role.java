@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.User;
+package mx.edu.utez.carsishop.models.user;
 
 public enum Role {
     ADMIN,

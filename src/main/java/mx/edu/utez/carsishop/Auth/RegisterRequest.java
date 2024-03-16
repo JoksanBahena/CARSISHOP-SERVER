@@ -2,7 +2,6 @@ package mx.edu.utez.carsishop.Auth;
 
 import lombok.*;
 
-import java.util.Date;
 
 @Builder
 @NoArgsConstructor
@@ -15,5 +14,4 @@ public class RegisterRequest {
     private String name;
     private String surname;
     private String phone;
-    private Date birthdate;
 }

@@ -1,7 +1,7 @@
 package mx.edu.utez.carsishop.Config;
 
 import lombok.RequiredArgsConstructor;
-import mx.edu.utez.carsishop.User.UserRepository;
+import mx.edu.utez.carsishop.models.user.UserRepository;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
