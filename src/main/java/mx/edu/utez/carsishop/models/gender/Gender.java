@@ -21,6 +21,6 @@ public class Gender {
     @Column(name = "gender", length = 20, nullable = false)
     private String gender;
 
-    @OneToMany(mappedBy = "genero")
+    @OneToMany(mappedBy = "gender")
     private List<User> users;
 }

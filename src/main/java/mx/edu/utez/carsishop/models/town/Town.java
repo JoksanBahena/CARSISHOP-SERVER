@@ -21,7 +21,7 @@ public class Town {
     @Column(name ="name",nullable = false,length = 100)
     private String name;
 
-    @OneToMany
+    @ManyToOne
     @JoinColumn(name="state")
     private State state;
 }
