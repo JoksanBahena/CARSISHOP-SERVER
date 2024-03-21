@@ -1,0 +1,34 @@
+package mx.edu.utez.carsishop.models.sellers;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import mx.edu.utez.carsishop.models.user.User;
+
+@AllArgsConstructor
+@NoArgsConstructor
+@Setter
+@Getter
+@Entity
+@Table(name = "sellers")
+public class Seller {
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
+    @Column(name = "rfc",nullable = false)
+    private String rfc;
+
+    @Column(name = "curp",nullable = false)
+    private String curp;
+
+    @Column(name = "id_image",nullable = false)
+    private String id_image;
+
+
+    @OneToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "user",referencedColumnName = "id")
+    private User user;
+}
