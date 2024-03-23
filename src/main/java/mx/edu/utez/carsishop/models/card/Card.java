@@ -42,6 +42,6 @@ public class Card {
     @JoinColumn(name = "user")
     private User user;
 
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "card")
     private List<Order> orders;
 }

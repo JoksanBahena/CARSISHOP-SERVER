@@ -18,7 +18,7 @@ import java.util.List;
 @Setter
 @Getter
 @Entity
-@Table(name = "order")
+@Table(name = "theorder")
 public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -42,7 +42,7 @@ public class Order {
     @Column(name = "status",nullable = false,length = 10,columnDefinition = "enum('Paid','In process','On the way','Delivered','Canceled','Returned') default 'Paid'")
     private String status;
 
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "theorder")
     private List<ClothOrder> clothOrders;
 
 }

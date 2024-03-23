@@ -20,8 +20,8 @@ public class ClothOrder {
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "order")
-    private Order order;
+    @JoinColumn(name = "theorder")
+    private Order theorder;
 
     @ManyToOne
     @JoinColumn(name = "clothes")
