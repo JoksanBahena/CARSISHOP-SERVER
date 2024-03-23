@@ -7,6 +7,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import mx.edu.utez.carsishop.models.gender.Gender;
+import mx.edu.utez.carsishop.models.sellers.Seller;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -44,6 +45,8 @@ public class User implements UserDetails {
     @Column(name = "profilepic")
     private String profilepic;
 
+    @OneToOne(mappedBy = "user")
+    private Seller seller;
 
 
     @Enumerated(EnumType.STRING) 
