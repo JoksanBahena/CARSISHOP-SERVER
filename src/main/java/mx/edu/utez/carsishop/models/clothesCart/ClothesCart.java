@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
 
 import java.util.List;
@@ -20,8 +21,11 @@ public class ClothesCart {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-
     @ManyToOne
     @JoinColumn(name = "shoppingCart")
     private ShoppingCart shoppingCart;
+
+    @ManyToOne
+    @JoinColumn(name = "clothes")
+    private Clothes clothes;
 }

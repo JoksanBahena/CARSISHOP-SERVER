@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.address;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -51,5 +52,6 @@ public class Address {
     private User user;
 
     @OneToMany(mappedBy = "address")
+    @JsonIgnore
     private List<Order> orders;
 }

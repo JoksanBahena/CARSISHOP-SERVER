@@ -29,4 +29,6 @@ public class Stock {
     @ManyToOne
     @JoinColumn(name = "clothes")
     private Clothes clothes;
+
+
 }

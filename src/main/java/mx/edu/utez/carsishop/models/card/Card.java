@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.card;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import lombok.AllArgsConstructor;
@@ -43,5 +44,6 @@ public class Card {
     private User user;
 
     @OneToMany(mappedBy = "card")
+    @JsonIgnore
     private List<Order> orders;
 }

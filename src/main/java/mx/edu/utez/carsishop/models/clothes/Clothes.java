@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.clothes;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -7,6 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.category.Category;
 import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
+import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
 import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.stock.Stock;
@@ -53,5 +55,10 @@ public class Clothes {
     private List<Stock> stock;
 
     @OneToMany(mappedBy = "clothes")
+    @JsonIgnore
     private List<ClothOrder> clothOrders;
+
+    @OneToMany(mappedBy = "clothes")
+    @JsonIgnore
+    private List<ClothesCart> clothesCarts;
 }

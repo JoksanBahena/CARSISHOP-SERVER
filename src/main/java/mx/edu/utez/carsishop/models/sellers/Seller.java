@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.sellers;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -30,11 +31,11 @@ public class Seller {
     @Column(name = "id_image",nullable = false)
     private String id_image;
 
-
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user",referencedColumnName = "id")
     private User user;
 
     @OneToMany(mappedBy = "seller")
+    @JsonIgnore
     private List<Clothes> clothes;
 }

@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.gender;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import mx.edu.utez.carsishop.models.user.User;
@@ -22,5 +23,6 @@ public class Gender {
     private String gender;
 
     @OneToMany(mappedBy = "gender")
+    @JsonIgnore
     private List<User> users;
 }
