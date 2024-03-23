@@ -6,8 +6,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import mx.edu.utez.carsishop.models.card.Card;
+import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.gender.Gender;
+import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.sellers.Seller;
+import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -48,6 +52,18 @@ public class User implements UserDetails {
     @OneToOne(mappedBy = "user")
     private Seller seller;
 
+    @OneToMany(mappedBy = "user")
+    private List<Card> cards;
+
+    @OneToMany(mappedBy = "user")
+    private List<Address> addresses;
+
+    @OneToMany(mappedBy = "user")
+    @JsonIgnore
+    private List<Order> orders;
+
+    @OneToOne(mappedBy = "user")
+    private ShoppingCart shoppingCart;
 
     @Enumerated(EnumType.STRING) 
     Role role;
