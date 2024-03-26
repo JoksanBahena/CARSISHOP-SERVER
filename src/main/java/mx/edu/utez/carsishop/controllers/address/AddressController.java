@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.controllers.Address;
+package mx.edu.utez.carsishop.controllers.address;
 
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.services.address.AddressService;
