@@ -34,20 +34,17 @@ public class AddressService {
     }
     public CustomResponse<List<Address>> getByUser(String email){
         Optional<User> user=userRepository.findByUsername(email);
-        if(user.isEmpty()){
-            return new CustomResponse<>(
-                    null,
-                    true,
-                    400,
-                    "User does not exists"
-            );
-        }
-        return new CustomResponse<>(
-                addressRepository.findAllByUser(user.get()),
+        return user.map(value -> new CustomResponse<>(
+                addressRepository.findAllByUser(value),
                 false,
                 200,
                 "OK"
-        );
+        )).orElseGet(() -> new CustomResponse<>(
+                null,
+                true,
+                400,
+                "User does not exists"
+        ));
     }
 
     public CustomResponse<Address> update(Address updatedAddress,long id){
