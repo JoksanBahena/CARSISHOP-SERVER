@@ -27,4 +27,7 @@ public class Category {
     @OneToMany(mappedBy = "category")
     @JsonIgnore
     private List<Clothes> clothes;
+
+    @Column(name = "status", columnDefinition = "BOOL DEFAULT TRUE")
+    private boolean status;
 }
