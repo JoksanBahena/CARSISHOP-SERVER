@@ -10,6 +10,12 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,19 +38,28 @@ public class AddressService {
                 "OK"
         );
     }
-    public CustomResponse<List<Address>> getByUser(String email){
+    public CustomResponse<List<Address>> getByUser(String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Optional<User> user=userRepository.findByUsername(email);
-        return user.map(value -> new CustomResponse<>(
-                addressRepository.findAllByUser(value),
-                false,
-                200,
-                "OK"
-        )).orElseGet(() -> new CustomResponse<>(
-                null,
-                true,
-                400,
-                "User does not exists"
-        ));
+        if(user.isEmpty()){
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "User does not exists"
+            );
+        }else {
+            List<Address> addresses=addressRepository.findAllByUser(user.get());
+            for (Address address: addresses) {
+                address.encryptData();
+            }
+            return new CustomResponse<>(
+                    addresses,
+                    false,
+                    200,
+                    "OK"
+            );
+        }
+
     }
 
     public CustomResponse<Address> update(Address updatedAddress,long id){
