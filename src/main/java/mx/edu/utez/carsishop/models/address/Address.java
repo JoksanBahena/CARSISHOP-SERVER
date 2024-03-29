@@ -10,7 +10,14 @@ import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.state.State;
 import mx.edu.utez.carsishop.models.town.Town;
 import mx.edu.utez.carsishop.models.user.User;
+import mx.edu.utez.carsishop.utils.CryptoService;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @AllArgsConstructor
@@ -54,4 +61,16 @@ public class Address {
     @OneToMany(mappedBy = "address")
     @JsonIgnore
     private List<Order> orders;
+
+    @Transient
+    private CryptoService cryptoService = new CryptoService();
+
+
+    public void encryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        this.cp = cryptoService.encrypt(this.cp);
+        this.suburb = cryptoService.encrypt(this.suburb);
+        this.street = cryptoService.encrypt(this.street);
+        this.intnumber = cryptoService.encrypt(this.intnumber);
+        this.extnumber = cryptoService.encrypt(this.extnumber);
+    }
 }
