@@ -1,11 +1,17 @@
 package mx.edu.utez.carsishop.Jwt;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import io.jsonwebtoken.ExpiredJwtException;
+import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -36,27 +42,65 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
             return;
         }
+        try{
+            username=jwtService.getUsernameFromToken(token);
 
-        username=jwtService.getUsernameFromToken(token);
-
-        if (username!=null && SecurityContextHolder.getContext().getAuthentication()==null)
-        {
-            UserDetails userDetails=userDetailsService.loadUserByUsername(username);
-
-            if (jwtService.isTokenValid(token, userDetails))
+            if (username!=null && SecurityContextHolder.getContext().getAuthentication()==null)
             {
-                UsernamePasswordAuthenticationToken authToken= new UsernamePasswordAuthenticationToken(
-                    userDetails,
-                    null,
-                    userDetails.getAuthorities());
+                UserDetails userDetails=userDetailsService.loadUserByUsername(username);
 
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+                if (jwtService.isTokenValid(token, userDetails))
+                {
+                    UsernamePasswordAuthenticationToken authToken= new UsernamePasswordAuthenticationToken(
+                            userDetails,
+                            null,
+                            userDetails.getAuthorities());
 
-                SecurityContextHolder.getContext().setAuthentication(authToken);
+                    authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+
             }
+        } catch (ExpiredJwtException ex) {
+            CustomResponse<String> customResponse = new CustomResponse<>();
+            customResponse.setError(true);
+            customResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            customResponse.setMessage("Token expirado");
 
+            // configurar la respuesta del servlet con el contenido de la instancia de CustomResponse
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.writeValue(response.getWriter(), customResponse);
+
+            return;
+        } catch (SignatureException e){
+            CustomResponse<String> customResponse = new CustomResponse<>();
+            customResponse.setError(true);
+            customResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            customResponse.setMessage("Token inválido");
+
+            // configurar la respuesta del servlet con el contenido de la instancia de CustomResponse
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.writeValue(response.getWriter(), customResponse);
+
+            return;
+        }catch (Exception e){
+            CustomResponse<String> customResponse = new CustomResponse<>();
+            customResponse.setError(true);
+            customResponse.setStatus(HttpStatus.UNAUTHORIZED.value());
+            customResponse.setMessage("Error desconocido de autenticación");
+
+            // configurar la respuesta del servlet con el contenido de la instancia de CustomResponse
+            response.setStatus(HttpStatus.UNAUTHORIZED.value());
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.writeValue(response.getWriter(), customResponse);
         }
-        
+
         filterChain.doFilter(request, response);
     }
 
