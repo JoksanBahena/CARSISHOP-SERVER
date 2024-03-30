@@ -5,8 +5,14 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ClothesRepository extends JpaRepository<Clothes, Long> {
+    @Query(
+            value = "SELECT * FROM Clothes WHERE id = :id", nativeQuery = true
+    )
+    Optional<Clothes> findById(Long id);
+
     @Query(
             value = "SELECT c.* FROM Clothes c JOIN Category cat ON c.category = cat.id WHERE cat.status = 1 AND cat.name = :category ORDER BY desc", nativeQuery = true
     )

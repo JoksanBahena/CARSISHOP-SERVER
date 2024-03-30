@@ -17,6 +17,11 @@ public class ClothesController {
     @Autowired
     private ClothesService clothesService;
 
+    @GetMapping("/getOne/{id:[0-9]+}")
+    public ResponseEntity<CustomResponse<Clothes>> getOne(@PathVariable Long id) {
+        return new ResponseEntity<>(clothesService.getOne(id), HttpStatus.OK);
+    }
+
     @GetMapping("/getByCategory/{category}")
     public ResponseEntity<CustomResponse<List<Clothes>>> getByCategory(@PathVariable String category) {
         return new ResponseEntity<>(clothesService.findByCategory(category), HttpStatus.OK);

@@ -13,6 +13,24 @@ public class ClothesService {
     @Autowired
     private ClothesRepository clothesRepository;
 
+    public CustomResponse<Clothes> getOne(Long id) {
+        if(!this.clothesRepository.existsById(id)) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "No se encontro alguna prenda"
+            );
+        }
+
+        return new CustomResponse<Clothes>(
+                this.clothesRepository.findById(id).get(),
+                false,
+                200,
+                "Ok"
+        );
+    }
+
     public CustomResponse<List<Clothes>> findByCategory(String category) {
         List<Clothes> clothes = this.clothesRepository.findClothesByCategory(category);
 
