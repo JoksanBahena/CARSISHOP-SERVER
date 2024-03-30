@@ -8,6 +8,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
@@ -19,7 +25,7 @@ public class AddressController {
     private AddressService addressService;
 
     @GetMapping("/getByUser/{email}")
-    public ResponseEntity<CustomResponse<List<Address>>> getByUser(@PathVariable String email){
+    public ResponseEntity<CustomResponse<List<Address>>> getByUser(@PathVariable String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         /*
         email = desecnptar(email);
          */
