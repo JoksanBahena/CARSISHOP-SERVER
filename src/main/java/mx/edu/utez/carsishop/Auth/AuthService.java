@@ -12,6 +12,9 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.SQLIntegrityConstraintViolationException;
+import java.util.Optional;
+
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -37,6 +40,15 @@ public class AuthService {
     }
 
     public CustomResponse<AuthResponse> register(RegisterRequest request) {
+        Optional<User> userOptional = userRepository.findByUsername(request.getEmail());
+        if (userOptional.isPresent()) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "User already exists"
+            );
+        }
         User user = User.builder()
             .username(request.getEmail())
             .password(passwordEncoder.encode( request.getPassword()))
@@ -48,16 +60,15 @@ public class AuthService {
 
         userRepository.save(user);
 
-        AuthResponse authResponse= AuthResponse.builder()
-            .token(jwtService.getToken(user))
-            .build();
+        AuthResponse authResponse = AuthResponse.builder()
+                .token(jwtService.getToken(user))
+                .build();
         return new CustomResponse<>(
                 authResponse,
                 false,
                 200,
                 "OK"
         );
-        
     }
 
 }
