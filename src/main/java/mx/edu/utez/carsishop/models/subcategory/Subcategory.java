@@ -21,7 +21,7 @@ public class Subcategory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "name",nullable = false,length = 40)
+    @Column(name = "name",nullable = false,length = 40,unique = true)
     private String name;
 
     @OneToMany(mappedBy = "subcategory")
