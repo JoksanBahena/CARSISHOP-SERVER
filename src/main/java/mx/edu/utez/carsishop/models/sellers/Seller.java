@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.models.sellers;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,6 +34,7 @@ public class Seller {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user",referencedColumnName = "id")
+    @JsonIgnoreProperties("seller")
     private User user;
 
     @OneToMany(mappedBy = "seller")

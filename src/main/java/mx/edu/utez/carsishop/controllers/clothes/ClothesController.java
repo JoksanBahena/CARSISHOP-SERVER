@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.controllers.clothes;
 
 import mx.edu.utez.carsishop.models.clothes.Clothes;
+import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.services.clothes.ClothesService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,15 +9,43 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
+import jakarta.validation.Valid;
+import mx.edu.utez.carsishop.models.stock.Stock;
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
-@RequestMapping("/api/clothes")
-@CrossOrigin({"*"})
+@RequestMapping(path = "/api/clothes")
+@CrossOrigin(origins = {"*"})
 public class ClothesController {
     @Autowired
     private ClothesService clothesService;
 
+    @PostMapping(path = "/create")
+    public ResponseEntity<CustomResponse<Clothes>> createClothes(@Valid @RequestBody ClothesDto clothes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return ResponseEntity.ok(clothesService.createClothes(clothes));
+    }
+
+    @PutMapping(path = "/update")
+    public ResponseEntity<CustomResponse<Clothes>> updateClothesInfo(@Valid @RequestBody ClothesUpdateDto clothes) {
+        return ResponseEntity.ok(clothesService.updateClothesInformation(clothes));
+    }
+
+    @PutMapping(path = "/update/stock")
+    public ResponseEntity<CustomResponse<List<Stock>>> updateClothesStock(@Valid @RequestBody ClothesStockUpdateDto clothes) {
+        return ResponseEntity.ok(clothesService.updateStock(clothes));
+    }
+
+    @PutMapping(path = "/disable/{id}")
+    public ResponseEntity<CustomResponse<Clothes>> disableCloth(@PathVariable long id) {
+        return ResponseEntity.ok(clothesService.disableCloth(id));
+    }
     @GetMapping("/getOne/{id:[0-9]+}")
     public ResponseEntity<CustomResponse<Clothes>> getOne(@PathVariable Long id) {
         return new ResponseEntity<>(clothesService.getOne(id), HttpStatus.OK);
@@ -36,4 +65,6 @@ public class ClothesController {
     public ResponseEntity<CustomResponse<List<Clothes>>> getAllClothesOrderedByPrice() {
         return new ResponseEntity<>(clothesService.findAllClothesOrderedByPrice(), HttpStatus.OK);
     }
+
+
 }

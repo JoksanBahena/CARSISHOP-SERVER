@@ -8,7 +8,10 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 import java.util.Optional;
 
+import java.util.Optional;
+
 public interface SubcaregoryRepository extends JpaRepository<Subcategory, Long> {
+    Optional<Subcategory> findByName(String subcategory);
 
     @Query(value = "SELECT s FROM Subcategory s WHERE UPPER(s.name) LIKE UPPER(?1)")
     List<Subcategory> findAllByNamePagination(String value, Pageable offset);
