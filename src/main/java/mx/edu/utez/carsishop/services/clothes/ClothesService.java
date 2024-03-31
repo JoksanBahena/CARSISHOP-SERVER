@@ -202,13 +202,13 @@ public class ClothesService {
         }
         //se suben las imagenes a cloudinary
         UploadImage uploadImage = new UploadImage();
-        List<MultipartFile> images = clothesImagesDto.getImages();
+        List<ClothesImagesDto.ImagesAndIndex> images = clothesImagesDto.getImages();
         for (int i = 0; i < images.size(); i++){
             if(imagesList.size()>=5){
                 break;
             }
             Image image = new Image();
-            image.setUrl(uploadImage.uploadImage(images.get(i), clothesOptional.get().getName()+"-"+imagesList.size()));
+            image.setUrl(uploadImage.uploadImage(images.get(i).getImage(), clothesOptional.get().getName()+"-"+images.get(i).getIndex()));
             image.setClothes(clothesOptional.get());
             Optional<Image> imageOptional = imageRepository.findByUrl(image.getUrl());
             if(imageOptional.isEmpty()){

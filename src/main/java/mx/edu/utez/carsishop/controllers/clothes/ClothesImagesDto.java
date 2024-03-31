@@ -19,9 +19,18 @@ public class ClothesImagesDto {
     private Long clothesId;
 
     @NotNull(message = "Las imágenes son obligatorias")
-    private List<MultipartFile> images;
+    private List<ImagesAndIndex> images;
 
     public boolean isValid(){
         return clothesId != null && images != null && !images.isEmpty()  && images.size()<=5;
+    }
+
+    @AllArgsConstructor
+    @NoArgsConstructor
+    @Setter
+    @Getter
+    public static class ImagesAndIndex{
+        private MultipartFile image;
+        private int index;
     }
 }
