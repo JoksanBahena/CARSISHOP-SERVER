@@ -36,6 +36,8 @@ public class Clothes {
     @Column(name = "price",nullable = false, columnDefinition = "DECIMAL(10,2)")
     private float price;
 
+    @Column(name = "enabled", columnDefinition = "tinyint DEFAULT 1")
+    private boolean enabled;
     @ManyToOne
     @JoinColumn(name = "seller")
     private Seller seller;
