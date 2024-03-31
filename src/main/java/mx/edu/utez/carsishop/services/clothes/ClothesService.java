@@ -3,14 +3,12 @@ package mx.edu.utez.carsishop.services.clothes;
 import mx.edu.utez.carsishop.controllers.clothes.ClothesDto;
 import mx.edu.utez.carsishop.controllers.clothes.ClothesStockUpdateDto;
 import mx.edu.utez.carsishop.controllers.clothes.ClothesUpdateDto;
-import mx.edu.utez.carsishop.models.category.Category;
 import mx.edu.utez.carsishop.models.category.CategoryRepository;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes.ClothesRepository;
 import mx.edu.utez.carsishop.models.stock.Stock;
 import mx.edu.utez.carsishop.models.stock.StockRepository;
 import mx.edu.utez.carsishop.models.subcategory.SubcaregoryRepository;
-import mx.edu.utez.carsishop.models.subcategory.Subcategory;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -62,7 +60,7 @@ public class ClothesService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public CustomResponse<Clothes> updateClothesInformation(ClothesUpdateDto clothes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public CustomResponse<Clothes> updateClothesInformation(ClothesUpdateDto clothes) {
         Optional <Clothes> clothesOptional = clothesRepository.findById(clothes.getId());
         if(clothesOptional.isEmpty()){
             return new CustomResponse<>(null, true, 400, "Clothes not found");
