@@ -67,6 +67,15 @@ public class CategoryService {
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<Object> register(CategoryDto dto) {
 
+        if (dto.getName().isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de la categoría no puede estar vacío."), HttpStatus.BAD_REQUEST);
+        }
+
+        //more than 3 characters
+        if (dto.getName().length() < 3) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de la categoría debe tener al menos 3 caracteres."), HttpStatus.BAD_REQUEST);
+        }
+
         Optional<Category> category = categoryRepository.findByNameIgnoreCase(dto.getName());
 
         if (category.isPresent()) {
@@ -86,6 +95,15 @@ public class CategoryService {
     public ResponseEntity<Object> update(CategoryDto dto) {
 
         Optional<Category> categoryExists = categoryRepository.findById(dto.getId());
+
+        if (dto.getName().isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de la categoría no puede estar vacío."), HttpStatus.BAD_REQUEST);
+        }
+
+        //more than 3 characters
+        if (dto.getName().length() < 3) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de la categoría debe tener al menos 3 caracteres."), HttpStatus.BAD_REQUEST);
+        }
 
         if (categoryExists.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "La categoría no existe."), HttpStatus.BAD_REQUEST);
