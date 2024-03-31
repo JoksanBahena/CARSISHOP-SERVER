@@ -24,6 +24,9 @@ public class Subcategory {
     @Column(name = "name",nullable = false,length = 40,unique = true)
     private String name;
 
+    @Column(name = "status",nullable = false, columnDefinition = "boolean default true")
+    private boolean status;
+
     @OneToMany(mappedBy = "subcategory")
     @JsonIgnore
     private List<Clothes> clothes;

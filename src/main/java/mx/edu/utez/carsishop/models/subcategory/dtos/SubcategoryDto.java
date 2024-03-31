@@ -1,22 +1,20 @@
-package mx.edu.utez.carsishop.models.category.dtos;
+package mx.edu.utez.carsishop.models.subcategory.dtos;
 
 import jakarta.validation.constraints.NotNull;
 
-public class CategoryDto {
+public class SubcategoryDto {
     @NotNull(groups = {Update.class, ChangeStatus.class})
     private Long id;
+
     @NotNull(groups = {Register.class, Update.class})
     private String name;
-    @NotNull(groups = {Register.class})
-    private boolean status;
 
-    public CategoryDto() {
+    public SubcategoryDto() {
     }
 
-    public CategoryDto(Long id, String name, boolean status) {
+    public SubcategoryDto(Long id, String name) {
         this.id = id;
         this.name = name;
-        this.status = status;
     }
 
     public Long getId() {
@@ -33,14 +31,6 @@ public class CategoryDto {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public boolean isStatus() {
-        return status;
-    }
-
-    public void setStatus(boolean status) {
-        this.status = status;
     }
 
     public interface Register {

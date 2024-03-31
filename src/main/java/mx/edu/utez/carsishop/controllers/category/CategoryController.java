@@ -5,6 +5,7 @@ import mx.edu.utez.carsishop.services.category.CategoryService;
 import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.SQLException;
@@ -21,22 +22,22 @@ public class CategoryController {
     }
 
     @PostMapping("/find-all")
-    public ResponseEntity<Object> findAll(@RequestBody PaginationDto paginationDto) throws SQLException {
+    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) throws SQLException {
         return categoryService.findAll(paginationDto);
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> register(@Validated({CategoryDto.Register.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
         return categoryService.register(categoryDto);
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> update(@Validated({CategoryDto.Update.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
         return categoryService.update(categoryDto);
     }
 
     @PutMapping("/change-status")
-    public ResponseEntity<Object> changeStatus(@RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> changeStatus(@Validated({CategoryDto.ChangeStatus.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
         return categoryService.changeStatus(categoryDto);
     }
 
