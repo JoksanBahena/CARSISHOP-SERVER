@@ -1,11 +1,14 @@
 package mx.edu.utez.carsishop.services.clothes;
 
 import mx.edu.utez.carsishop.controllers.clothes.ClothesDto;
+import mx.edu.utez.carsishop.controllers.clothes.ClothesImagesDto;
 import mx.edu.utez.carsishop.controllers.clothes.ClothesStockUpdateDto;
 import mx.edu.utez.carsishop.controllers.clothes.ClothesUpdateDto;
 import mx.edu.utez.carsishop.models.category.CategoryRepository;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes.ClothesRepository;
+import mx.edu.utez.carsishop.models.images.Image;
+import mx.edu.utez.carsishop.models.images.ImageRepository;
 import mx.edu.utez.carsishop.models.stock.Stock;
 import mx.edu.utez.carsishop.models.stock.StockRepository;
 import mx.edu.utez.carsishop.models.subcategory.SubcaregoryRepository;
@@ -13,16 +16,20 @@ import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import mx.edu.utez.carsishop.utils.UploadImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,6 +46,8 @@ public class ClothesService {
     private SubcaregoryRepository subcaregoryRepository;
     @Autowired
     private StockRepository stockRepository;
+    @Autowired
+    private ImageRepository imageRepository;
 
     private CryptoService cryptoService = new CryptoService();
 
@@ -176,5 +185,32 @@ public class ClothesService {
                 200,
                 "Ok"
         );
+    }
+
+    public CustomResponse<List<Image>> addImages(ClothesImagesDto clothesImagesDto) throws IOException {
+        Optional<Clothes> clothesOptional = clothesRepository.findById(clothesImagesDto.getClothesId());
+        if(clothesOptional.isEmpty()){
+            return new CustomResponse<>(null, true, 400, "Clothes not found");
+        }
+        if(!clothesImagesDto.isValid()){
+            return new CustomResponse<>(null, true, 400, "Invalid data");
+
+        }
+        //se suben las imagenes a cloudinary
+        UploadImage uploadImage = new UploadImage();
+        List<MultipartFile> images = clothesImagesDto.getImages();
+        List<Image> imagesList = new ArrayList<>();
+        for (int i = 0; i < images.size(); i++){
+            Image image = new Image();
+            image.setUrl(uploadImage.uploadImage(images.get(i), clothesOptional.get().getName()+"-"+i));
+            image.setClothes(clothesOptional.get());
+            Optional<Image> imageOptional = imageRepository.findByUrl(image.getUrl());
+            if(imageOptional.isEmpty()){
+                imagesList.add(image);
+            }else {
+                imagesList.add(imageOptional.get());
+            }
+        }
+        return  new CustomResponse<>(imageRepository.saveAll(imagesList), false, 200, "Images uploaded");
     }
 }

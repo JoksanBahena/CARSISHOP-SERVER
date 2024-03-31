@@ -1,12 +1,15 @@
 package mx.edu.utez.carsishop.controllers.clothes;
 
 import mx.edu.utez.carsishop.models.clothes.Clothes;
+import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.services.clothes.ClothesService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
 import java.util.List;
 import jakarta.validation.Valid;
 import mx.edu.utez.carsishop.models.stock.Stock;
@@ -61,5 +64,10 @@ public class ClothesController {
     @GetMapping("/getAllClothesOrderedByPrice")
     public ResponseEntity<CustomResponse<List<Clothes>>> getAllClothesOrderedByPrice() {
         return new ResponseEntity<>(clothesService.findAllClothesOrderedByPrice(), HttpStatus.OK);
+    }
+
+    @PutMapping("/addImages")
+    public ResponseEntity<CustomResponse<List<Image>>> addImages(@Valid @ModelAttribute ClothesImagesDto clothesImagesDto) throws IOException {
+        return ResponseEntity.ok(clothesService.addImages(clothesImagesDto));
     }
 }
