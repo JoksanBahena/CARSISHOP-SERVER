@@ -88,7 +88,7 @@ public class CategoryService {
 
         this.categoryRepository.save(categorySave);
 
-        return new ResponseEntity<>(new CustomResponse<>(null, false, HttpStatus.CREATED.value(), "Categoría registrada correctamente."), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse<>(categorySave, false, HttpStatus.CREATED.value(), "Categoría registrada correctamente."), HttpStatus.CREATED);
     }
 
     @Transactional(rollbackFor = {SQLException.class})
@@ -120,7 +120,7 @@ public class CategoryService {
 
         this.categoryRepository.save(categoryUpdate);
 
-        return new ResponseEntity<>(new CustomResponse<>(null, false, HttpStatus.CREATED.value(), "Categoría registrada correctamente."), HttpStatus.CREATED);
+        return new ResponseEntity<>(new CustomResponse<>(categoryUpdate, false, HttpStatus.CREATED.value(), "Categoría actualizada correctamente."), HttpStatus.CREATED);
     }
 
     @Transactional(rollbackFor = {SQLException.class})
@@ -136,7 +136,7 @@ public class CategoryService {
 
         this.categoryRepository.save(categoryUpdate);
 
-        return new ResponseEntity<>(new CustomResponse<>(null, false, HttpStatus.OK.value(), "Categoría actualizada correctamente."), HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse<>(categoryUpdate, false, HttpStatus.OK.value(), "Categoría actualizada correctamente."), HttpStatus.OK);
     }
 
 
