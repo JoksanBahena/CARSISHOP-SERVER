@@ -196,13 +196,19 @@ public class ClothesService {
             return new CustomResponse<>(null, true, 400, "Invalid data");
 
         }
+        List<Image> imagesList = imageRepository.findByClothes(clothesOptional.get());
+        if(imagesList.size()>=5){
+            return new CustomResponse<>(null, true, 400, "Max images reached");
+        }
         //se suben las imagenes a cloudinary
         UploadImage uploadImage = new UploadImage();
         List<MultipartFile> images = clothesImagesDto.getImages();
-        List<Image> imagesList = new ArrayList<>();
         for (int i = 0; i < images.size(); i++){
+            if(imagesList.size()>=5){
+                break;
+            }
             Image image = new Image();
-            image.setUrl(uploadImage.uploadImage(images.get(i), clothesOptional.get().getName()+"-"+i));
+            image.setUrl(uploadImage.uploadImage(images.get(i), clothesOptional.get().getName()+"-"+imagesList.size()));
             image.setClothes(clothesOptional.get());
             Optional<Image> imageOptional = imageRepository.findByUrl(image.getUrl());
             if(imageOptional.isEmpty()){
