@@ -66,8 +66,5 @@ public class ClothesController {
         return new ResponseEntity<>(clothesService.findAllClothesOrderedByPrice(), HttpStatus.OK);
     }
 
-    @PutMapping("/addImages")
-    public ResponseEntity<CustomResponse<List<Image>>> addImages(@Valid @ModelAttribute ClothesImagesDto clothesImagesDto) throws IOException {
-        return ResponseEntity.ok(clothesService.addImages(clothesImagesDto));
-    }
+
 }
