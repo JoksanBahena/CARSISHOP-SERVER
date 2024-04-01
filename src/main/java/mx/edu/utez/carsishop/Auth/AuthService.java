@@ -1,7 +1,9 @@
 package mx.edu.utez.carsishop.Auth;
 
 
+import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
+import mx.edu.utez.carsishop.Jwt.JwtBlackList;
 import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
 import mx.edu.utez.carsishop.models.user.Role;
@@ -14,9 +16,11 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
+import java.util.concurrent.ExecutionException;
 
 @Service
 @RequiredArgsConstructor
@@ -76,6 +80,7 @@ public class AuthService {
         );
     }
 
+    @Transactional(readOnly = true)
     public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Optional<User> userOptional = this.userRepository.findByUsername(forgotPasswordRequest.getEmail());
         if(userOptional.isPresent()){
@@ -116,6 +121,7 @@ public class AuthService {
                     "<p>" +
                     "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SIOCU. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
                     "</p>" +
+                    authResponse.token +
                     "<p>" +
                     "Para restablecer tu contraseña, haz clic en el siguiente enlace:" + link +
                     "</p>" +
@@ -150,6 +156,49 @@ public class AuthService {
                 400,
                 "Correo no encontrado"
         );
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<Integer> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+        try {
+            String email = jwtService.getUsernameFromToken(token);
+
+            String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());
+
+            if(JwtBlackList.isTokenBlacklisted(token)){
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "Token inválido"
+                );
+            }
+
+            if(!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmNewPassword())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "Las contraseñas no coinciden"
+                );
+            }
+
+            JwtBlackList.addToBlacklist(token);
+
+            return new CustomResponse<>(
+                    this.userRepository.updatePasswordById(encodedPassword, userRepository.findByUsername(email).get().getId()),
+                    false,
+                    200,
+                    "Contraseña actualizada correctamente"
+            );
+        } catch (JwtException | ExecutionException e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Token inválido"
+            );
+        }
     }
 
 }

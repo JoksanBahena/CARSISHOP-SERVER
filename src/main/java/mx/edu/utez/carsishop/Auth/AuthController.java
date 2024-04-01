@@ -45,4 +45,9 @@ public class AuthController {
         return ResponseEntity.ok(authService.forgotPassword(forgotPasswordRequest));
     }
 
+    @PostMapping(value = "resetPassword/{token}")
+    public ResponseEntity<CustomResponse<Integer>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @PathVariable String token) {
+        return ResponseEntity.ok(authService.resetPassword(resetPasswordRequest, token));
+    }
+
 }
