@@ -23,7 +23,7 @@ public class EmailService implements EmailInterface {
         try {
             SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
 
-            simpleMailMessage.setFrom("20203tn008@utez.edu.mx");
+            simpleMailMessage.setFrom(sender);
             simpleMailMessage.setTo(emailDetails.getRecipient());
             simpleMailMessage.setSubject(emailDetails.getSubject());
             simpleMailMessage.setText(emailDetails.getBody());
@@ -40,7 +40,7 @@ public class EmailService implements EmailInterface {
 
         try {
             MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage, true);
-            mimeMessageHelper.setFrom("20203tn008@utez.edu.mx");
+            mimeMessageHelper.setFrom(sender);
             mimeMessageHelper.setTo(emailDetails.getRecipient());
             mimeMessageHelper.setSubject(emailDetails.getSubject());
             mimeMessageHelper.setText(emailDetails.getBody(), true);
