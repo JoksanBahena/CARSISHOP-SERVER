@@ -3,6 +3,7 @@ package mx.edu.utez.carsishop.services.user;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.sellers.SellerRepository;
 import mx.edu.utez.carsishop.models.user.Role;
+import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +26,9 @@ public class UserService {
                     "El RFC o CURP ya se encuentra registrado en el sistema"
             );
         }
-        this.userRepository.findById(seller.getUser().getId()).get().setRole(Role.SELLER);
+        User user = this.userRepository.findById(seller.getUser().getId()).get();
+        user.setRole(Role.SELLER);
+        this.userRepository.save(user);
         return new CustomResponse<>(
                 this.sellerRepository.save(seller),
                 false,
