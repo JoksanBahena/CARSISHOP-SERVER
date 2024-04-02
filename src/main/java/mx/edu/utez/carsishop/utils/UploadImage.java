@@ -11,12 +11,12 @@ import java.util.Map;
 public class UploadImage {
     private final CloudinaryConfig cloudinaryConfig = new CloudinaryConfig();
 
-    public String uploadImage(MultipartFile image, String name) throws IOException {
+    public String uploadImage(MultipartFile image, String name, String folder) throws IOException {
         Cloudinary cloudinary = cloudinaryConfig.cloudinary();
 
         try {
             Map<?, ?> result = cloudinary.uploader().upload(image.getBytes(),
-                    ObjectUtils.asMap("folder", "carsishop/clothes" + name, "public_id", name));
+                    ObjectUtils.asMap("folder", "carsishop/" + folder + "/" + name, "public_id", name));
 
             return (String) result.get("url");
         } catch (IOException e) {

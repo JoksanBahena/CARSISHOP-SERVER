@@ -45,7 +45,7 @@ public class ImageService {
             if(images.get(i).getIndex()>4 || images.get(i).getIndex()<0){
                 continue;
             }
-            image.setUrl(uploadImage.uploadImage(images.get(i).getImage(), clothesOptional.get().getName()+"-"+images.get(i).getIndex()));
+            image.setUrl(uploadImage.uploadImage(images.get(i).getImage(), clothesOptional.get().getName()+"-"+images.get(i).getIndex(), "clothes"));
             image.setClothes(clothesOptional.get());
             Optional<Image> imageOptional = imageRepository.findByUrl(image.getUrl());
             if(imageOptional.isEmpty()){

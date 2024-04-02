@@ -1,7 +1,9 @@
 package mx.edu.utez.carsishop.Auth;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.http.ResponseEntity;
@@ -29,9 +31,9 @@ public class AuthController {
     }
 
     @PostMapping(value = "register")
-    public ResponseEntity<CustomResponse<AuthResponse>> register(@RequestBody RegisterRequest request)
+    public ResponseEntity<CustomResponse<AuthResponse>> register(@Valid @ModelAttribute UserDto userDto)
     {
-        return ResponseEntity.ok(authService.register(request));
+        return ResponseEntity.ok(authService.register(userDto));
     }
 
     @GetMapping(value = "encode/{wordToEncode}")
