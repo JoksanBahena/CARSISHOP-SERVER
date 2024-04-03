@@ -7,6 +7,7 @@ import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.models.images.ImageRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
+import mx.edu.utez.carsishop.utils.ValidateTypeFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,12 +27,18 @@ public class ImageService {
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<List<Image>> addImages(ClothesImagesDto clothesImagesDto) throws IOException {
         Optional<Clothes> clothesOptional = clothesRepository.findById(clothesImagesDto.getClothesId());
+
+        ValidateTypeFile validateTypeFile = new ValidateTypeFile();
+
         if(clothesOptional.isEmpty()){
             return new CustomResponse<>(null, true, 400, "Clothes not found");
         }
         if(!clothesImagesDto.isValid()){
             return new CustomResponse<>(null, true, 400, "Invalid data");
 
+        }
+        if(!validateTypeFile.isImagesFiles(clothesImagesDto.getImages())){
+            return new CustomResponse<>(null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)");
         }
         List<Image> imagesList = new ArrayList<>();
         //se suben las imagenes a cloudinary

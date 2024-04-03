@@ -14,6 +14,7 @@ import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.services.email.EmailService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
+import mx.edu.utez.carsishop.utils.ValidateTypeFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -56,6 +57,9 @@ public class AuthService {
 
     public CustomResponse<AuthResponse> register(UserDto userDto) {
         Optional<User> userOptional = userRepository.findByUsername(userDto.getUsername());
+
+        ValidateTypeFile validateTypeFile = new ValidateTypeFile();
+
         if (userOptional.isPresent()) {
             return new CustomResponse<>(
                     null,
@@ -66,6 +70,15 @@ public class AuthService {
         }
 
         try {
+            if(!validateTypeFile.isImageFile(userDto.getProfilepic())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)"
+                );
+            }
+
             UploadImage uploadImage = new UploadImage();
             String imgUrl = uploadImage.uploadImage(userDto.getProfilepic(), userDto.getUsername(), "users");
 
