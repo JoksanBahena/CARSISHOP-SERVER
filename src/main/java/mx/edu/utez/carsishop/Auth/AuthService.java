@@ -5,12 +5,15 @@ import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.Jwt.JwtBlackList;
 import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
+import mx.edu.utez.carsishop.models.gender.GenderRepository;
 import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.services.email.EmailService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import mx.edu.utez.carsishop.utils.UploadImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -25,6 +29,8 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
+    @Autowired
+    private GenderRepository genderRepository;
 
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -48,8 +54,8 @@ public class AuthService {
         );
     }
 
-    public CustomResponse<AuthResponse> register(RegisterRequest request) {
-        Optional<User> userOptional = userRepository.findByUsername(request.getEmail());
+    public CustomResponse<AuthResponse> register(UserDto userDto) {
+        Optional<User> userOptional = userRepository.findByUsername(userDto.getUsername());
         if (userOptional.isPresent()) {
             return new CustomResponse<>(
                     null,
@@ -58,26 +64,47 @@ public class AuthService {
                     "User already exists"
             );
         }
-        User user = User.builder()
-            .username(request.getEmail())
-            .password(passwordEncoder.encode( request.getPassword()))
-            .name(request.getName())
-            .surname(request.getSurname())
-            .phone(request.getPhone())
-            .role(Role.CUSTOMER)
-            .build();
 
-        userRepository.save(user);
+        try {
+            UploadImage uploadImage = new UploadImage();
+            String imgUrl = uploadImage.uploadImage(userDto.getProfilepic(), userDto.getUsername(), "users");
 
-        AuthResponse authResponse = AuthResponse.builder()
-                .token(jwtService.getToken(user))
-                .build();
-        return new CustomResponse<>(
-                authResponse,
-                false,
-                200,
-                "OK"
-        );
+            User userCasted = userDto.castToUser();
+            userCasted.setProfilepic(imgUrl);
+
+            User user = User.builder()
+                    .name(userDto.getName())
+                    .surname(userDto.getSurname())
+                    .username(userDto.getUsername())
+                    .phone(userDto.getPhone())
+                    .birthdate(userDto.getBirthdate())
+                    .gender(this.genderRepository.findById(userDto.getGender()).get())
+                    .password(passwordEncoder.encode(userDto.getPassword()))
+                    .profilepic(imgUrl)
+                    .role(Role.CUSTOMER)
+                    .build();
+
+            userRepository.save(user);
+
+            AuthResponse authResponse = AuthResponse.builder()
+                    .token(jwtService.getToken(user))
+                    .build();
+            return new CustomResponse<>(
+                    authResponse,
+                    false,
+                    200,
+                    "OK"
+            );
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Error al registrar al usuario"
+            );
+        }
+
     }
 
     @Transactional(readOnly = true)

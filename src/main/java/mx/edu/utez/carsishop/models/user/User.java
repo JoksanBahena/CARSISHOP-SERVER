@@ -37,6 +37,8 @@ public class User implements UserDetails {
     private String username;
     @Column(name = "phone",unique = true,length = 10)
     private String phone;
+    @Column(name = "birthdate",nullable = false)
+    private String birthdate;
 
     @ManyToOne
     @JoinColumn(name="gender")

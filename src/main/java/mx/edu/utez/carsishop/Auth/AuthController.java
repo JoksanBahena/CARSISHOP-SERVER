@@ -1,10 +1,13 @@
 package mx.edu.utez.carsishop.Auth;
 
+import jakarta.validation.Valid;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
+import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
@@ -23,15 +26,15 @@ public class AuthController {
     private final AuthService authService;
     
     @PostMapping(value = "login")
-    public ResponseEntity<CustomResponse<AuthResponse>> login(@RequestBody LoginRequest request)
+    public ResponseEntity<CustomResponse<AuthResponse>> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request)
     {
         return ResponseEntity.ok(authService.login(request));
     }
 
     @PostMapping(value = "register")
-    public ResponseEntity<CustomResponse<AuthResponse>> register(@RequestBody RegisterRequest request)
+    public ResponseEntity<CustomResponse<AuthResponse>> register(@Validated({UserDto.Register.class}) @RequestBody UserDto userDto)
     {
-        return ResponseEntity.ok(authService.register(request));
+        return ResponseEntity.ok(authService.register(userDto));
     }
 
     @GetMapping(value = "encode/{wordToEncode}")
