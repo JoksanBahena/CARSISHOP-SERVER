@@ -29,8 +29,8 @@ public class Seller {
     @Column(name = "curp",nullable = false, columnDefinition = "varchar(18)")
     private String curp;
 
-    @Column(name = "id_image",nullable = false)
-    private String id_image;
+    @Column(name = "image",nullable = false)
+    private String image;
 
     //1. PENNDING 2. APPROVED 3. REJECTED
     @Column(name = "request_status",nullable = false, columnDefinition = "varchar(20)")

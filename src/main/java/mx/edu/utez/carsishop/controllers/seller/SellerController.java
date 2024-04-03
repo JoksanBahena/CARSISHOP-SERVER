@@ -9,6 +9,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+
 @RestController
 @RequestMapping(path = "/api/sellers")
 @CrossOrigin(origins = {"*"}, methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
@@ -27,7 +29,7 @@ public class SellerController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @RequestBody SellerDto sellerDto) {
+    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @ModelAttribute SellerDto sellerDto) throws IOException {
         return sellerService.register(sellerDto);
     }
 
