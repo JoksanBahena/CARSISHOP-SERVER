@@ -23,14 +23,21 @@ public class Seller {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "rfc",nullable = false)
+    @Column(name = "rfc",nullable = false, columnDefinition = "varchar(13)")
     private String rfc;
 
-    @Column(name = "curp",nullable = false)
+    @Column(name = "curp",nullable = false, columnDefinition = "varchar(18)")
     private String curp;
 
     @Column(name = "id_image",nullable = false)
     private String id_image;
+
+    //1. PENNDING 2. APPROVED 3. REJECTED
+    @Column(name = "request_status",nullable = false, columnDefinition = "varchar(20)")
+    private String request_status;
+
+    @Column(name = "status",nullable = false, columnDefinition = "boolean default true")
+    private boolean status;
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user",referencedColumnName = "id")
@@ -40,4 +47,6 @@ public class Seller {
     @OneToMany(mappedBy = "seller")
     @JsonIgnore
     private List<Clothes> clothes;
+
+
 }
