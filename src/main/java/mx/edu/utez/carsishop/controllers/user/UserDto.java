@@ -18,24 +18,26 @@ import java.util.List;
 public class UserDto {
     private Long id;
 
-    @NotNull(message = "El nombre es obligatorio")
+    @NotNull(groups = {Register.class}, message = "El nombre es obligatorio")
     private String name;
-    @NotNull(message = "El apellido es obligatorio")
+    @NotNull(groups = {Register.class}, message ="El apellido es obligatorio")
     private String surname;
-    @NotNull(message = "El email es obligatorio")
+    @NotNull(groups = {Register.class}, message ="El nombre de usuario es obligatorio")
     private String username;
-    @NotNull(message = "El teléfono es obligatorio")
+    @NotNull(groups = {Register.class}, message ="El teléfono es obligatorio")
     private String phone;
-    @NotNull(message = "La fecha de nacimiento es obligatoria")
+    @NotNull(groups = {Register.class}, message ="La fecha de nacimiento es obligatoria")
     private String birthdate;
-    @NotNull(message = "La contraseña es obligatoria")
+    @NotNull(groups = {Register.class}, message ="La contraseña es obligatoria")
     private String password;
-    @NotNull(message = "Foto de perfil es obligatoria")
+    @NotNull(groups = {Register.class}, message ="La imagen de perfil es obligatoria")
     private MultipartFile profilepic;
-
+    @NotNull(groups = {Register.class}, message ="El género es obligatorio")
     private Long gender;
 
     public User castToUser() {
         return new User(getId(), getName(), getSurname(), getUsername(), getPhone(), getBirthdate(), null, getPassword(), null, null, null, null, null, null, null);
     }
+
+    public interface Register {}
 }

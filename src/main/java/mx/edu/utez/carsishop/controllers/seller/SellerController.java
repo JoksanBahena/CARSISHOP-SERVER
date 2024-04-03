@@ -27,17 +27,17 @@ public class SellerController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@Validated @RequestBody SellerDto sellerDto) {
+    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @RequestBody SellerDto sellerDto) {
         return sellerService.register(sellerDto);
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@Validated @RequestBody SellerDto sellerDto) {
+    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @RequestBody SellerDto sellerDto) {
         return sellerService.update(sellerDto);
     }
 
     @PutMapping("/change-status")
-    public ResponseEntity<Object> changeStatus(@Validated @RequestBody SellerDto sellerDto) {
+    public ResponseEntity<Object> changeStatus(@Validated({SellerDto.ChangeStatus.class}) @RequestBody SellerDto sellerDto) {
         return sellerService.changeStatus(sellerDto);
     }
 
