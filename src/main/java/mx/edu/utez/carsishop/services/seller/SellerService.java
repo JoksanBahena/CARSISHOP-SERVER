@@ -9,6 +9,7 @@ import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.PaginationDto;
+import mx.edu.utez.carsishop.utils.UploadImage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -114,9 +116,7 @@ public class SellerService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<Object> register(SellerDto seller) {
-
-        seller.setRequest_status(seller.getRequest_status().toUpperCase());
+    public ResponseEntity<Object> register(SellerDto seller) throws IOException {
 
         if (this.sellerRepository.existsByCurp(seller.getCurp())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
@@ -125,26 +125,23 @@ public class SellerService {
         if (this.sellerRepository.existsByRfc(seller.getRfc())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
         }
-
-        if (!this.userRepository.existsById(seller.getUser().getId())) {
+        Optional<User> user = this.userRepository.findByUsername(seller.getUser().getUsername());
+        if (user.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema"), HttpStatus.BAD_REQUEST);
         }
 
-        Optional<Seller> sellerPending = this.sellerRepository.findSellerPending(seller.getUser().getId());
+        Optional<Seller> sellerPending = this.sellerRepository.findSellerPending(user.get().getId());
         if (sellerPending.isPresent()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Ya existe una solicitud de vendedor pendiente"), HttpStatus.BAD_REQUEST);
         }
-
-//        User user = this.userRepository.findById(seller.getUser().getId()).get();
-//        user.setRole(Role.SELLER);
-//        this.userRepository.save(user);
-
-        // GUARDAR IMAGEN Y AGREGRAR AL sellerToSave
+        UploadImage uploadImage= new UploadImage();
+        String url= uploadImage.uploadImage(seller.getImage(), seller.getCurp(), "seller");
 
         Seller sellerToSave = new Seller();
+        sellerToSave.setImage(url);
         sellerToSave.setCurp(seller.getCurp());
         sellerToSave.setRfc(seller.getRfc());
-        sellerToSave.setUser(seller.getUser());
+        sellerToSave.setUser(user.get());
         sellerToSave.setStatus(true);
         sellerToSave.setRequest_status("PENDING");
 
