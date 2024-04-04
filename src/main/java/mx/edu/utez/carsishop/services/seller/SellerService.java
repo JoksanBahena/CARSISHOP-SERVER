@@ -10,6 +10,7 @@ import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.PaginationDto;
 import mx.edu.utez.carsishop.utils.UploadImage;
+import mx.edu.utez.carsishop.utils.ValidateTypeFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -134,20 +135,36 @@ public class SellerService {
         if (sellerPending.isPresent()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Ya existe una solicitud de vendedor pendiente"), HttpStatus.BAD_REQUEST);
         }
-        UploadImage uploadImage= new UploadImage();
-        String url= uploadImage.uploadImage(seller.getImage(), seller.getCurp(), "seller");
 
-        Seller sellerToSave = new Seller();
-        sellerToSave.setImage(url);
-        sellerToSave.setCurp(seller.getCurp());
-        sellerToSave.setRfc(seller.getRfc());
-        sellerToSave.setUser(user.get());
-        sellerToSave.setStatus(true);
-        sellerToSave.setRequest_status("PENDING");
+        try {
+            ValidateTypeFile validateTypeFile = new ValidateTypeFile();
 
-        sellerToSave = this.sellerRepository.save(sellerToSave);
+            if(!validateTypeFile.isImageFile(seller.getImage())) {
+                return new ResponseEntity<>(new CustomResponse<>(
+                        null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)"
+                ), HttpStatus.BAD_REQUEST);
+            }
 
-        return new ResponseEntity<>(new CustomResponse<>(sellerToSave, false, 201, "Vendedor registrado correctamente"), HttpStatus.CREATED);
+            UploadImage uploadImage = new UploadImage();
+            String urlImage = uploadImage.uploadImage(seller.getImage(), seller.getRfc(), "sellers");
+
+            Seller sellerToSave = new Seller();
+            sellerToSave.setCurp(seller.getCurp());
+            sellerToSave.setRfc(seller.getRfc());
+            sellerToSave.setUser(seller.getUser());
+            sellerToSave.setImage(urlImage);
+            sellerToSave.setStatus(true);
+            sellerToSave.setRequest_status("PENDING");
+
+            sellerToSave = this.sellerRepository.save(sellerToSave);
+
+            return new ResponseEntity<>(new CustomResponse<>(sellerToSave, false, 201, "Vendedor registrado correctamente"), HttpStatus.CREATED);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null, true, 400, "Error al guardar al vendedor"
+            ), HttpStatus.BAD_REQUEST);
+        }
     }
 
     @Transactional(rollbackFor = SQLException.class)
