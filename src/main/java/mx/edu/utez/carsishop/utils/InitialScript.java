@@ -35,6 +35,7 @@ public class InitialScript implements CommandLineRunner {
                     .name("admin")
                     .surname("admin")
                     .phone("1234567890")
+                    .birthdate("2021-01-01")
                     .role(Role.ADMIN)
                     .build();
 
