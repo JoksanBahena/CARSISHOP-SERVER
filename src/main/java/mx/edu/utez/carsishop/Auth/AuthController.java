@@ -32,7 +32,7 @@ public class AuthController {
     }
 
     @PostMapping(value = "register")
-    public ResponseEntity<CustomResponse<AuthResponse>> register(@Validated({UserDto.Register.class}) @RequestBody UserDto userDto)
+    public ResponseEntity<CustomResponse<AuthResponse>> register(@Validated({UserDto.Register.class}) @ModelAttribute UserDto userDto)
     {
         return ResponseEntity.ok(authService.register(userDto));
     }
