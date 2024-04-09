@@ -16,6 +16,9 @@ public class StateService {
 
     @Transactional(readOnly = true)
     public CustomResponse<List<State>> findAll(){
-        return new CustomResponse<>(stateRepository.findAll(), false, 200, "OK");
+
+        List<State> states = stateRepository.findAll();
+
+        return new CustomResponse<>(states, false, 200, "OK", states.size());
     }
 }

@@ -16,8 +16,8 @@ import java.util.List;
 @Getter
 @Setter
 public class UserDto {
+    @NotNull(groups = {GetInfo.class}, message = "El id es obligatorio")
     private Long id;
-
     @NotNull(groups = {Register.class}, message = "El nombre es obligatorio")
     private String name;
     @NotNull(groups = {Register.class}, message ="El apellido es obligatorio")
@@ -40,4 +40,6 @@ public class UserDto {
     }
 
     public interface Register {}
+
+    public interface GetInfo {}
 }

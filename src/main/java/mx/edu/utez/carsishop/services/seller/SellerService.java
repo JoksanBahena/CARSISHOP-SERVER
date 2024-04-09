@@ -38,20 +38,20 @@ public class SellerService {
                 paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
                 paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()
         )
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente."), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
         if (!paginationDto.getPaginationType().getFilter().equals("curp") || !paginationDto.getPaginationType().getSortBy().equals("curp") ||
                 !paginationDto.getPaginationType().getFilter().equals("rfc") || !paginationDto.getPaginationType().getSortBy().equals("rfc") ||
                 !paginationDto.getPaginationType().getFilter().equals("request_status") || !paginationDto.getPaginationType().getSortBy().equals("request_status") ||
                 !paginationDto.getPaginationType().getFilter().equals("user_name") || !paginationDto.getPaginationType().getSortBy().equals("user_name") ||
                 !paginationDto.getPaginationType().getFilter().equals("user_surname") || !paginationDto.getPaginationType().getSortBy().equals("user_surname"))
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente."), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
         if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente."), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
         paginationDto.setValue("%" + paginationDto.getValue() + "%");
-        long count = sellerRepository.searchCount();
+        int count = sellerRepository.searchCount();
 
         List<Seller> list;
         switch (paginationDto.getPaginationType().getFilter()) {
@@ -110,30 +110,35 @@ public class SellerService {
                 );
                 break;
             default:
-                return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente."), HttpStatus.BAD_REQUEST);
+                return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente."), HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
     }
 
     @Transactional(rollbackFor = SQLException.class)
     public ResponseEntity<Object> register(SellerDto seller) throws IOException {
 
         if (this.sellerRepository.existsByCurp(seller.getCurp())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (this.sellerRepository.existsByRfc(seller.getRfc())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
         Optional<User> user = this.userRepository.findByUsername(seller.getUser().getUsername());
         if (user.isEmpty()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
         Optional<Seller> sellerPending = this.sellerRepository.findSellerPending(user.get().getId());
         if (sellerPending.isPresent()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Ya existe una solicitud de vendedor pendiente"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Ya existe una solicitud de vendedor pendiente", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<Seller> sellerRejected = this.sellerRepository.findSellerRejected(user.get().getId());
+        if (sellerRejected.isPresent()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Ya existe una solicitud de vendedor rechazada", 0), HttpStatus.BAD_REQUEST);
         }
 
         try {
@@ -141,7 +146,7 @@ public class SellerService {
 
             if(!validateTypeFile.isImageFile(seller.getImage())) {
                 return new ResponseEntity<>(new CustomResponse<>(
-                        null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)"
+                        null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)", 0
                 ), HttpStatus.BAD_REQUEST);
             }
 
@@ -158,11 +163,11 @@ public class SellerService {
 
             sellerToSave = this.sellerRepository.save(sellerToSave);
 
-            return new ResponseEntity<>(new CustomResponse<>(sellerToSave, false, 201, "Vendedor registrado correctamente"), HttpStatus.CREATED);
+            return new ResponseEntity<>(new CustomResponse<>(sellerToSave, false, 201, "Vendedor registrado correctamente", 1), HttpStatus.CREATED);
         } catch (Exception e) {
             e.printStackTrace();
             return new ResponseEntity<>(new CustomResponse<>(
-                    null, true, 400, "Error al guardar al vendedor"
+                    null, true, 400, "Error al guardar al vendedor", 0
             ), HttpStatus.BAD_REQUEST);
         }
     }
@@ -175,28 +180,24 @@ public class SellerService {
         seller.setRequest_status(seller.getRequest_status().toUpperCase());
 
         if (!sellerOptional.isPresent()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al vendedor"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al vendedor", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (this.sellerRepository.existsByCurpAndAndIdNot(seller.getCurp(), seller.getId())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (this.sellerRepository.existsByRfcAndAndIdNot(seller.getRfc(), seller.getId())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (!seller.getRequest_status().equals("APPROVED") && !seller.getRequest_status().equals("REJECTED") && !seller.getRequest_status().equals("PENDING")) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (!this.userRepository.existsById(seller.getUser().getId())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
         }
-
-        //Validaciones y subida de imagen
-        //
-        //
 
         Seller sellerToUpdate = sellerOptional.get();
         sellerToUpdate.setCurp(seller.getCurp());
@@ -218,14 +219,14 @@ public class SellerService {
             this.userRepository.save(user);
         }
 
-        return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor actualizado correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor actualizado correctamente", 1), HttpStatus.OK);
     }
 
     public ResponseEntity<Object> changeStatus(SellerDto seller) {
         Optional<Seller> sellerOptional = this.sellerRepository.findById(seller.getId());
 
         if (!sellerOptional.isPresent()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al vendedor"), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al vendedor", 0), HttpStatus.BAD_REQUEST);
         }
 
         Seller sellerToUpdate = sellerOptional.get();
@@ -233,6 +234,6 @@ public class SellerService {
 
         sellerToUpdate = this.sellerRepository.save(sellerToUpdate);
 
-        return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Estatus del vendedor actualizado correctamente"), HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Estatus del vendedor actualizado correctamente", 1), HttpStatus.OK);
     }
 }

@@ -16,6 +16,9 @@ public class TownService {
 
     @Transactional(readOnly = true)
     public CustomResponse<List<Town>> findAll(){
-        return new CustomResponse<>(townRepository.findAll(), false, 200, "OK");
+
+        List<Town> towns = townRepository.findAll();
+
+        return new CustomResponse<>(towns, false, 200, "OK", towns.size());
     }
 }

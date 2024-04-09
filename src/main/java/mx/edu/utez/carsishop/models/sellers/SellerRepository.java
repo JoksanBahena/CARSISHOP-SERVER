@@ -18,6 +18,9 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     @Query("SELECT s FROM Seller s WHERE s.user.id = ?1 AND s.request_status = 'PENDING'")
     Optional<Seller> findSellerPending(long userId);
 
+    @Query("SELECT s FROM Seller s WHERE s.user.id = ?1 AND s.request_status = 'REJECTED'")
+    Optional<Seller> findSellerRejected(long userId);
+
     @Query(value = "SELECT s FROM Seller s WHERE UPPER(s.curp) LIKE UPPER(?1)")
     List<Seller> findAllByCurpPagination(String value, Pageable offset);
 
@@ -33,8 +36,7 @@ public interface SellerRepository extends JpaRepository<Seller, Long> {
     @Query(value = "SELECT s FROM Seller s WHERE UPPER(s.user.surname) LIKE UPPER(?1)")
     List<Seller> findAllByUserSurnamePagination(String value, Pageable offset);
 
-
     @Query(value = "SELECT COUNT(id) FROM sellers", nativeQuery = true)
-    long searchCount();
+    int searchCount();
 
 }

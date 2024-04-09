@@ -31,14 +31,14 @@ public class ImageService {
         ValidateTypeFile validateTypeFile = new ValidateTypeFile();
 
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "Clothes not found");
+            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
         }
         if(!clothesImagesDto.isValid()){
-            return new CustomResponse<>(null, true, 400, "Invalid data");
+            return new CustomResponse<>(null, true, 400, "Invalid data", 0);
 
         }
         if(!validateTypeFile.isImagesFiles(clothesImagesDto.getImages())){
-            return new CustomResponse<>(null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)");
+            return new CustomResponse<>(null, true, 400, "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)", 0);
         }
         List<Image> imagesList = new ArrayList<>();
         //se suben las imagenes a cloudinary
@@ -61,7 +61,7 @@ public class ImageService {
                 imagesList.add(imageOptional.get());
             }
         }
-        return  new CustomResponse<>(imageRepository.saveAll(imagesList), false, 200, "Images uploaded");
+        return  new CustomResponse<>(imageRepository.saveAll(imagesList), false, 200, "Images uploaded", imagesList.size());
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -69,8 +69,8 @@ public class ImageService {
         Optional<Image> image = imageRepository.findById(id);
         if(image.isPresent()){
             imageRepository.deleteById(id);
-            return new CustomResponse<>("Image has being deleted", false,200,"OK");
+            return new CustomResponse<>("Image has being deleted", false,200,"OK", 0);
         }
-        return new CustomResponse<>("Image not found", true,400,"NOT_FOUND");
+        return new CustomResponse<>("Image not found", true,400,"NOT_FOUND", 0);
     }
 }
