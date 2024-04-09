@@ -21,7 +21,7 @@ public class UserService {
     }
 
     public ResponseEntity<CustomResponse<User>> getUserInfo(UserDto dto) {
-        Optional<User> user = userRepository.findById(dto.getId());
+        Optional<User> user = userRepository.findByUsername(dto.getUsername());
 
         if (!user.isPresent()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.NOT_FOUND.value(), "Usuario no encontrado.", 0), HttpStatus.NOT_FOUND);
