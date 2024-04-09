@@ -17,7 +17,7 @@ public interface SubcaregoryRepository extends JpaRepository<Subcategory, Long> 
     List<Subcategory> findAllByNamePagination(String value, Pageable offset);
 
     @Query(value = "SELECT COUNT(id) FROM subcategory", nativeQuery = true)
-    long searchCount();
+    int searchCount();
 
     Optional<Subcategory> findByNameIgnoreCase(String name);
 

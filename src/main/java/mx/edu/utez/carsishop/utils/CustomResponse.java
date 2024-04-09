@@ -14,4 +14,5 @@ public class CustomResponse<T> {
     boolean error;
     int status;
     String message;
+    int total;
 }

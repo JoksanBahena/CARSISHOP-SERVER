@@ -15,7 +15,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
     List<Category> findAllByNamePagination(String value, Pageable offset);
 
     @Query(value = "SELECT COUNT(id) FROM category", nativeQuery = true)
-    long searchCount();
+    int searchCount();
 
     Optional<Category> findByNameIgnoreCase(String name);
 

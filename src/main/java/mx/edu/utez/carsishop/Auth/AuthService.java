@@ -51,7 +51,8 @@ public class AuthService {
                 authResponse,
                 false,
                 200,
-                "OK"
+                "OK",
+                1
         );
     }
 
@@ -65,7 +66,8 @@ public class AuthService {
                     null,
                     true,
                     400,
-                    "User already exists"
+                    "User already exists",
+                    0
             );
         }
 
@@ -75,7 +77,8 @@ public class AuthService {
                         null,
                         true,
                         400,
-                        "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)"
+                        "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)",
+                        0
                 );
             }
 
@@ -106,7 +109,8 @@ public class AuthService {
                     authResponse,
                     false,
                     200,
-                    "OK"
+                    "OK",
+                    1
             );
         } catch (Exception e) {
             e.printStackTrace();
@@ -114,7 +118,8 @@ public class AuthService {
                     null,
                     true,
                     400,
-                    "Error al registrar al usuario"
+                    "Error al registrar al usuario",
+                    0
             );
         }
 
@@ -186,7 +191,8 @@ public class AuthService {
                     null,
                     false,
                     200,
-                    "Correo enviado correctamente"
+                    "Correo enviado correctamente",
+                    0
             );
         }
 
@@ -194,7 +200,8 @@ public class AuthService {
                 null,
                 true,
                 400,
-                "Correo no encontrado"
+                "Correo no encontrado",
+                0
         );
     }
 
@@ -210,7 +217,8 @@ public class AuthService {
                         null,
                         true,
                         400,
-                        "Token inválido"
+                        "Token inválido",
+                        0
                 );
             }
 
@@ -219,7 +227,8 @@ public class AuthService {
                         null,
                         true,
                         400,
-                        "Las contraseñas no coinciden"
+                        "Las contraseñas no coinciden",
+                        0
                 );
             }
 
@@ -229,14 +238,16 @@ public class AuthService {
                     this.userRepository.updatePasswordById(encodedPassword, userRepository.findByUsername(email).get().getId()),
                     false,
                     200,
-                    "Contraseña actualizada correctamente"
+                    "Contraseña actualizada correctamente",
+                    1
             );
         } catch (JwtException | ExecutionException e) {
             return new CustomResponse<>(
                     null,
                     true,
                     400,
-                    "Token inválido"
+                    "Token inválido",
+                    0
             );
         }
     }

@@ -32,7 +32,7 @@ public class Seller {
     @Column(name = "image",nullable = false)
     private String image;
 
-    //1. PENNDING 2. APPROVED 3. REJECTED
+    //1. PENDING 2. APPROVED 3. REJECTED
     @Column(name = "request_status",nullable = false, columnDefinition = "varchar(20)")
     private String request_status;
 

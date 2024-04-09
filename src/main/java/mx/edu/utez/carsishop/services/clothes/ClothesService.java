@@ -59,21 +59,21 @@ public class ClothesService {
         if(user.isPresent()){
             newClothes.setSeller(user.get().getSeller());
         }else {
-            return new CustomResponse<>(null, true, 400, "User not found");
+            return new CustomResponse<>(null, true, 400, "User not found", 0);
         }
         Clothes clothesSaved = clothesRepository.save(newClothes);
         for (Stock stock:clothes.getStock()) {
             stock.setClothes(clothesSaved);
         }
         stockRepository.saveAll(clothes.getStock());
-        return new CustomResponse<>(clothesSaved, false, 200, "Clothes created");
+        return new CustomResponse<>(clothesSaved, false, 200, "Clothes created", 1);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<Clothes> updateClothesInformation(ClothesUpdateDto clothes) {
         Optional <Clothes> clothesOptional = clothesRepository.findById(clothes.getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "Clothes not found");
+            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
         }else {
             Clothes clothesToUpdate = clothesOptional.get();
             clothesToUpdate.setName(clothes.getName());
@@ -82,7 +82,7 @@ public class ClothesService {
             clothesToUpdate.setCategory(clothes.getCategory());
             clothesToUpdate.setSubcategory(clothes.getSubcategory());
             clothesToUpdate.setStock(clothesToUpdate.getStock());
-            return new CustomResponse<>(clothesRepository.save(clothesToUpdate), false, 200, "Clothes updated");
+            return new CustomResponse<>(clothesRepository.save(clothesToUpdate), false, 200, "Clothes updated", 1);
         }
 
     }
@@ -91,9 +91,9 @@ public class ClothesService {
     public CustomResponse<List<Stock>> updateStock(ClothesStockUpdateDto clothesStockUpdateDto){
         Optional<Clothes> clothesOptional = clothesRepository.findById(clothesStockUpdateDto.getStock().get(0).getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "Clothes not found");
+            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
         }else {
-            return new CustomResponse<>(stockRepository.saveAll(clothesStockUpdateDto.getStock()), false, 200, "Stock updated");
+            return new CustomResponse<>(stockRepository.saveAll(clothesStockUpdateDto.getStock()), false, 200, "Stock updated", 0);
         }
     }
 
@@ -101,10 +101,10 @@ public class ClothesService {
     public CustomResponse<Clothes> disableCloth(Long id){
         Optional<Clothes> clothesOptional = clothesRepository.findById(id);
         if(clothesOptional.isEmpty()) {
-            return new CustomResponse<>(null, true, 400, "Clothes not found");
+            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
         }
         clothesOptional.get().setEnabled(false);
-        return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "Clothes found");
+        return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "Clothes found", 0);
     }
 
 
@@ -115,7 +115,8 @@ public class ClothesService {
                     null,
                     true,
                     400,
-                    "No se encontro alguna prenda"
+                    "No se encontro alguna prenda",
+                    0
             );
         }
 
@@ -123,7 +124,8 @@ public class ClothesService {
                 this.clothesRepository.findById(id).get(),
                 false,
                 200,
-                "Ok"
+                "Ok",
+                1
         );
     }
 
@@ -135,7 +137,8 @@ public class ClothesService {
                     null,
                     true,
                     400,
-                    "No se encontró ropa en esa categoria"
+                    "No se encontró ropa en esa categoria",
+                    0
             );
         }
 
@@ -143,7 +146,8 @@ public class ClothesService {
                 clothes,
                 false,
                 200,
-                "Ok"
+                "Ok",
+                clothes.size()
         );
     }
 
@@ -155,7 +159,8 @@ public class ClothesService {
                     null,
                     true,
                     400,
-                    "No se encontró ropa en esa categoria o subcategoria"
+                    "No se encontró ropa en esa categoria o subcategoria",
+                    0
             );
         }
 
@@ -163,7 +168,8 @@ public class ClothesService {
                 clothes,
                 false,
                 200,
-                "Ok"
+                "Ok",
+                clothes.size()
         );
     }
 
@@ -175,7 +181,8 @@ public class ClothesService {
                     null,
                     true,
                     400,
-                    "No hay datos"
+                    "No hay datos",
+                    0
             );
         }
 
@@ -183,7 +190,8 @@ public class ClothesService {
                 clothes,
                 false,
                 200,
-                "Ok"
+                "Ok",
+                clothes.size()
         );
     }
 

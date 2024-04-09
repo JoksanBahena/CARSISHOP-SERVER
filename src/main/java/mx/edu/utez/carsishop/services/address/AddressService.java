@@ -35,7 +35,8 @@ public class AddressService {
                 addressRepository.save(address),
                 false,
                 200,
-                "OK"
+                "OK",
+                1
         );
     }
     public CustomResponse<List<Address>> getByUser(String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -45,7 +46,8 @@ public class AddressService {
                     null,
                     true,
                     400,
-                    "User does not exists"
+                    "User does not exists",
+                    0
             );
         }else {
             List<Address> addresses=addressRepository.findAllByUser(user.get());
@@ -56,7 +58,8 @@ public class AddressService {
                     addresses,
                     false,
                     200,
-                    "OK"
+                    "OK",
+                    addresses.size()
             );
         }
 
@@ -69,7 +72,8 @@ public class AddressService {
                     null,
                     true,
                     400,
-                    "Address not found"
+                    "Address not found",
+                    0
             );
         }
         updatedAddress.setId(id);
@@ -77,7 +81,8 @@ public class AddressService {
                 addressRepository.save(updatedAddress),
                 false,
                 200,
-                "OK"
+                "OK",
+                1
         );
     }
 
@@ -89,7 +94,8 @@ public class AddressService {
                     null,
                     true,
                     400,
-                    "Address not found"
+                    "Address not found",
+                    0
             );
         }
         Optional<Order> order=orderRepository.findByAddress(address.get());
@@ -99,14 +105,16 @@ public class AddressService {
                     "Address deleted successfully",
                     false,
                     200,
-                    "OK"
+                    "OK",
+                    0
             );
         }else{
             return new CustomResponse<>(
                     "An Order is using this address, can not be deleted",
                     true,
                     400,
-                    "Address can not be deleted"
+                    "Address can not be deleted",
+                    0
             );
         }
     }

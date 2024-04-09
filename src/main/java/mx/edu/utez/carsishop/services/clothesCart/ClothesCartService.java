@@ -40,10 +40,10 @@ public class ClothesCartService {
         if (user.isPresent()){
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());
             if (shoppingCart.isPresent()){
-                return new CustomResponse<>(shoppingCart.get(),false,200,"ok");
+                return new CustomResponse<>(shoppingCart.get(),false,200,"ok", 1);
             }
         }
-        return new CustomResponse<>(null,true,400,"not found");
+        return new CustomResponse<>(null,true,400,"not found", 0);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -64,9 +64,9 @@ public class ClothesCartService {
                 clothesCart.setShoppingCart(newShoppingCart);
             }
             clothesCart.setSize(request.getSize());
-            return new CustomResponse<>(clothesCartRepository.save(clothesCart),false,200,"ok");
+            return new CustomResponse<>(clothesCartRepository.save(clothesCart),false,200,"ok", 1);
         }
-        return new CustomResponse<>(null,true,400,"user not found");
+        return new CustomResponse<>(null,true,400,"user not found", 0);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -74,17 +74,17 @@ public class ClothesCartService {
         Optional<ClothesCart> clothesCart=clothesCartRepository.findById(id);
         if (clothesCart.isPresent()){
             clothesCartRepository.deleteById(id);
-            return new CustomResponse<>("deleted",false,200,"ok");
+            return new CustomResponse<>("deleted",false,200,"ok", 0);
         }
-        return new CustomResponse<>(null,true,400,"not found");
+        return new CustomResponse<>(null,true,400,"not found", 0);
     }
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<ClothesCart> updateClothesCart(Long id, int amount) {
         Optional<ClothesCart> clothesCart=clothesCartRepository.findById(id);
         if (clothesCart.isPresent()){
             clothesCart.get().setAmount(amount);
-            return new CustomResponse<>(clothesCartRepository.save(clothesCart.get()),false,200,"ok");
+            return new CustomResponse<>(clothesCartRepository.save(clothesCart.get()),false,200,"ok", 1);
         }
-        return new CustomResponse<>(null,true,400,"not found");
+        return new CustomResponse<>(null,true,400,"not found", 0);
     }
 }
