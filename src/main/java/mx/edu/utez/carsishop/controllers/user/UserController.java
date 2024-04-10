@@ -20,4 +20,9 @@ public class UserController {
         return userService.getUserInfo(userDto);
     }
 
+    @PostMapping("/updateInfo")
+    public ResponseEntity<CustomResponse<User>> updateInfo(@Validated({UserDto.Update.class}) @ModelAttribute UserDto userDto) {
+        return userService.updateUserInfo(userDto);
+    }
+
 }
