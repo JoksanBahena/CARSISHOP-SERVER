@@ -7,6 +7,7 @@ import mx.edu.utez.carsishop.Jwt.JwtBlackList;
 import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
+import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.gender.GenderRepository;
 import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
@@ -87,6 +88,17 @@ public class AuthService {
 
             User userCasted = userDto.castToUser();
             userCasted.setProfilepic(imgUrl);
+            Optional<Gender> gender = genderRepository.findById(userDto.getGender());
+
+            if (!gender.isPresent()) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "No existe dicho genero registrado dentro del sistema",
+                        0
+                );
+            }
 
             User user = User.builder()
                     .name(userDto.getName())
@@ -94,7 +106,7 @@ public class AuthService {
                     .username(userDto.getUsername())
                     .phone(userDto.getPhone())
                     .birthdate(userDto.getBirthdate())
-                    .gender(this.genderRepository.findById(userDto.getGender()).get())
+                    .gender(gender.get())
                     .password(passwordEncoder.encode(userDto.getPassword()))
                     .profilepic(imgUrl)
                     .role(Role.CUSTOMER)
@@ -140,7 +152,7 @@ public class AuthService {
                     .token(jwtService.getToken(user))
                     .build();
 
-            String url = "http://44.216.6.63:3000/reset-pass/";
+            String url = "http://localhost:3000/reset-pass/";
             String link = " <a href=\"" + url + authResponse.token + "\">Reestablecer contraseña</a> ";
             String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
