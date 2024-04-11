@@ -3,6 +3,7 @@ package mx.edu.utez.carsishop.controllers.user;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.services.user.UserService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,7 +22,7 @@ public class UserController {
     }
 
     @PostMapping("/updateInfo")
-    public ResponseEntity<CustomResponse<User>> updateInfo(@Validated({UserDto.Update.class}) @ModelAttribute UserDto userDto) {
+    public ResponseEntity<CustomResponse<User>> updateInfo(@Validated({UserDto.Update.class}) @RequestBody UserDto userDto) {
         return userService.updateUserInfo(userDto);
     }
 
@@ -40,5 +41,9 @@ public class UserController {
             return ResponseEntity.ok(new CustomResponse<>(null,true,400,"ctm",1));
 
         }
+    }
+    @PutMapping("/updateProfilePic")
+    public ResponseEntity<CustomResponse<User>> updateProfilePic(@Validated({UserDto.UpdateProfilePic.class}) @ModelAttribute UserDto userDto) {
+        return userService.updateProfilePic(userDto);
     }
 }
