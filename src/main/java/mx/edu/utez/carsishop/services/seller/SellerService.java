@@ -40,12 +40,13 @@ public class SellerService {
         )
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
-        if (!paginationDto.getPaginationType().getFilter().equals("curp") || !paginationDto.getPaginationType().getSortBy().equals("curp") ||
-                !paginationDto.getPaginationType().getFilter().equals("rfc") || !paginationDto.getPaginationType().getSortBy().equals("rfc") ||
-                !paginationDto.getPaginationType().getFilter().equals("request_status") || !paginationDto.getPaginationType().getSortBy().equals("request_status") ||
-                !paginationDto.getPaginationType().getFilter().equals("user_name") || !paginationDto.getPaginationType().getSortBy().equals("user_name") ||
-                !paginationDto.getPaginationType().getFilter().equals("user_surname") || !paginationDto.getPaginationType().getSortBy().equals("user_surname"))
+        if (!(paginationDto.getPaginationType().getFilter().equals("curp") && paginationDto.getPaginationType().getSortBy().equals("curp")) &&
+                !(paginationDto.getPaginationType().getFilter().equals("rfc") && paginationDto.getPaginationType().getSortBy().equals("rfc")) &&
+                !(paginationDto.getPaginationType().getFilter().equals("request_status") && paginationDto.getPaginationType().getSortBy().equals("request_status")) &&
+                !(paginationDto.getPaginationType().getFilter().equals("user_name") && paginationDto.getPaginationType().getSortBy().equals("user_name")) &&
+                !(paginationDto.getPaginationType().getFilter().equals("user_surname") && paginationDto.getPaginationType().getSortBy().equals("user_surname"))) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
 
         if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
