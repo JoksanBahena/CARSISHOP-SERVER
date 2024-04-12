@@ -34,7 +34,7 @@ public class SellerController {
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @RequestBody SellerDto sellerDto) {
+    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @ModelAttribute SellerDto sellerDto) {
         return sellerService.update(sellerDto);
     }
 
