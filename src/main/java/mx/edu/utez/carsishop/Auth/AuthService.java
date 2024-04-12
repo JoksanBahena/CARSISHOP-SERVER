@@ -61,7 +61,6 @@ public class AuthService {
         Optional<User> userOptional = userRepository.findByUsername(userDto.getUsername());
 
         ValidateTypeFile validateTypeFile = new ValidateTypeFile();
-
         if (userOptional.isPresent()) {
             return new CustomResponse<>(
                     null,
@@ -117,6 +116,48 @@ public class AuthService {
             AuthResponse authResponse = AuthResponse.builder()
                     .token(jwtService.getToken(user))
                     .build();
+
+            String url = "http://localhost:3000/confirm/";
+            String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
+            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+            String firma = "<div style=\"display: flex; align-items: center;\">" +
+                    "<img src=\"" + img + "\" alt=\"Logo SIOCU\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<div>" +
+                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">SIOCU Academy</h3>" +
+                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">sccul.academy@gmail.com</p>" +
+                    "</div>" +
+                    "</div>";
+
+
+            String body = "<html>" +
+                    "<head>" +
+                    "<style>" +
+                    "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
+                    "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
+                    "a { color: #002e60; text-decoration: underline; }" +
+                    "</style>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h2>Hola, estimado usuario.</h2>" +
+                    "<p>" +
+                    "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú puedes ignorar este mensaje." +
+                    "</p>" +
+                    "<p>" +
+                    "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
+                    "</p>" +
+                    firma +
+                    "</body>" +
+                    "</html>";
+
+            emailDetails = new EmailDetails(
+                    userDto.getUsername(),
+                    "NoReply. Confirma tu cuenta " + " \n\n",
+                    body
+            );
+
+            emailService.sendHtmlMail(emailDetails);
+
             return new CustomResponse<>(
                     authResponse,
                     false,
