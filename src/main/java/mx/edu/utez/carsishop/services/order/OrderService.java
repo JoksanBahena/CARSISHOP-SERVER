@@ -11,6 +11,8 @@ import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
 import mx.edu.utez.carsishop.models.clothesCart.ClothesCartRepository;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
+import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
+import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCartRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
@@ -43,7 +45,7 @@ public class OrderService {
     private AddressRepository addressRepository;
 
     @Autowired
-    private ClothesCartRepository clothesCartRepository;
+    private ShoppingCartRepository shoppingCartRepository;
 
     @Autowired
     private ClothOrderRepository clothOrderRepository;
@@ -66,13 +68,17 @@ public class OrderService {
         if(address.isEmpty()){
             return new CustomResponse<>(null,true,400,"Direccion no encontrada", 0);
         }
+        Optional<ShoppingCart> shoppingCart = shoppingCartRepository.findByUser(user.get());
+        if(shoppingCart.isEmpty()){
+            return new CustomResponse<>(null,true,400,"Carrito no encontrado", 0);
+        }
         order.setAt(new Date(System.currentTimeMillis()));
         order.setUser(user.get());
         order.setCard(card.get());
         order.setAddress(address.get());
         order.setStatus(Order.Status.Paid);
         order= orderRepository.save(order);
-        List<ClothesCart> clothesCarts = clothesCartRepository.findByUser(user.get());
+        List<ClothesCart> clothesCarts = shoppingCart.get().getClothesCarts();
         List<ClothOrder> clothOrders = new ArrayList<>();
         for (ClothesCart clothesCart: clothesCarts) {
             ClothOrder clothOrder = new ClothOrder();
