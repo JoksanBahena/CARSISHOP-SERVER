@@ -46,4 +46,9 @@ public class UserController {
     public ResponseEntity<CustomResponse<User>> updateProfilePic(@Validated({UserDto.UpdateProfilePic.class}) @ModelAttribute UserDto userDto) {
         return userService.updateProfilePic(userDto);
     }
+
+    @PostMapping("/register-admin")
+    public ResponseEntity<CustomResponse<User>> registerAdmin(@Validated({UserDto.RegisterAdmin.class}) @RequestBody UserDto userDto) {
+        return userService.registerAdmin(userDto);
+    }
 }
