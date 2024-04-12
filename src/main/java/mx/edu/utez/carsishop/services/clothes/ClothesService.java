@@ -78,6 +78,7 @@ public class ClothesService {
             Clothes clothesToUpdate = clothesOptional.get();
             clothesToUpdate.setName(clothes.getName());
             clothesToUpdate.setDescription(clothes.getDescription());
+            clothesToUpdate.setPrice(clothes.getPrice());
             clothesToUpdate.setCategory(clothes.getCategory());
             clothesToUpdate.setSubcategory(clothes.getSubcategory());
             clothesToUpdate.setStock(clothesToUpdate.getStock());
