@@ -13,6 +13,7 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.services.email.EmailService;
+import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
 import mx.edu.utez.carsishop.utils.ValidateTypeFile;
@@ -23,7 +24,13 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
@@ -34,6 +41,7 @@ public class AuthService {
     @Autowired
     private GenderRepository genderRepository;
 
+    private CryptoService cryptoService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -41,7 +49,9 @@ public class AuthService {
     private final EmailService emailService;
     EmailDetails emailDetails;
 
-    public CustomResponse<AuthResponse> login(LoginRequest request) {
+    public CustomResponse<AuthResponse> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        request.setEmail(cryptoService.decrypt(request.getEmail()));
+        request.setPassword(cryptoService.decrypt(request.getPassword()));
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user=userRepository.findByUsername(request.getEmail()).orElseThrow();
         String token=jwtService.getToken(user);
@@ -67,7 +77,7 @@ public class AuthService {
                     null,
                     true,
                     400,
-                    "User already exists",
+                    "El correo que intentas registrar ya se encuentra en uso",
                     0
             );
         }
@@ -101,13 +111,13 @@ public class AuthService {
             }
 
             User user = User.builder()
-                    .name(userDto.getName())
-                    .surname(userDto.getSurname())
-                    .username(userDto.getUsername())
-                    .phone(userDto.getPhone())
-                    .birthdate(userDto.getBirthdate())
+                    .name(cryptoService.decrypt(userDto.getName()))
+                    .surname(cryptoService.decrypt(userDto.getSurname()))
+                    .username(cryptoService.decrypt(userDto.getUsername()))
+                    .phone(cryptoService.decrypt(userDto.getPhone()))
+                    .birthdate(cryptoService.decrypt(userDto.getBirthdate()))
                     .gender(gender.get())
-                    .password(passwordEncoder.encode(userDto.getPassword()))
+                    .password(passwordEncoder.encode(cryptoService.decrypt(userDto.getPassword())))
                     .profilepic(imgUrl)
                     .role(Role.CUSTOMER)
                     .build();
@@ -138,7 +148,8 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+    public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        forgotPasswordRequest.setEmail(cryptoService.decrypt(forgotPasswordRequest.getEmail()));
         Optional<User> userOptional = this.userRepository.findByUsername(forgotPasswordRequest.getEmail());
         if(userOptional.isPresent()){
             User user = User.builder()
@@ -218,8 +229,10 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public CustomResponse<Integer> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+    public CustomResponse<Integer> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
         try {
+            resetPasswordRequest.setNewPassword(cryptoService.decrypt(resetPasswordRequest.getNewPassword()));
+            resetPasswordRequest.setConfirmNewPassword(cryptoService.decrypt(resetPasswordRequest.getConfirmNewPassword()));
             String email = jwtService.getUsernameFromToken(token);
 
             String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());

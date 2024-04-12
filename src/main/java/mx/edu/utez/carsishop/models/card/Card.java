@@ -24,16 +24,16 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "number",nullable = false)
+    @Column(name = "number",nullable = false,length = 100)
     private String number;
 
     @Column(name = "lastFour",nullable = false,length = 4)
     private String lastFour;
 
-    @Column(name = "expiration_date",nullable = false,length = 5)
+    @Column(name = "expiration_date",nullable = false,length = 50)
     private String expirationDate;
 
-    @Column(name = "cvv",nullable = false,length = 3)
+    @Column(name = "cvv",nullable = false,length = 50)
     private String cvv;
 
     @Column(name = "owner",nullable = false,length = 60)

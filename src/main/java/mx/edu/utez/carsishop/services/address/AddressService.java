@@ -31,6 +31,7 @@ public class AddressService {
     private OrderRepository orderRepository;
 
     public CustomResponse<Address> register(Address address){
+
         return new CustomResponse<>(
                 addressRepository.save(address),
                 false,
@@ -65,7 +66,7 @@ public class AddressService {
 
     }
 
-    public CustomResponse<Address> update(Address updatedAddress,long id){
+    public CustomResponse<Address> update(Address updatedAddress,long id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Optional<Address> address=addressRepository.findById(id);
         if(address.isEmpty()){
             return new CustomResponse<>(
@@ -76,6 +77,7 @@ public class AddressService {
                     0
             );
         }
+        updatedAddress.decryptData();
         updatedAddress.setId(id);
         return new CustomResponse<>(
                 addressRepository.save(updatedAddress),
