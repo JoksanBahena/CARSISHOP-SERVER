@@ -9,7 +9,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 
 @RestController
 @RequestMapping(path = "/api/sellers")
@@ -29,12 +35,12 @@ public class SellerController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @ModelAttribute SellerDto sellerDto) throws IOException {
+    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @ModelAttribute SellerDto sellerDto) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return sellerService.register(sellerDto);
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @ModelAttribute SellerDto sellerDto) {
+    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @ModelAttribute SellerDto sellerDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return sellerService.update(sellerDto);
     }
 
