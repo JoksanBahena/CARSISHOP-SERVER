@@ -4,12 +4,15 @@ import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.services.clothes.ClothesService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.sql.SQLException;
 import java.util.List;
 import jakarta.validation.Valid;
 import mx.edu.utez.carsishop.models.stock.Stock;
@@ -26,6 +29,11 @@ import java.security.NoSuchAlgorithmException;
 public class ClothesController {
     @Autowired
     private ClothesService clothesService;
+
+    @PostMapping(path = "/find-all")
+    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) throws SQLException {
+        return clothesService.findAll(paginationDto);
+    }
 
     @PostMapping(path = "/create")
     public ResponseEntity<CustomResponse<Clothes>> createClothes(@Valid @RequestBody ClothesDto clothes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
