@@ -44,64 +44,75 @@ public class UserService {
 
         if(!user.isPresent()) {
             return new ResponseEntity<>(
-                    new CustomResponse<>(null, true, HttpStatus.NOT_FOUND.value(), "No se encontró al usuario", 0), HttpStatus.NOT_FOUND
+                    new CustomResponse<>(
+                            null,
+                            true,
+                            400,
+                            "No se encontró al usuario",
+                            0
+                    ), HttpStatus.NOT_FOUND
             );
         }
 
         if(this.userRepository.existsUserByPhoneAndIdNot(userDto.getPhone(), user.get().getId())) {
             return new ResponseEntity<>(
-                    new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El número de teléfono ya se encuentra registrado", 0), HttpStatus.BAD_REQUEST
-            );
-        }
-
-        User userToUpdate = user.get();
-        userToUpdate.setName(userDto.getName());
-        userToUpdate.setSurname(userDto.getSurname());
-        userToUpdate.setPhone(userDto.getPhone());
-        userToUpdate.setGender(this.genderRepository.findById(userDto.getGender()).get());
-
-        this.userRepository.save(userToUpdate);
-
-        return new ResponseEntity<>(
-                new CustomResponse<>(userToUpdate, false, HttpStatus.OK.value(), "Se acutalizó la información", 1), HttpStatus.OK
-        );
-    }
-
-    @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> updateProfilePic(UserDto userDto) {
-        Optional<User> user = this.userRepository.findByUsername(userDto.getUsername());
-
-        if(!user.isPresent()) {
-            return new ResponseEntity<>(
-                    new CustomResponse<>(null, true, HttpStatus.NOT_FOUND.value(), "No se encontró al usuario", 0), HttpStatus.NOT_FOUND
+                    new CustomResponse<>(
+                            null,
+                            true,
+                            400,
+                            "El número de teléfono ya se encuentra registrado",
+                            0
+                    ), HttpStatus.BAD_REQUEST
             );
         }
 
         ValidateTypeFile validateTypeFile = new ValidateTypeFile();
 
         try {
-            if (!validateTypeFile.isImageFile(userDto.getProfilepic())) {
+            if(!validateTypeFile.isImageFile(userDto.getProfilepic())) {
                 return new ResponseEntity<>(
-                        new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)", 0), HttpStatus.BAD_REQUEST
+                        new CustomResponse<>(
+                                null,
+                                true,
+                                400,
+                                "El archivo debe ser de tipo imagen (JPEG, JPG, PNG)",
+                                0
+                        ), HttpStatus.BAD_REQUEST
                 );
             }
 
             UploadImage uploadImage = new UploadImage();
             String imgUrl = uploadImage.uploadImage(userDto.getProfilepic(), userDto.getUsername(), "users");
 
-            User userToUpdate = user.get();
-            userToUpdate.setProfilepic(imgUrl);
+            User userOptional = user.get();
+            userOptional.setName(userDto.getName());
+            userOptional.setSurname(userDto.getSurname());
+            userOptional.setPhone(userDto.getPhone());
+            userOptional.setGender(this.genderRepository.findById(userDto.getGender()).get());
+            userOptional.setProfilepic(imgUrl);
 
-            this.userRepository.save(userToUpdate);
+            userOptional = this.userRepository.save(userOptional);
 
             return new ResponseEntity<>(
-                    new CustomResponse<>(userToUpdate, false, HttpStatus.OK.value(), "Foto de perfil actualizada correctamente", 1), HttpStatus.OK
+                    new CustomResponse<>(
+                            userOptional,
+                            false,
+                            200,
+                            "Se acutalizó la información",
+                            0
+                    ), HttpStatus.OK
             );
-        }catch (Exception e) {
-            e.printStackTrace();
 
+        } catch (Exception e) {
+            e.printStackTrace();
             return new ResponseEntity<>(
-                    new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Error al actualizar la foto de perfil", 0), HttpStatus.BAD_REQUEST
+                    new CustomResponse<>(
+                            null,
+                            true,
+                            400,
+                            "Error al actualizar el usuario",
+                            0
+                    ), HttpStatus.BAD_REQUEST
             );
         }
     }

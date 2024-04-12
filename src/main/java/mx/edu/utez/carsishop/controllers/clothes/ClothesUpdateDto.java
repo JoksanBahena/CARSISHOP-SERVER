@@ -27,13 +27,15 @@ public class ClothesUpdateDto {
     private Category category;
     @NotNull(message = "La subcategoría es obligatoria")
     private Subcategory subcategory;
-
+    @NotNull(message = "El precio es obligatorio")
+    private float price;
 
     public Clothes castToClothes(){
         Clothes clothe=new Clothes();
         clothe.setId(id);
         clothe.setName(name);
         clothe.setDescription(description);
+        clothe.setPrice(price);
         clothe.setCategory(category);
         clothe.setSubcategory(subcategory);
         return clothe;

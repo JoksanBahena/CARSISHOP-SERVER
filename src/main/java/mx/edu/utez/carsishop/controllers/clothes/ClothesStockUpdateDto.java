@@ -19,7 +19,4 @@ import java.util.List;
 public class ClothesStockUpdateDto {
     @NotNull(message = "El stock es obligatorio")
     private List<Stock> stock;
-
-    @NotNull(message = "El id es obligatorio")
-    private Clothes clothes;
 }
