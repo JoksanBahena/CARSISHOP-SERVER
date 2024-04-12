@@ -18,4 +18,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     int updatePasswordById(@Param("password") String password, @Param("id") Long id);
 
     Optional<User> findById(Long id);
+
+    boolean existsUserByUsername(String username);
+
+    boolean existsUserByPhone(String phone);
 }

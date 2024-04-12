@@ -1,7 +1,9 @@
 package mx.edu.utez.carsishop.services.user;
 
 import mx.edu.utez.carsishop.controllers.user.UserDto;
+import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.gender.GenderRepository;
+import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
@@ -11,6 +13,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,14 +23,54 @@ import java.util.Optional;
 @Service
 public class UserService {
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
     @Autowired
     private GenderRepository genderRepository;
 
     @Autowired
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    @Transactional(rollbackFor = SQLException.class)
+    public ResponseEntity<CustomResponse<User>> registerAdmin(UserDto userDto) {
+        if (this.userRepository.existsUserByUsername(userDto.getUsername())) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de usuario ya se encuentra registrado.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (this.userRepository.existsUserByPhone(userDto.getPhone())) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El número de teléfono ya se encuentra registrado.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        Optional<Gender> gender = genderRepository.findById(userDto.getGender());
+
+        if (!gender.isPresent()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.NOT_FOUND.value(), "El género ingresado no se encuentra registrado.", 0), HttpStatus.NOT_FOUND);
+        }
+
+        if (userDto.getPhone().length() != 10) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El número de teléfono debe contener 10 dígitos.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        String encodedPassword = passwordEncoder.encode(userDto.getPassword());
+
+        User user = new User();
+        user.setName(userDto.getName());
+        user.setSurname(userDto.getSurname());
+        user.setUsername(userDto.getUsername());
+        user.setPassword(encodedPassword);
+        user.setPhone(userDto.getPhone());
+        user.setGender(gender.get());
+        user.setBirthdate(userDto.getBirthdate());
+        user.setRole(Role.ADMIN);
+
+        user = this.userRepository.save(user);
+
+        return new ResponseEntity<>(new CustomResponse<>(user, false, HttpStatus.CREATED.value(), "Administrador registrado correctamente.", 1), HttpStatus.CREATED);
+    }
+
+    @Transactional(readOnly = true)
     public ResponseEntity<CustomResponse<User>> getUserInfo(UserDto dto) {
         Optional<User> user = userRepository.findByUsername(dto.getUsername());
 
