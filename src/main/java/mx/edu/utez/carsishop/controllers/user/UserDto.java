@@ -21,7 +21,7 @@ public class UserDto {
     private String name;
     @NotNull(groups = {Register.class, Update.class}, message ="El apellido es obligatorio")
     private String surname;
-    @NotNull(groups = {GetInfo.class, Register.class, Update.class}, message ="El nombre de usuario es obligatorio")
+    @NotNull(groups = {GetInfo.class, Register.class, Update.class, UpdateProfilePic.class}, message ="El nombre de usuario es obligatorio")
     private String username;
     @NotNull(groups = {Register.class, Update.class}, message ="El teléfono es obligatorio")
     private String phone;
@@ -29,7 +29,7 @@ public class UserDto {
     private String birthdate;
     @NotNull(groups = {Register.class}, message ="La contraseña es obligatoria")
     private String password;
-    @NotNull(groups = {Register.class, Update.class}, message ="La imagen de perfil es obligatoria")
+    @NotNull(groups = {Register.class, UpdateProfilePic.class}, message ="La imagen de perfil es obligatoria")
     private MultipartFile profilepic;
     @NotNull(groups = {Register.class, Update.class}, message ="El género es obligatorio")
     private Long gender;
@@ -43,4 +43,6 @@ public class UserDto {
     public interface GetInfo {}
 
     public interface Update {}
+
+    public interface UpdateProfilePic {}
 }
