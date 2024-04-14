@@ -16,7 +16,10 @@ import mx.edu.utez.carsishop.services.email.EmailService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
 import mx.edu.utez.carsishop.utils.ValidateTypeFile;
+import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -39,20 +42,30 @@ public class AuthService {
     private final EmailService emailService;
     EmailDetails emailDetails;
 
-    public CustomResponse<AuthResponse> login(LoginRequest request) {
+    public ResponseEntity<Object> login(LoginRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
+        if (!userRepository.getStatusByEmail(request.getEmail())) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "La cuenta no ha sido confirmada", 0),
+                    HttpStatus.BAD_REQUEST);
+        }
+
         String token = jwtService.getToken(user);
         AuthResponse authResponse = AuthResponse.builder()
                 .token(token)
                 .build();
-        return new CustomResponse<>(
+
+        return new ResponseEntity<>(new CustomResponse<>(
                 authResponse,
                 false,
                 200,
-                "OK",
-                1
-        );
+                "OK", 1),
+                HttpStatus.OK);
+
     }
 
     public CustomResponse<AuthResponse> register(UserDto userDto) {

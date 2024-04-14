@@ -23,9 +23,9 @@ public class AuthController {
     private final AuthService authService;
     
     @PostMapping(value = "login")
-    public ResponseEntity<CustomResponse<AuthResponse>> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request)
+    public ResponseEntity<Object> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request)
     {
-        return ResponseEntity.ok(authService.login(request));
+        return authService.login(request);
     }
 
     @PostMapping(value = "register")
