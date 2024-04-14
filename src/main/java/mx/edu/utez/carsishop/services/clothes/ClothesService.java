@@ -92,7 +92,7 @@ public class ClothesService {
                 break;
 
             case "request_status":
-                list = clothesRepository.findAllByRequestStatus(
+                list = clothesRepository.findAllByRequestStatusPagination(
                         paginationDto.getValue(),
                         PageRequest.of(paginationDto.getPaginationType().getPage(),
                                 paginationDto.getPaginationType().getLimit(),

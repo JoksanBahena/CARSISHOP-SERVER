@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.models.clothes;
 
 import mx.edu.utez.carsishop.models.category.Category;
+import mx.edu.utez.carsishop.models.sellers.Seller;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
@@ -37,6 +38,6 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     List<Clothes> findAllByNamePagination(String value, Pageable offset);
 
     //isAccepted
-    @Query(value = "SELECT c FROM Clothes c WHERE c.request_status = ?1")
-    List<Clothes> findAllByRequestStatus(String value, Pageable offset);
+    @Query(value = "SELECT c FROM Clothes c WHERE UPPER(c.request_status) LIKE UPPER(?1)")
+    List<Clothes> findAllByRequestStatusPagination(String value, Pageable offset);
 }
