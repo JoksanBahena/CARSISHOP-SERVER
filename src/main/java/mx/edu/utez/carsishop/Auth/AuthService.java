@@ -17,7 +17,6 @@ import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
 import mx.edu.utez.carsishop.utils.ValidateTypeFile;
-import org.apache.coyote.Response;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -30,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -330,5 +327,160 @@ public class AuthService {
             );
         }
     }
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<Integer> confirm(String token) {
+        try {
+            if (!userRepository.existsUserByUsername(jwtService.getUsernameFromToken(token))) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        404,
+                        "La cuenta no existe",
+                        0
+                );
+            }
 
+            if (userRepository.getStatusByEmail(jwtService.getUsernameFromToken(token))) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada",
+                        0
+                );
+            }
+
+            if (JwtBlackList.isTokenBlacklisted(token)) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        403,
+                        "Token inválido",
+                        0
+                );
+            }
+            JwtBlackList.addToBlacklist(token);
+
+            return new CustomResponse<>(
+                    this.userRepository.updateStatusByEmail(jwtService.getUsernameFromToken(token)),
+                    false,
+                    200,
+                    "Usuario confirmado correctamente",
+                    1
+            );
+
+        } catch (Exception e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    500,
+                    "Error al confirmar usuario",
+                    0
+            );
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<AuthResponse> resendconfirm(ResendConfirmRequest resendConfirmRequest) {
+        try {
+            if (!userRepository.existsUserByUsername(resendConfirmRequest.getEmail())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta no existe",
+                        0
+                );
+            }
+
+            if (userRepository.getStatusByEmail(resendConfirmRequest.getEmail())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada",
+                        0
+                );
+            }
+
+            Optional<User> userOptional = this.userRepository.findByUsername(resendConfirmRequest.getEmail());
+
+            if (userOptional.isPresent()) {
+                User user = User.builder()
+                        .username(userOptional.get().getUsername())
+                        .name(userOptional.get().getName())
+                        .surname(userOptional.get().getSurname())
+                        .role(userOptional.get().getRole())
+                        .build();
+
+                AuthResponse authResponse = AuthResponse.builder()
+                        .token(jwtService.getToken(user))
+                        .build();
+
+                String url = "http://localhost:3000/confirm/";
+                String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
+                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+                String firma = "<div style=\"display: flex; align-items: center;\">" +
+                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                        "<div>" +
+                        "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                        "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
+                        "</div>" +
+                        "</div>";
+
+
+                String body = "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
+                        "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
+                        "a { color: #002e60; text-decoration: underline; }" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<h2>Hola, estimado usuario.</h2>" +
+                        "<p>" +
+                        "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú, puedes ignorar este mensaje." +
+                        "</p>" +
+                        "<p>" +
+                        "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
+                        "</p>" +
+                        firma +
+                        "</body>" +
+                        "</html>";
+
+                emailDetails = new EmailDetails(
+                        resendConfirmRequest.getEmail(),
+                        "NoReply. Confirma tu cuenta " + " \n\n",
+                        body
+                );
+                emailService.sendHtmlMail(emailDetails);
+
+                return new CustomResponse<>(
+                        null,
+                        false,
+                        200,
+                        "Correo enviado correctamente",
+                        0
+                );
+            }else{
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        500,
+                        "Error al reenviar correo de confirmación",
+                        0
+                );
+            }
+        } catch (Exception e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    500,
+                    "Error al reenviar correo de confirmación",
+                    0
+            );
+        }
+    }
 }
