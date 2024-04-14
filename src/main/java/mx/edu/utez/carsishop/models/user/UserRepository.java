@@ -18,4 +18,10 @@ public interface UserRepository extends JpaRepository<User,Long> {
     int updatePasswordById(@Param("password") String password, @Param("id") Long id);
 
     Optional<User> findById(Long id);
+
+    @Modifying
+    @Query(
+            value = "UPDATE user SET status = :true WHERE email = :username",nativeQuery = true
+    )
+    int updateStatusByEmail(@Param("username") String username);
 }

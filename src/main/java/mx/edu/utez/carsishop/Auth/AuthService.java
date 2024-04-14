@@ -23,8 +23,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.io.IOException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -122,10 +120,10 @@ public class AuthService {
             String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
             String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo SIOCU\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                     "<div>" +
-                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">SIOCU Academy</h3>" +
-                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">sccul.academy@gmail.com</p>" +
+                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
                     "</div>" +
                     "</div>";
 
@@ -198,12 +196,13 @@ public class AuthService {
             String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
             String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo SIOCU\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                     "<div>" +
-                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">SIOCU Academy</h3>" +
-                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">sccul.academy@gmail.com</p>" +
+                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
                     "</div>" +
                     "</div>";
+
 
 
             String body = "<html>" +
@@ -219,7 +218,6 @@ public class AuthService {
                     "<p>" +
                     "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SIOCU. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
                     "</p>" +
-                    authResponse.token +
                     "<p>" +
                     "Para restablecer tu contraseña, haz clic en el siguiente enlace:" + link +
                     "</p>" +
@@ -305,4 +303,37 @@ public class AuthService {
         }
     }
 
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<Integer> confirm(String token) {
+
+        try{
+            if(JwtBlackList.isTokenBlacklisted(token)){
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "Token inválido",
+                        0
+                );
+            }
+            JwtBlackList.addToBlacklist(token);
+
+            return new CustomResponse<>(
+                    this.userRepository.updateStatusByEmail(jwtService.getUsernameFromToken(token)),
+                    false,
+                    200,
+                    "Usuario confirmado correctamente",
+                    1
+            );
+
+        } catch (Exception e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Token inválido",
+                    0
+            );
+        }
+    }
 }
