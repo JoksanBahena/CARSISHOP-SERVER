@@ -260,14 +260,14 @@ public class ClothesService {
 
         clothesDto.setRequest_status(clothesDto.getRequest_status().toUpperCase());
 
-        if (!Objects.equals(clothesDto.getRequest_status(), "ACCEPTED") && !Objects.equals(clothesDto.getRequest_status(), "REJECTED")) {
+        if (!Objects.equals(clothesDto.getRequest_status(), "APPROVED") && !Objects.equals(clothesDto.getRequest_status(), "REJECTED")) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El estado proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
         clothes.get().setRequest_status(clothesDto.getRequest_status());
         clothesRepository.save(clothes.get());
 
-        String message = Objects.equals(clothesDto.getRequest_status(), "ACCEPTED") ? "Prenda aceptada correctamente." : "Prenda rechazada correctamente.";
+        String message = Objects.equals(clothesDto.getRequest_status(), "APPROVED") ? "Prenda aceptada correctamente." : "Prenda rechazada correctamente.";
 
         return new ResponseEntity<>(new CustomResponse<>(clothes.get(), false, HttpStatus.OK.value(), message, 1), HttpStatus.OK);
 
