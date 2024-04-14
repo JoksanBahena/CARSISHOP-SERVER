@@ -22,6 +22,9 @@ public class Stock {
     @Column(name = "quantity",nullable = false)
     private int quantity;
 
+    @Column(name = "price",nullable = false, columnDefinition = "DECIMAL(10,2)")
+    private float price;
+
     @ManyToOne
     @JoinColumn(name = "size")
     private Size size;

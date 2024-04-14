@@ -22,7 +22,7 @@ public class SellerDto {
     private String curp;
     @NotNull(groups = {Update.class}, message = "El estado de la solicitud del vendedor no puede ser nulo.")
     private String request_status;
-    @NotNull(groups = {Register.class, Update.class}, message = "La imagen del vendedor no puede ser nula.")
+    @NotNull(groups = {Register.class}, message = "La imagen del vendedor no puede ser nula.")
     private MultipartFile image;
     @NotNull(groups = {Register.class, Update.class}, message = "El usuario del vendedor no puede ser nulo.")
     private User user;

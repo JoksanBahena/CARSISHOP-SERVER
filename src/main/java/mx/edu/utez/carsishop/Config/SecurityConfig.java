@@ -29,16 +29,14 @@ public class SecurityConfig {
             .authorizeHttpRequests(authRequest ->
               authRequest
                 .requestMatchers("/api/auth/**").permitAll()
+                      .requestMatchers("/api/captcha/**").permitAll()
                 .anyRequest().authenticated()
                 )
             .sessionManagement(sessionManager->
-                sessionManager 
+                sessionManager
                   .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authenticationProvider(authProvider)
             .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
             .build();
-            
-            
     }
-
 }
