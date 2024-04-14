@@ -11,6 +11,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findByUsername(String username);
     boolean existsUserByPhoneAndIdNot(String phone, long id);
     boolean existsUserByUsername(String username);
+    boolean existsUserByPhone(String phone);
 
     @Modifying
     @Query(
@@ -25,4 +26,5 @@ public interface UserRepository extends JpaRepository<User,Long> {
             value = "UPDATE user SET status = true WHERE email = :username",nativeQuery = true
     )
     int updateStatusByEmail(@Param("username") String username);
+
 }
