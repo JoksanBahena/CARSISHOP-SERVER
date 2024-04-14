@@ -10,6 +10,7 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<User,Long> {
     Optional<User> findByUsername(String username);
     boolean existsUserByPhoneAndIdNot(String phone, long id);
+    boolean existsUserByUsername(String username);
 
     @Modifying
     @Query(
@@ -21,7 +22,7 @@ public interface UserRepository extends JpaRepository<User,Long> {
 
     @Modifying
     @Query(
-            value = "UPDATE user SET status = :true WHERE email = :username",nativeQuery = true
+            value = "UPDATE user SET status = true WHERE email = :username",nativeQuery = true
     )
     int updateStatusByEmail(@Param("username") String username);
 }

@@ -41,9 +41,9 @@ public class AuthService {
 
     public CustomResponse<AuthResponse> login(LoginRequest request) {
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        User user=userRepository.findByUsername(request.getEmail()).orElseThrow();
-        String token=jwtService.getToken(user);
-        AuthResponse authResponse= AuthResponse.builder()
+        User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
+        String token = jwtService.getToken(user);
+        AuthResponse authResponse = AuthResponse.builder()
                 .token(token)
                 .build();
         return new CustomResponse<>(
@@ -70,7 +70,7 @@ public class AuthService {
         }
 
         try {
-            if(!validateTypeFile.isImageFile(userDto.getProfilepic())) {
+            if (!validateTypeFile.isImageFile(userDto.getProfilepic())) {
                 return new CustomResponse<>(
                         null,
                         true,
@@ -179,7 +179,7 @@ public class AuthService {
     @Transactional(readOnly = true)
     public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
         Optional<User> userOptional = this.userRepository.findByUsername(forgotPasswordRequest.getEmail());
-        if(userOptional.isPresent()){
+        if (userOptional.isPresent()) {
             User user = User.builder()
                     .username(userOptional.get().getUsername())
                     .name(userOptional.get().getName())
@@ -202,7 +202,6 @@ public class AuthService {
                     "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
                     "</div>" +
                     "</div>";
-
 
 
             String body = "<html>" +
@@ -263,7 +262,7 @@ public class AuthService {
 
             String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());
 
-            if(JwtBlackList.isTokenBlacklisted(token)){
+            if (JwtBlackList.isTokenBlacklisted(token)) {
                 return new CustomResponse<>(
                         null,
                         true,
@@ -273,7 +272,7 @@ public class AuthService {
                 );
             }
 
-            if(!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmNewPassword())) {
+            if (!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmNewPassword())) {
                 return new CustomResponse<>(
                         null,
                         true,
@@ -305,14 +304,23 @@ public class AuthService {
 
     @Transactional(rollbackFor = {Exception.class})
     public CustomResponse<Integer> confirm(String token) {
-
-        try{
-            if(JwtBlackList.isTokenBlacklisted(token)){
+        try {
+            if (!userRepository.existsUserByUsername(jwtService.getUsernameFromToken(token))) {
                 return new CustomResponse<>(
                         null,
                         true,
                         400,
-                        "Token inválido",
+                        "La cuenta no existe",
+                        0
+                );
+            }
+
+            if (JwtBlackList.isTokenBlacklisted(token)) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "Token ya utilizado",
                         0
                 );
             }
@@ -330,8 +338,102 @@ public class AuthService {
             return new CustomResponse<>(
                     null,
                     true,
-                    400,
-                    "Token inválido",
+                    500,
+                    "Error al confirmar usuario",
+                    0
+            );
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<AuthResponse> resendconfirm(ResendConfirmRequest resendConfirmRequest) {
+        try {
+            if (!userRepository.existsUserByUsername(resendConfirmRequest.getEmail())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta no existe",
+                        0
+                );
+            }
+
+            Optional<User> userOptional = this.userRepository.findByUsername(resendConfirmRequest.getEmail());
+
+            if (userOptional.isPresent()) {
+                User user = User.builder()
+                        .username(userOptional.get().getUsername())
+                        .name(userOptional.get().getName())
+                        .surname(userOptional.get().getSurname())
+                        .role(userOptional.get().getRole())
+                        .build();
+
+                AuthResponse authResponse = AuthResponse.builder()
+                        .token(jwtService.getToken(user))
+                        .build();
+
+                String url = "http://localhost:3000/confirm/";
+                String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
+                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+                String firma = "<div style=\"display: flex; align-items: center;\">" +
+                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                        "<div>" +
+                        "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                        "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
+                        "</div>" +
+                        "</div>";
+
+
+                String body = "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
+                        "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
+                        "a { color: #002e60; text-decoration: underline; }" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<h2>Hola, estimado usuario.</h2>" +
+                        "<p>" +
+                        "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú, puedes ignorar este mensaje." +
+                        "</p>" +
+                        "<p>" +
+                        "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
+                        "</p>" +
+                        firma +
+                        "</body>" +
+                        "</html>";
+
+                emailDetails = new EmailDetails(
+                        resendConfirmRequest.getEmail(),
+                        "NoReply. Confirma tu cuenta " + " \n\n",
+                        body
+                );
+                emailService.sendHtmlMail(emailDetails);
+
+                return new CustomResponse<>(
+                        null,
+                        false,
+                        200,
+                        "Correo enviado correctamente",
+                        0
+                );
+            }else{
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        500,
+                        "Error al reenviar correo de confirmación",
+                        0
+                );
+            }
+        } catch (Exception e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    500,
+                    "Error al reenviar correo de confirmación",
                     0
             );
         }
