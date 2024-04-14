@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
 import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
 import mx.edu.utez.carsishop.models.stock.Stock;
 
@@ -32,4 +33,8 @@ public class Size {
     @OneToMany(mappedBy = "size")
     @JsonIgnore
     private List<ClothesCart> clothesCarts;
+
+    @OneToMany(mappedBy = "size")
+    @JsonIgnore
+    private List<ClothOrder> clothOrders;
 }

@@ -26,8 +26,7 @@ public class AuthController {
     private final AuthService authService;
     
     @PostMapping(value = "login")
-    public ResponseEntity<CustomResponse<AuthResponse>> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request)
-    {
+    public ResponseEntity<CustomResponse<AuthResponse>> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return ResponseEntity.ok(authService.login(request));
     }
 
@@ -44,12 +43,12 @@ public class AuthController {
     }
 
     @PostMapping(value = "forgotPassword")
-    public ResponseEntity<CustomResponse<AuthResponse>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) {
+    public ResponseEntity<CustomResponse<AuthResponse>> forgotPassword(@RequestBody ForgotPasswordRequest forgotPasswordRequest) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return ResponseEntity.ok(authService.forgotPassword(forgotPasswordRequest));
     }
 
     @PostMapping(value = "resetPassword/{token}")
-    public ResponseEntity<CustomResponse<Integer>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @PathVariable String token) {
+    public ResponseEntity<CustomResponse<Integer>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @PathVariable String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return ResponseEntity.ok(authService.resetPassword(resetPasswordRequest, token));
     }
 
