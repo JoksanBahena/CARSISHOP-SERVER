@@ -381,26 +381,25 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public CustomResponse<AuthResponse> resendconfirm(ResendConfirmRequest resendConfirmRequest) {
+    public ResponseEntity<Object> resendconfirm(ResendConfirmRequest resendConfirmRequest)
+    {
         try {
             if (!userRepository.existsUserByUsername(resendConfirmRequest.getEmail())) {
-                return new CustomResponse<>(
+                return new ResponseEntity<>(new CustomResponse<>(
                         null,
                         true,
-                        400,
-                        "La cuenta no existe",
-                        0
-                );
+                        404,
+                        "La cuenta no existe", 0),
+                        HttpStatus.NOT_FOUND);
             }
 
             if (userRepository.getStatusByEmail(resendConfirmRequest.getEmail())) {
-                return new CustomResponse<>(
+                return new ResponseEntity<>(new CustomResponse<>(
                         null,
                         true,
                         400,
-                        "La cuenta ya ha sido confirmada",
-                        0
-                );
+                        "La cuenta ya ha sido confirmada", 0),
+                        HttpStatus.BAD_REQUEST);
             }
 
             Optional<User> userOptional = this.userRepository.findByUsername(resendConfirmRequest.getEmail());
@@ -457,30 +456,27 @@ public class AuthService {
                 );
                 emailService.sendHtmlMail(emailDetails);
 
-                return new CustomResponse<>(
+                return new ResponseEntity<>(new CustomResponse<>(
                         null,
                         false,
                         200,
-                        "Correo enviado correctamente",
-                        0
-                );
+                        "Correo enviado correctamente", 0),
+                        HttpStatus.OK);
             }else{
-                return new CustomResponse<>(
+                return new ResponseEntity<>(new CustomResponse<>(
                         null,
                         true,
-                        500,
-                        "Error al reenviar correo de confirmación",
-                        0
-                );
+                        400,
+                        "Error al reenviar correo de confirmación", 0),
+                        HttpStatus.BAD_REQUEST);
             }
         } catch (Exception e) {
-            return new CustomResponse<>(
+            return new ResponseEntity<>(new CustomResponse<>(
                     null,
                     true,
                     500,
-                    "Error al reenviar correo de confirmación",
-                    0
-            );
+                    "Error al reenviar correo de confirmación", 0),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }

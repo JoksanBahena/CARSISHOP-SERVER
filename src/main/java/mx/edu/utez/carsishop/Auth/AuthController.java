@@ -55,8 +55,8 @@ public class AuthController {
     }
 
     @PostMapping(value = "resend-confirm")
-        public ResponseEntity<CustomResponse<AuthResponse>> confirm(@RequestBody ResendConfirmRequest resendConfirmRequest) {
-        return ResponseEntity.ok(authService.resendconfirm(resendConfirmRequest));
+        public ResponseEntity<Object> confirm(@RequestBody ResendConfirmRequest resendConfirmRequest) {
+        return authService.resendconfirm(resendConfirmRequest);
     }
 
 
