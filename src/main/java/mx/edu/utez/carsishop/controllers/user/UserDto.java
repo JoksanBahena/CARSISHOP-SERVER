@@ -35,7 +35,7 @@ public class UserDto {
     private Long gender;
 
     public User castToUser() {
-        return new User(getId(), getName(), getSurname(), getUsername(), getPhone(), getBirthdate(), null, getPassword(), null, null, null, null, null, null, null);
+        return new User(getId(), getName(), getSurname(), getUsername(), getPhone(), getBirthdate(),false, null, getPassword(), null, null, null, null, null, null, null);
     }
 
     public interface Register {}

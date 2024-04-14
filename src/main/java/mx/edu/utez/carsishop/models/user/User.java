@@ -39,6 +39,8 @@ public class User implements UserDetails {
     private String phone;
     @Column(name = "birthdate",nullable = false)
     private String birthdate;
+    @Column(name = "status", columnDefinition = "boolean default true")
+    private boolean status;
 
     @ManyToOne
     @JoinColumn(name="gender")
