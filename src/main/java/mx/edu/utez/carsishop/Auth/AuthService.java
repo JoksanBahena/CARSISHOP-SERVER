@@ -41,7 +41,7 @@ public class AuthService {
     @Autowired
     private GenderRepository genderRepository;
 
-    private CryptoService cryptoService;
+    private final CryptoService cryptoService = new CryptoService();
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -52,6 +52,8 @@ public class AuthService {
     public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));
         request.setPassword(cryptoService.decrypt(request.getPassword()));
+        System.out.println(request.getEmail());
+        System.out.println(request.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
         if (!userRepository.getStatusByEmail(request.getEmail())) {
