@@ -18,6 +18,8 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
 import mx.edu.utez.carsishop.utils.ValidateTypeFile;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -27,11 +29,9 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import java.io.IOException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -41,7 +41,7 @@ public class AuthService {
     @Autowired
     private GenderRepository genderRepository;
 
-    private CryptoService cryptoService;
+    private final CryptoService cryptoService = new CryptoService();
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -49,22 +49,34 @@ public class AuthService {
     private final EmailService emailService;
     EmailDetails emailDetails;
 
-    public CustomResponse<AuthResponse> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));
         request.setPassword(cryptoService.decrypt(request.getPassword()));
+        System.out.println(request.getEmail());
+        System.out.println(request.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        User user=userRepository.findByUsername(request.getEmail()).orElseThrow();
-        String token=jwtService.getToken(user);
-        AuthResponse authResponse= AuthResponse.builder()
+        User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
+        if (!userRepository.getStatusByEmail(request.getEmail())) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "La cuenta no ha sido confirmada", 0),
+                    HttpStatus.BAD_REQUEST);
+        }
+
+        String token = jwtService.getToken(user);
+        AuthResponse authResponse = AuthResponse.builder()
                 .token(token)
                 .build();
-        return new CustomResponse<>(
+
+        return new ResponseEntity<>(new CustomResponse<>(
                 authResponse,
                 false,
                 200,
-                "OK",
-                1
-        );
+                "OK", 1),
+                HttpStatus.OK);
+
     }
 
     public CustomResponse<AuthResponse> register(UserDto userDto) {
@@ -127,6 +139,48 @@ public class AuthService {
             AuthResponse authResponse = AuthResponse.builder()
                     .token(jwtService.getToken(user))
                     .build();
+
+            String url = "http://localhost:3000/confirm/";
+            String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
+            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+            String firma = "<div style=\"display: flex; align-items: center;\">" +
+                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<div>" +
+                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
+                    "</div>" +
+                    "</div>";
+
+
+            String body = "<html>" +
+                    "<head>" +
+                    "<style>" +
+                    "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
+                    "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
+                    "a { color: #002e60; text-decoration: underline; }" +
+                    "</style>" +
+                    "</head>" +
+                    "<body>" +
+                    "<h2>Hola, estimado usuario.</h2>" +
+                    "<p>" +
+                    "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú puedes ignorar este mensaje." +
+                    "</p>" +
+                    "<p>" +
+                    "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
+                    "</p>" +
+                    firma +
+                    "</body>" +
+                    "</html>";
+
+            emailDetails = new EmailDetails(
+                    userDto.getUsername(),
+                    "NoReply. Confirma tu cuenta " + " \n\n",
+                    body
+            );
+
+            emailService.sendHtmlMail(emailDetails);
+
             return new CustomResponse<>(
                     authResponse,
                     false,
@@ -168,10 +222,10 @@ public class AuthService {
             String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
             String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo SIOCU\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                     "<div>" +
-                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">SIOCU Academy</h3>" +
-                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">sccul.academy@gmail.com</p>" +
+                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
                     "</div>" +
                     "</div>";
 
@@ -189,7 +243,6 @@ public class AuthService {
                     "<p>" +
                     "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SIOCU. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
                     "</p>" +
-                    authResponse.token +
                     "<p>" +
                     "Para restablecer tu contraseña, haz clic en el siguiente enlace:" + link +
                     "</p>" +
@@ -276,5 +329,156 @@ public class AuthService {
             );
         }
     }
+    @Transactional(rollbackFor = {Exception.class})
+    public CustomResponse<Integer> confirm(String token) {
+        try {
+            if (!userRepository.existsUserByUsername(jwtService.getUsernameFromToken(token))) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        404,
+                        "La cuenta no existe",
+                        0
+                );
+            }
 
+            if (userRepository.getStatusByEmail(jwtService.getUsernameFromToken(token))) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada",
+                        0
+                );
+            }
+
+            if (JwtBlackList.isTokenBlacklisted(token)) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        403,
+                        "Token inválido",
+                        0
+                );
+            }
+            JwtBlackList.addToBlacklist(token);
+
+            return new CustomResponse<>(
+                    this.userRepository.updateStatusByEmail(jwtService.getUsernameFromToken(token)),
+                    false,
+                    200,
+                    "Usuario confirmado correctamente",
+                    1
+            );
+
+        } catch (Exception e) {
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    500,
+                    "Error al confirmar usuario",
+                    0
+            );
+        }
+    }
+
+    @Transactional(rollbackFor = {Exception.class})
+    public ResponseEntity<Object> resendconfirm(ResendConfirmRequest resendConfirmRequest)
+    {
+        try {
+            if (!userRepository.existsUserByUsername(resendConfirmRequest.getEmail())) {
+                return new ResponseEntity<>(new CustomResponse<>(
+                        null,
+                        true,
+                        404,
+                        "La cuenta no existe", 0),
+                        HttpStatus.NOT_FOUND);
+            }
+
+            if (userRepository.getStatusByEmail(resendConfirmRequest.getEmail())) {
+                return new ResponseEntity<>(new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada", 0),
+                        HttpStatus.BAD_REQUEST);
+            }
+
+            Optional<User> userOptional = this.userRepository.findByUsername(resendConfirmRequest.getEmail());
+
+            if (userOptional.isPresent()) {
+                User user = User.builder()
+                        .username(userOptional.get().getUsername())
+                        .name(userOptional.get().getName())
+                        .surname(userOptional.get().getSurname())
+                        .role(userOptional.get().getRole())
+                        .build();
+
+                AuthResponse authResponse = AuthResponse.builder()
+                        .token(jwtService.getToken(user))
+                        .build();
+
+                String url = "http://localhost:3000/confirm/";
+                String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
+                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+                String firma = "<div style=\"display: flex; align-items: center;\">" +
+                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                        "<div>" +
+                        "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
+                        "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
+                        "</div>" +
+                        "</div>";
+
+
+                String body = "<html>" +
+                        "<head>" +
+                        "<style>" +
+                        "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
+                        "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
+                        "a { color: #002e60; text-decoration: underline; }" +
+                        "</style>" +
+                        "</head>" +
+                        "<body>" +
+                        "<h2>Hola, estimado usuario.</h2>" +
+                        "<p>" +
+                        "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú, puedes ignorar este mensaje." +
+                        "</p>" +
+                        "<p>" +
+                        "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
+                        "</p>" +
+                        firma +
+                        "</body>" +
+                        "</html>";
+
+                emailDetails = new EmailDetails(
+                        resendConfirmRequest.getEmail(),
+                        "NoReply. Confirma tu cuenta " + " \n\n",
+                        body
+                );
+                emailService.sendHtmlMail(emailDetails);
+
+                return new ResponseEntity<>(new CustomResponse<>(
+                        null,
+                        false,
+                        200,
+                        "Correo enviado correctamente", 0),
+                        HttpStatus.OK);
+            }else{
+                return new ResponseEntity<>(new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "Error al reenviar correo de confirmación", 0),
+                        HttpStatus.BAD_REQUEST);
+            }
+        } catch (Exception e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null,
+                    true,
+                    500,
+                    "Error al reenviar correo de confirmación", 0),
+                    HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 }

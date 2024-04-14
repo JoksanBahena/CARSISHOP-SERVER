@@ -1,7 +1,5 @@
 package mx.edu.utez.carsishop.Auth;
 
-import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -9,7 +7,6 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
@@ -26,8 +23,8 @@ public class AuthController {
     private final AuthService authService;
     
     @PostMapping(value = "login")
-    public ResponseEntity<CustomResponse<AuthResponse>> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        return ResponseEntity.ok(authService.login(request));
+    public ResponseEntity<Object> login(@Validated({LoginRequest.Login.class}) @RequestBody LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return authService.login(request);
     }
 
     @PostMapping(value = "register")
@@ -51,5 +48,16 @@ public class AuthController {
     public ResponseEntity<CustomResponse<Integer>> resetPassword(@RequestBody ResetPasswordRequest resetPasswordRequest, @PathVariable String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return ResponseEntity.ok(authService.resetPassword(resetPasswordRequest, token));
     }
+
+    @PostMapping(value = "confirm/{token}")
+    public ResponseEntity<CustomResponse<Integer>> confirm(@PathVariable String token) {
+        return ResponseEntity.ok(authService.confirm(token));
+    }
+
+    @PostMapping(value = "resend-confirm")
+        public ResponseEntity<Object> confirm(@RequestBody ResendConfirmRequest resendConfirmRequest) {
+        return authService.resendconfirm(resendConfirmRequest);
+    }
+
 
 }
