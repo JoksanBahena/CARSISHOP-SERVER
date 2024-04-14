@@ -1,6 +1,8 @@
 package mx.edu.utez.carsishop.services.clothesCart;
 
 import mx.edu.utez.carsishop.controllers.clothesCart.ClothesCartDto;
+import mx.edu.utez.carsishop.models.clothes.Clothes;
+import mx.edu.utez.carsishop.models.clothes.ClothesRepository;
 import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
 import mx.edu.utez.carsishop.models.clothesCart.ClothesCartRepository;
 import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
@@ -30,6 +32,8 @@ public class ClothesCartService {
     private UserRepository userRepository;
     @Autowired
     private ShoppingCartRepository shoppingCartRepository;
+    @Autowired
+    private ClothesRepository clothesRepository;
 
     private CryptoService cryptoService;
 
@@ -54,6 +58,12 @@ public class ClothesCartService {
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());
             ClothesCart clothesCart=new ClothesCart();
             clothesCart.setAmount(request.getAmount());
+
+            Optional<Clothes> clothes=clothesRepository.findById(request.getCloth().getId());
+            if (!clothes.isPresent()){
+                return new CustomResponse<>(null,true,400,"cloth not found", 0);
+            }
+
             clothesCart.setClothes(request.getCloth());
             if(shoppingCart.isPresent()){
                 clothesCart.setShoppingCart(shoppingCart.get());

@@ -33,8 +33,9 @@ public class Clothes {
     @Column(name = "description",nullable = false)
     private String description;
 
-    @Column(name = "is_accepted", columnDefinition = "tinyint DEFAULT 1")
-    private boolean isAccepted;
+    //1. PENDING 2. APPROVED 3. REJECTED
+    @Column(name = "request_status", columnDefinition = "varchar(20) DEFAULT 'PENDING'")
+    private String request_status;
 
     @Column(name = "status", columnDefinition = "boolean DEFAULT true")
     private boolean status;

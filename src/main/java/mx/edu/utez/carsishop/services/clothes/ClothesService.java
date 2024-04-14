@@ -38,6 +38,7 @@ import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 
@@ -67,7 +68,7 @@ public class ClothesService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
         if (!paginationDto.getPaginationType().getFilter().equals("name") && !paginationDto.getPaginationType().getSortBy().equals("name") &&
-                !paginationDto.getPaginationType().getSortBy().equals("isAccepted") && !paginationDto.getPaginationType().getSortBy().equals("status")
+                !paginationDto.getPaginationType().getSortBy().equals("request_status") && !paginationDto.getPaginationType().getSortBy().equals("request_status")
         )
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
@@ -90,9 +91,9 @@ public class ClothesService {
                 );
                 break;
 
-            case "isAccepted":
-                list = clothesRepository.findAllByIsAccepted(
-                        Boolean.parseBoolean(paginationDto.getValue()),
+            case "request_status":
+                list = clothesRepository.findAllByRequestStatus(
+                        paginationDto.getValue(),
                         PageRequest.of(paginationDto.getPaginationType().getPage(),
                                 paginationDto.getPaginationType().getLimit(),
                                 paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
@@ -110,6 +111,7 @@ public class ClothesService {
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<Clothes> createClothes(ClothesDto clothes) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         Clothes newClothes = clothes.castToClothes();
+        newClothes.setRequest_status("PENDING");
         String emaildecoded=cryptoService.decrypt(clothes.getSellerEmail());
         Optional<User> user = userRepository.findByUsername(emaildecoded);
         if(user.isPresent()){
@@ -256,10 +258,16 @@ public class ClothesService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "No se encontró la prenda", 0), HttpStatus.BAD_REQUEST);
         }
 
-        clothes.get().setAccepted(clothesDto.isAccepted());
+        clothesDto.setRequest_status(clothesDto.getRequest_status().toUpperCase());
+
+        if (!Objects.equals(clothesDto.getRequest_status(), "ACCEPTED") && !Objects.equals(clothesDto.getRequest_status(), "REJECTED")) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El estado proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        clothes.get().setRequest_status(clothesDto.getRequest_status());
         clothesRepository.save(clothes.get());
 
-        String message = clothesDto.isAccepted() ? "Prenda aceptada correctamente" : "Prenda rechazada correctamente";
+        String message = Objects.equals(clothesDto.getRequest_status(), "ACCEPTED") ? "Prenda aceptada correctamente." : "Prenda rechazada correctamente.";
 
         return new ResponseEntity<>(new CustomResponse<>(clothes.get(), false, HttpStatus.OK.value(), message, 1), HttpStatus.OK);
 

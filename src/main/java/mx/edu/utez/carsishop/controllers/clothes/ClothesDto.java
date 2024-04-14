@@ -33,7 +33,7 @@ public class ClothesDto {
     @NotNull(message = "La subcategoría es obligatoria")
     private Subcategory subcategory;
     @NotNull(groups = {ChangeIsAccepted.class}, message = "El estado es obligatorio")
-    private boolean isAccepted;
+    private String request_status;
 
 
     public Clothes castToClothes(){
@@ -43,7 +43,7 @@ public class ClothesDto {
         clothe.setCategory(category);
         clothe.setSubcategory(subcategory);
         clothe.setStatus(true);
-        clothe.setAccepted(false);
+        clothe.setRequest_status(request_status);
         return clothe;
     }
 
