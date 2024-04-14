@@ -3,11 +3,14 @@ package mx.edu.utez.carsishop.controllers.user;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.services.user.UserService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+
+import java.sql.SQLException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -15,6 +18,11 @@ import org.springframework.web.bind.annotation.*;
 public class UserController {
     @Autowired
     private UserService userService;
+
+    @PostMapping("/find-all")
+    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) throws SQLException {
+        return userService.findAll(paginationDto);
+    }
 
     @PostMapping("/info")
     public ResponseEntity<CustomResponse<User>> getInfo(@Validated({UserDto.GetInfo.class}) @RequestBody UserDto userDto) {
