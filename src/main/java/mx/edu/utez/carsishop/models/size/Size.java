@@ -26,6 +26,7 @@ public class Size {
     private String name;
 
     @OneToMany(mappedBy = "size")
+    @JsonIgnore
     private List<Stock> stock;
 
     @OneToMany(mappedBy = "size")

@@ -53,6 +53,7 @@ public class Clothes {
     private List<Image> images;
 
     @OneToMany(mappedBy = "clothes")
+
     private List<Stock> stock;
 
     @OneToMany(mappedBy = "clothes")
@@ -63,3 +64,4 @@ public class Clothes {
     @JsonIgnore
     private List<ClothesCart> clothesCarts;
 }
+    
