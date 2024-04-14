@@ -309,8 +309,18 @@ public class AuthService {
                 return new CustomResponse<>(
                         null,
                         true,
-                        400,
+                        404,
                         "La cuenta no existe",
+                        0
+                );
+            }
+
+            if (userRepository.getStatusByEmail(jwtService.getUsernameFromToken(token))) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada",
                         0
                 );
             }
@@ -319,8 +329,8 @@ public class AuthService {
                 return new CustomResponse<>(
                         null,
                         true,
-                        400,
-                        "Token ya utilizado",
+                        403,
+                        "Token inválido",
                         0
                 );
             }
@@ -354,6 +364,16 @@ public class AuthService {
                         true,
                         400,
                         "La cuenta no existe",
+                        0
+                );
+            }
+
+            if (userRepository.getStatusByEmail(resendConfirmRequest.getEmail())) {
+                return new CustomResponse<>(
+                        null,
+                        true,
+                        400,
+                        "La cuenta ya ha sido confirmada",
                         0
                 );
             }

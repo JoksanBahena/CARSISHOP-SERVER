@@ -27,4 +27,8 @@ public interface UserRepository extends JpaRepository<User,Long> {
     )
     int updateStatusByEmail(@Param("username") String username);
 
+    @Query(
+            value = "SELECT status FROM user WHERE email = :username",nativeQuery = true
+    )
+    boolean getStatusByEmail(@Param("username") String username);
 }
