@@ -66,7 +66,9 @@ public class ClothesService {
         )
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
-        if (!paginationDto.getPaginationType().getFilter().equals("name") || !paginationDto.getPaginationType().getSortBy().equals("name"))
+        if (!paginationDto.getPaginationType().getFilter().equals("name") && !paginationDto.getPaginationType().getSortBy().equals("name") &&
+                !paginationDto.getPaginationType().getSortBy().equals("isAccepted") && !paginationDto.getPaginationType().getSortBy().equals("status")
+        )
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
         if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
@@ -80,6 +82,17 @@ public class ClothesService {
             case "name":
                 list = clothesRepository.findAllByNamePagination(
                         paginationDto.getValue(),
+                        PageRequest.of(paginationDto.getPaginationType().getPage(),
+                                paginationDto.getPaginationType().getLimit(),
+                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
+                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
+                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
+                );
+                break;
+
+            case "isAccepted":
+                list = clothesRepository.findAllByIsAccepted(
+                        Boolean.parseBoolean(paginationDto.getValue()),
                         PageRequest.of(paginationDto.getPaginationType().getPage(),
                                 paginationDto.getPaginationType().getLimit(),
                                 paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
@@ -102,21 +115,21 @@ public class ClothesService {
         if(user.isPresent()){
             newClothes.setSeller(user.get().getSeller());
         }else {
-            return new CustomResponse<>(null, true, 400, "User not found", 0);
+            return new CustomResponse<>(null, true, 400, "El usuario no se encuentra registrado dentro del sistema", 0);
         }
         Clothes clothesSaved = clothesRepository.save(newClothes);
         for (Stock stock:clothes.getStock()) {
             stock.setClothes(clothesSaved);
         }
         stockRepository.saveAll(clothes.getStock());
-        return new CustomResponse<>(clothesSaved, false, 200, "Clothes created", 1);
+        return new CustomResponse<>(clothesSaved, false, 200, "Prenda registrada correctamente", 1);
     }
 
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<Clothes> updateClothesInformation(ClothesUpdateDto clothes) {
         Optional <Clothes> clothesOptional = clothesRepository.findById(clothes.getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
+            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
         }else {
             Clothes clothesToUpdate = clothesOptional.get();
             clothesToUpdate.setName(clothes.getName());
@@ -124,7 +137,7 @@ public class ClothesService {
             clothesToUpdate.setCategory(clothes.getCategory());
             clothesToUpdate.setSubcategory(clothes.getSubcategory());
             clothesToUpdate.setStock(clothesToUpdate.getStock());
-            return new CustomResponse<>(clothesRepository.save(clothesToUpdate), false, 200, "Clothes updated", 1);
+            return new CustomResponse<>(clothesRepository.save(clothesToUpdate), false, 200, "Prenda actualizada correctamente", 1);
         }
 
     }
@@ -133,9 +146,9 @@ public class ClothesService {
     public CustomResponse<List<Stock>> updateStock(ClothesStockUpdateDto clothesStockUpdateDto){
         Optional<Clothes> clothesOptional = clothesRepository.findById(clothesStockUpdateDto.getStock().get(0).getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
+            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
         }else {
-            return new CustomResponse<>(stockRepository.saveAll(clothesStockUpdateDto.getStock()), false, 200, "Stock updated", 0);
+            return new CustomResponse<>(stockRepository.saveAll(clothesStockUpdateDto.getStock()), false, 200, "El stock de la prenda ha sido actualizado correctamente.", 0);
         }
     }
 
@@ -143,10 +156,10 @@ public class ClothesService {
     public CustomResponse<Clothes> disableCloth(Long id){
         Optional<Clothes> clothesOptional = clothesRepository.findById(id);
         if(clothesOptional.isEmpty()) {
-            return new CustomResponse<>(null, true, 400, "Clothes not found", 0);
+            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
         }
-        clothesOptional.get().setEnabled(false);
-        return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "Clothes found", 0);
+        clothesOptional.get().setStatus(false);
+        return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "El estatus de la prenda ha sido actualizado con éxito", 0);
     }
 
 
@@ -235,6 +248,21 @@ public class ClothesService {
                 "Ok",
                 clothes.size()
         );
+    }
+
+    public ResponseEntity<Object> changeIsAccepted(ClothesDto clothesDto) {
+        Optional<Clothes> clothes = clothesRepository.findById(clothesDto.getId());
+        if (!clothes.isPresent()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "No se encontró la prenda", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        clothes.get().setAccepted(clothesDto.isAccepted());
+        clothesRepository.save(clothes.get());
+
+        String message = clothesDto.isAccepted() ? "Prenda aceptada correctamente" : "Prenda rechazada correctamente";
+
+        return new ResponseEntity<>(new CustomResponse<>(clothes.get(), false, HttpStatus.OK.value(), message, 1), HttpStatus.OK);
+
     }
 
 

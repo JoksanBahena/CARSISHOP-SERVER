@@ -33,10 +33,12 @@ public class Clothes {
     @Column(name = "description",nullable = false)
     private String description;
 
+    @Column(name = "is_accepted", columnDefinition = "tinyint DEFAULT 1")
+    private boolean isAccepted;
 
+    @Column(name = "status", columnDefinition = "boolean DEFAULT true")
+    private boolean status;
 
-    @Column(name = "enabled", columnDefinition = "tinyint DEFAULT 1")
-    private boolean enabled;
     @ManyToOne
     @JoinColumn(name = "seller")
     private Seller seller;
@@ -53,7 +55,6 @@ public class Clothes {
     private List<Image> images;
 
     @OneToMany(mappedBy = "clothes")
-
     private List<Stock> stock;
 
     @OneToMany(mappedBy = "clothes")
@@ -63,5 +64,7 @@ public class Clothes {
     @OneToMany(mappedBy = "clothes")
     @JsonIgnore
     private List<ClothesCart> clothesCarts;
+
+
 }
     
