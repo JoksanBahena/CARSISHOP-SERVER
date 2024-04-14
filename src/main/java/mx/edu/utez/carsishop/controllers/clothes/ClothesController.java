@@ -74,5 +74,10 @@ public class ClothesController {
         return new ResponseEntity<>(clothesService.findAllClothesOrderedByPrice(), HttpStatus.OK);
     }
 
+    @PostMapping("/isAccepted")
+    public ResponseEntity<Object> changeIsAccepted(@Validated({ClothesDto.ChangeIsAccepted.class}) @RequestBody ClothesDto clothesDto) {
+        return clothesService.changeIsAccepted(clothesDto);
+    }
+
 
 }

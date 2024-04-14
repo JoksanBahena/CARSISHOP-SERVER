@@ -73,4 +73,12 @@ public class Address {
         this.intnumber = cryptoService.encrypt(this.intnumber);
         this.extnumber = cryptoService.encrypt(this.extnumber);
     }
+
+    public void decryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        this.cp = cryptoService.decrypt(this.cp);
+        this.suburb = cryptoService.decrypt(this.suburb);
+        this.street = cryptoService.decrypt(this.street);
+        this.intnumber = cryptoService.decrypt(this.intnumber);
+        this.extnumber = cryptoService.decrypt(this.extnumber);
+    }
 }

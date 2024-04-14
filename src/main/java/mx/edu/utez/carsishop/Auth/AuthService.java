@@ -13,6 +13,7 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.services.email.EmailService;
+import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.UploadImage;
 import mx.edu.utez.carsishop.utils.ValidateTypeFile;
@@ -26,6 +27,14 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.sql.SQLIntegrityConstraintViolationException;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
@@ -35,6 +44,7 @@ public class AuthService {
     @Autowired
     private GenderRepository genderRepository;
 
+    private CryptoService cryptoService;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -42,7 +52,9 @@ public class AuthService {
     private final EmailService emailService;
     EmailDetails emailDetails;
 
-    public ResponseEntity<Object> login(LoginRequest request) {
+    public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
+        request.setEmail(cryptoService.decrypt(request.getEmail()));
+        request.setPassword(cryptoService.decrypt(request.getPassword()));
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
         if (!userRepository.getStatusByEmail(request.getEmail())) {
@@ -72,18 +84,19 @@ public class AuthService {
         Optional<User> userOptional = userRepository.findByUsername(userDto.getUsername());
 
         ValidateTypeFile validateTypeFile = new ValidateTypeFile();
+
         if (userOptional.isPresent()) {
             return new CustomResponse<>(
                     null,
                     true,
                     400,
-                    "User already exists",
+                    "El correo que intentas registrar ya se encuentra en uso",
                     0
             );
         }
 
         try {
-            if (!validateTypeFile.isImageFile(userDto.getProfilepic())) {
+            if(!validateTypeFile.isImageFile(userDto.getProfilepic())) {
                 return new CustomResponse<>(
                         null,
                         true,
@@ -111,13 +124,13 @@ public class AuthService {
             }
 
             User user = User.builder()
-                    .name(userDto.getName())
-                    .surname(userDto.getSurname())
-                    .username(userDto.getUsername())
-                    .phone(userDto.getPhone())
-                    .birthdate(userDto.getBirthdate())
+                    .name(cryptoService.decrypt(userDto.getName()))
+                    .surname(cryptoService.decrypt(userDto.getSurname()))
+                    .username(cryptoService.decrypt(userDto.getUsername()))
+                    .phone(cryptoService.decrypt(userDto.getPhone()))
+                    .birthdate(cryptoService.decrypt(userDto.getBirthdate()))
                     .gender(gender.get())
-                    .password(passwordEncoder.encode(userDto.getPassword()))
+                    .password(passwordEncoder.encode(cryptoService.decrypt(userDto.getPassword())))
                     .profilepic(imgUrl)
                     .role(Role.CUSTOMER)
                     .build();
@@ -190,9 +203,10 @@ public class AuthService {
     }
 
     @Transactional(readOnly = true)
-    public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) {
+    public CustomResponse<AuthResponse> forgotPassword(ForgotPasswordRequest forgotPasswordRequest) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        forgotPasswordRequest.setEmail(cryptoService.decrypt(forgotPasswordRequest.getEmail()));
         Optional<User> userOptional = this.userRepository.findByUsername(forgotPasswordRequest.getEmail());
-        if (userOptional.isPresent()) {
+        if(userOptional.isPresent()){
             User user = User.builder()
                     .username(userOptional.get().getUsername())
                     .name(userOptional.get().getName())
@@ -269,13 +283,15 @@ public class AuthService {
     }
 
     @Transactional(rollbackFor = {Exception.class})
-    public CustomResponse<Integer> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) {
+    public CustomResponse<Integer> resetPassword(ResetPasswordRequest resetPasswordRequest, String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
         try {
+            resetPasswordRequest.setNewPassword(cryptoService.decrypt(resetPasswordRequest.getNewPassword()));
+            resetPasswordRequest.setConfirmNewPassword(cryptoService.decrypt(resetPasswordRequest.getConfirmNewPassword()));
             String email = jwtService.getUsernameFromToken(token);
 
             String encodedPassword = passwordEncoder.encode(resetPasswordRequest.getNewPassword());
 
-            if (JwtBlackList.isTokenBlacklisted(token)) {
+            if(JwtBlackList.isTokenBlacklisted(token)){
                 return new CustomResponse<>(
                         null,
                         true,
@@ -285,7 +301,7 @@ public class AuthService {
                 );
             }
 
-            if (!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmNewPassword())) {
+            if(!resetPasswordRequest.getNewPassword().equals(resetPasswordRequest.getConfirmNewPassword())) {
                 return new CustomResponse<>(
                         null,
                         true,
@@ -315,160 +331,4 @@ public class AuthService {
         }
     }
 
-    @Transactional(rollbackFor = {Exception.class})
-    public CustomResponse<Integer> confirm(String token) {
-        try {
-            if (!userRepository.existsUserByUsername(jwtService.getUsernameFromToken(token))) {
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        404,
-                        "La cuenta no existe",
-                        0
-                );
-            }
-
-            if (userRepository.getStatusByEmail(jwtService.getUsernameFromToken(token))) {
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        400,
-                        "La cuenta ya ha sido confirmada",
-                        0
-                );
-            }
-
-            if (JwtBlackList.isTokenBlacklisted(token)) {
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        403,
-                        "Token inválido",
-                        0
-                );
-            }
-            JwtBlackList.addToBlacklist(token);
-
-            return new CustomResponse<>(
-                    this.userRepository.updateStatusByEmail(jwtService.getUsernameFromToken(token)),
-                    false,
-                    200,
-                    "Usuario confirmado correctamente",
-                    1
-            );
-
-        } catch (Exception e) {
-            return new CustomResponse<>(
-                    null,
-                    true,
-                    500,
-                    "Error al confirmar usuario",
-                    0
-            );
-        }
-    }
-
-    @Transactional(rollbackFor = {Exception.class})
-    public CustomResponse<AuthResponse> resendconfirm(ResendConfirmRequest resendConfirmRequest) {
-        try {
-            if (!userRepository.existsUserByUsername(resendConfirmRequest.getEmail())) {
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        400,
-                        "La cuenta no existe",
-                        0
-                );
-            }
-
-            if (userRepository.getStatusByEmail(resendConfirmRequest.getEmail())) {
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        400,
-                        "La cuenta ya ha sido confirmada",
-                        0
-                );
-            }
-
-            Optional<User> userOptional = this.userRepository.findByUsername(resendConfirmRequest.getEmail());
-
-            if (userOptional.isPresent()) {
-                User user = User.builder()
-                        .username(userOptional.get().getUsername())
-                        .name(userOptional.get().getName())
-                        .surname(userOptional.get().getSurname())
-                        .role(userOptional.get().getRole())
-                        .build();
-
-                AuthResponse authResponse = AuthResponse.builder()
-                        .token(jwtService.getToken(user))
-                        .build();
-
-                String url = "http://localhost:3000/confirm/";
-                String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
-                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
-
-                String firma = "<div style=\"display: flex; align-items: center;\">" +
-                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
-                        "<div>" +
-                        "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
-                        "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
-                        "</div>" +
-                        "</div>";
-
-
-                String body = "<html>" +
-                        "<head>" +
-                        "<style>" +
-                        "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
-                        "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
-                        "a { color: #002e60; text-decoration: underline; }" +
-                        "</style>" +
-                        "</head>" +
-                        "<body>" +
-                        "<h2>Hola, estimado usuario.</h2>" +
-                        "<p>" +
-                        "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú, puedes ignorar este mensaje." +
-                        "</p>" +
-                        "<p>" +
-                        "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
-                        "</p>" +
-                        firma +
-                        "</body>" +
-                        "</html>";
-
-                emailDetails = new EmailDetails(
-                        resendConfirmRequest.getEmail(),
-                        "NoReply. Confirma tu cuenta " + " \n\n",
-                        body
-                );
-                emailService.sendHtmlMail(emailDetails);
-
-                return new CustomResponse<>(
-                        null,
-                        false,
-                        200,
-                        "Correo enviado correctamente",
-                        0
-                );
-            }else{
-                return new CustomResponse<>(
-                        null,
-                        true,
-                        500,
-                        "Error al reenviar correo de confirmación",
-                        0
-                );
-            }
-        } catch (Exception e) {
-            return new CustomResponse<>(
-                    null,
-                    true,
-                    500,
-                    "Error al reenviar correo de confirmación",
-                    0
-            );
-        }
-    }
 }

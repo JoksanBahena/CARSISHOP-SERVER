@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.user.User;
+import mx.edu.utez.carsishop.utils.CryptoService;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
 @Getter
 @Setter
 public class UserDto {
+
     private Long id;
     @NotNull(groups = {Register.class, Update.class, RegisterAdmin.class}, message = "El nombre es obligatorio")
     private String name;

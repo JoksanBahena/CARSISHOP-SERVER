@@ -35,4 +35,8 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
 
     @Query(value = "SELECT c FROM Clothes c WHERE UPPER(c.name) LIKE UPPER(?1)")
     List<Clothes> findAllByNamePagination(String value, Pageable offset);
+
+    //isAccepted
+    @Query(value = "SELECT c FROM Clothes c WHERE c.isAccepted = ?1")
+    List<Clothes> findAllByIsAccepted(boolean isAccepted, Pageable offset);
 }

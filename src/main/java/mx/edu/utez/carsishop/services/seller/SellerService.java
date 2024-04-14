@@ -7,10 +7,7 @@ import mx.edu.utez.carsishop.models.sellers.dtos.SellerDto;
 import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
-import mx.edu.utez.carsishop.utils.CustomResponse;
-import mx.edu.utez.carsishop.utils.PaginationDto;
-import mx.edu.utez.carsishop.utils.UploadImage;
-import mx.edu.utez.carsishop.utils.ValidateTypeFile;
+import mx.edu.utez.carsishop.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,7 +16,13 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
 import java.io.IOException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +34,7 @@ public class SellerService {
 
     @Autowired
     private SellerRepository sellerRepository;
+    private CryptoService cryptoService = new CryptoService();
 
     @Transactional(readOnly = true)
     public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
@@ -118,8 +122,9 @@ public class SellerService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<Object> register(SellerDto seller) throws IOException {
-
+    public ResponseEntity<Object> register(SellerDto seller) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        seller.setRfc(cryptoService.decrypt(seller.getRfc()));
+        seller.setCurp(cryptoService.decrypt(seller.getCurp()));
         if (this.sellerRepository.existsByCurp(seller.getCurp())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El CURP ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
@@ -174,7 +179,7 @@ public class SellerService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<Object> update(SellerDto seller) {
+    public ResponseEntity<Object> update(SellerDto seller) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
 
         Optional<Seller> sellerOptional = this.sellerRepository.findById(seller.getId());
 
@@ -201,8 +206,8 @@ public class SellerService {
         }
 
         Seller sellerToUpdate = sellerOptional.get();
-        sellerToUpdate.setCurp(seller.getCurp());
-        sellerToUpdate.setRfc(seller.getRfc());
+        sellerToUpdate.setCurp(cryptoService.decrypt( seller.getCurp()));
+        sellerToUpdate.setRfc(cryptoService.decrypt(seller.getRfc()));
         sellerToUpdate.setRequest_status(seller.getRequest_status());
         sellerToUpdate.setUser(seller.getUser());
 

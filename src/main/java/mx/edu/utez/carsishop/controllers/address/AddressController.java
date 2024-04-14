@@ -33,12 +33,13 @@ public class AddressController {
     }
 
     @PostMapping("/register")
-    private ResponseEntity<CustomResponse<Address>> register(@RequestBody Address address){
+    private ResponseEntity<CustomResponse<Address>> register(@RequestBody Address address) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        address.decryptData();
         return new ResponseEntity<>(addressService.register(address), HttpStatus.OK);
     }
 
     @PutMapping("/update/{id}")
-    private ResponseEntity<CustomResponse<Address>> update(@RequestBody Address updatedAddress,@PathVariable String id){
+    private ResponseEntity<CustomResponse<Address>> update(@RequestBody Address updatedAddress,@PathVariable String id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
            /*
         long idlong = desecnptar(id);
          */

@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.order.Order;
+import mx.edu.utez.carsishop.models.size.Size;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -26,4 +27,11 @@ public class ClothOrder {
     @ManyToOne
     @JoinColumn(name = "clothes")
     private Clothes clothes;
+
+    @Column
+    private int amount;
+
+    @ManyToOne
+    @JoinColumn(name = "size")
+    private Size size;
 }
