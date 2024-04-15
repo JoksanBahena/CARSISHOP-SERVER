@@ -62,7 +62,7 @@ public class User implements UserDetails {
     private List<Card> cards;
 
     @OneToMany(mappedBy = "user")
-    @JsonIgnoreProperties("user")
+    @JsonIgnore
     private List<Address> addresses;
 
     @OneToMany(mappedBy = "user")
