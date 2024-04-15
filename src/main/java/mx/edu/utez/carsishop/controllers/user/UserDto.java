@@ -17,13 +17,12 @@ import java.util.List;
 @Getter
 @Setter
 public class UserDto {
-
     private Long id;
     @NotNull(groups = {Register.class, Update.class, RegisterAdmin.class}, message = "El nombre es obligatorio")
     private String name;
     @NotNull(groups = {Register.class, Update.class, RegisterAdmin.class}, message ="El apellido es obligatorio")
     private String surname;
-    @NotNull(groups = {GetInfo.class, Register.class, Update.class, UpdateProfilePic.class, RegisterAdmin.class}, message ="El nombre de usuario es obligatorio")
+    @NotNull(groups = {GetInfo.class, Register.class, UpdateProfilePic.class, RegisterAdmin.class}, message ="El nombre de usuario es obligatorio")
     private String username;
     @NotNull(groups = {Register.class, Update.class, RegisterAdmin.class}, message ="El teléfono es obligatorio")
     private String phone;

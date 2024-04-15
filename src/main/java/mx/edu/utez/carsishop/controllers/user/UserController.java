@@ -44,7 +44,7 @@ public class UserController {
     }
 
     @PostMapping("/updateInfo")
-    public ResponseEntity<CustomResponse<User>> updateInfo(@RequestHeader("Authorization") String authorizationHeader,@Validated({UserDto.Update.class}) @RequestBody UserDto userDto) {
+    public ResponseEntity<CustomResponse<User>> updateInfo(@RequestHeader("Authorization") String authorizationHeader,@Validated({UserDto.Update.class}) @RequestBody UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwtToken = authorizationHeader.substring(7);
             return userService.updateUserInfo(userDto,jwtToken);

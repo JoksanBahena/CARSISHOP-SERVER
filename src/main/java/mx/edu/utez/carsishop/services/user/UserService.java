@@ -175,7 +175,7 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> updateUserInfo(UserDto userDto, String jwtToken) {
+    public ResponseEntity<CustomResponse<User>> updateUserInfo(UserDto userDto, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String username= jwtService.getUsernameFromToken(jwtToken);
         Optional<User> user = userRepository.findByUsername(username);
 
@@ -185,16 +185,16 @@ public class UserService {
             );
         }
 
-        if(this.userRepository.existsUserByPhoneAndIdNot(userDto.getPhone(), user.get().getId())) {
+        if(this.userRepository.existsUserByPhoneAndIdNot(cryptoService.decrypt(userDto.getPhone()), user.get().getId())) {
             return new ResponseEntity<>(
                     new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El número de teléfono ya se encuentra registrado", 0), HttpStatus.BAD_REQUEST
             );
         }
 
         User userToUpdate = user.get();
-        userToUpdate.setName(userDto.getName());
-        userToUpdate.setSurname(userDto.getSurname());
-        userToUpdate.setPhone(userDto.getPhone());
+        userToUpdate.setName(cryptoService.decrypt(userDto.getName()));
+        userToUpdate.setSurname(cryptoService.decrypt(userDto.getSurname()));
+        userToUpdate.setPhone(cryptoService.decrypt(userDto.getPhone()));
         userToUpdate.setGender(this.genderRepository.findById(userDto.getGender()).get());
 
         this.userRepository.save(userToUpdate);

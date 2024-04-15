@@ -6,6 +6,7 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
@@ -57,13 +58,12 @@ public class AddressController {
         return new ResponseEntity<>(addressService.update(updatedAddress,idLong), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete/{id}")
-    private ResponseEntity<CustomResponse<String>> delete(@PathVariable String id){
+    @DeleteMapping("/delete")
+    private ResponseEntity<CustomResponse<String>> delete(@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
         /*
         long idlong = desecnptar(id);
          */
-        long idLong = Long.parseLong(id);
-        return new ResponseEntity<>(addressService.delete(idLong), HttpStatus.OK);
+        return new ResponseEntity<>(addressService.delete(addressDto), HttpStatus.OK);
     }
 
 }
