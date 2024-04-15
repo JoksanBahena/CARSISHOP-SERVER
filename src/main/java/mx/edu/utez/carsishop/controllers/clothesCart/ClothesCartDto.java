@@ -13,8 +13,7 @@ import mx.edu.utez.carsishop.models.size.Size;
 @Setter
 @Getter
 public class ClothesCartDto {
-    @NotNull
-    private String email;
+
     @NotNull
     private Clothes cloth;
     @NotNull

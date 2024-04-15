@@ -4,6 +4,7 @@ import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
 import mx.edu.utez.carsishop.services.clothesCart.ClothesCartService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import javax.crypto.BadPaddingException;
@@ -22,14 +23,27 @@ public class ClothesCartController {
     private ClothesCartService clothesCartService;
 
     @GetMapping("/findByUser")
-    public ResponseEntity<CustomResponse<ShoppingCart>> getClothesCartByUser(@RequestBody String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<CustomResponse<ShoppingCart>> getClothesCartByUser(@RequestHeader("Authorization") String authorizationHeader) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
 
-        return ResponseEntity.ok(clothesCartService.getClothesCartByUser(email));
+            return ResponseEntity.ok(clothesCartService.getClothesCartByUser(jwtToken));
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PostMapping("/add")
-    public ResponseEntity<CustomResponse<ClothesCart>> addClothesCart(@RequestBody ClothesCartDto request){
-        return ResponseEntity.ok(clothesCartService.addClothesCart(request));
+    public ResponseEntity<CustomResponse<ClothesCart>> addClothesCart(@RequestHeader("Authorization") String authorizationHeader,@RequestBody ClothesCartDto request){
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+
+            return ResponseEntity.ok(clothesCartService.addClothesCart(request,jwtToken));
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @DeleteMapping("/delete")

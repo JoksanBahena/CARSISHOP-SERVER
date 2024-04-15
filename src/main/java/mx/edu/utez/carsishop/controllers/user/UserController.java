@@ -6,6 +6,7 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.checkerframework.checker.units.qual.C;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,34 +32,37 @@ public class UserController {
     }
 
     @PostMapping("/info")
-    public ResponseEntity<CustomResponse<User>> getInfo(@Validated({UserDto.GetInfo.class}) @RequestBody UserDto userDto) {
-        return userService.getUserInfo(userDto);
-    }
-
-    @PostMapping("/updateInfo")
-    public ResponseEntity<CustomResponse<User>> updateInfo(@Validated({UserDto.Update.class}) @RequestBody UserDto userDto) {
-        return userService.updateUserInfo(userDto);
-    }
-
-    @GetMapping("/getBearer")
-    public ResponseEntity<CustomResponse<String>> updateInfo(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<CustomResponse<User>> getInfo(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
-            // Extraemos el token JWT eliminando el prefijo "Bearer "
             String jwtToken = authorizationHeader.substring(7);
 
-            // Ahora puedes utilizar el token JWT de la forma que necesites
-            // Por ejemplo, puedes validar el token, extraer información del usuario, etc.
-
-            return ResponseEntity.ok(new CustomResponse<>(jwtToken,false,200,"hola",1));
+            return userService.getUserInfo(jwtToken);
         } else {
-            // Si no se proporciona el token en el encabezado de autorización, puedes manejar el caso aquí
-            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"ctm",1));
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
 
         }
     }
+
+    @PostMapping("/updateInfo")
+    public ResponseEntity<CustomResponse<User>> updateInfo(@RequestHeader("Authorization") String authorizationHeader,@Validated({UserDto.Update.class}) @RequestBody UserDto userDto) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return userService.updateUserInfo(userDto,jwtToken);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
+    }
+
     @PutMapping("/updateProfilePic")
-    public ResponseEntity<CustomResponse<User>> updateProfilePic(@Validated({UserDto.UpdateProfilePic.class}) @ModelAttribute UserDto userDto) {
-        return userService.updateProfilePic(userDto);
+    public ResponseEntity<CustomResponse<User>> updateProfilePic(@RequestHeader("Authorization") String authorizationHeader,@Validated({UserDto.UpdateProfilePic.class}) @ModelAttribute UserDto userDto) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return userService.updateProfilePic(userDto,jwtToken);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PostMapping("/register-admin")
