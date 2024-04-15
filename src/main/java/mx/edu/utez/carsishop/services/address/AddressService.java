@@ -1,15 +1,18 @@
 package mx.edu.utez.carsishop.services.address;
 
 import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.controllers.address.AddressDto;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
+import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -17,6 +20,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -32,6 +36,8 @@ public class AddressService {
     private OrderRepository orderRepository;
     @Autowired
     private JwtService jwtService;
+
+    private CryptoService cryptoService = new CryptoService();
 
     public CustomResponse<Address> register(Address address, String jwtToken){
         String username=jwtService.getUsernameFromToken(jwtToken);
@@ -103,9 +109,9 @@ public class AddressService {
         );
     }
 
-
-    public CustomResponse<String> delete(long id){
-        Optional<Address> address=addressRepository.findById(id);
+    @Transactional(rollbackFor = SQLException.class)
+    public CustomResponse<String> delete(AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<Address> address=addressRepository.findById(Long.parseLong(cryptoService.decrypt(addressDto.getId())));
         if(address.isEmpty()){
             return new CustomResponse<>(
                     null,
@@ -135,6 +141,4 @@ public class AddressService {
             );
         }
     }
-
-
 }
