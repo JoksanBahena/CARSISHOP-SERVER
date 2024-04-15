@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.models.address;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -33,10 +34,12 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name="state")
+    @JsonIgnoreProperties("towns")
     private State state;
 
     @ManyToOne
     @JoinColumn(name="town")
+    @JsonIgnoreProperties("state")
     private Town town;
 
     @Column(name="cp",nullable = false, length = 5)
@@ -56,6 +59,7 @@ public class Address {
 
     @ManyToOne
     @JoinColumn(name="user")
+    @JsonIgnore
     private User user;
 
     @OneToMany(mappedBy = "address")
@@ -63,6 +67,7 @@ public class Address {
     private List<Order> orders;
 
     @Transient
+    @JsonIgnore
     private CryptoService cryptoService = new CryptoService();
 
 
