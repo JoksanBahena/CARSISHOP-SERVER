@@ -32,6 +32,9 @@ public class Address {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(name = "name",nullable = false,length = 30)
+    private String name;
+
     @ManyToOne
     @JoinColumn(name="state")
     @JsonIgnoreProperties("towns")
@@ -72,6 +75,7 @@ public class Address {
 
 
     public void encryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        this.name= cryptoService.encrypt(this.name);
         this.cp = cryptoService.encrypt(this.cp);
         this.suburb = cryptoService.encrypt(this.suburb);
         this.street = cryptoService.encrypt(this.street);
@@ -80,6 +84,7 @@ public class Address {
     }
 
     public void decryptData() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        this.name= cryptoService.decrypt(this.name);
         this.cp = cryptoService.decrypt(this.cp);
         this.suburb = cryptoService.decrypt(this.suburb);
         this.street = cryptoService.decrypt(this.street);
