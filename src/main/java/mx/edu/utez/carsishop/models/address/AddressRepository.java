@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface AddressRepository extends JpaRepository<Address, Long> {
     List<Address> findAllByUser(User user);
+    List<Address> findAllByUserAndEnable(User user, boolean enable);
 }

@@ -3,6 +3,8 @@ package mx.edu.utez.carsishop.services.card;
 import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
+import mx.edu.utez.carsishop.models.order.Order;
+import mx.edu.utez.carsishop.models.order.OrderRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -30,6 +32,9 @@ public class CardService {
     private JwtService jwtService;
     @Autowired
     private UserRepository userRepository;
+    @Autowired
+    private OrderRepository orderRepository;
+
     private CryptoService cryptoService=new CryptoService();
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<CustomResponse<Card>> register(Card card,String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
@@ -105,6 +110,18 @@ public class CardService {
                     0
             ));
         }
+        Optional<Order> order=orderRepository.findByCard(cardOptional.get());
+        if (order.isPresent()){
+            cardOptional.get().setEnable(false);
+            cardRepository.save(cardOptional.get());
+            return ResponseEntity.status(400).body(new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Tarjeta inabilitada por que tiene ordenes asociadas",
+                    0
+            ));
+        }
         cardRepository.delete(cardOptional.get());
         return ResponseEntity.ok(new CustomResponse<>(
                 "Tarjeta eliminada Correctamente",
@@ -128,7 +145,7 @@ public class CardService {
                     0
             ));
         }
-        List<Card> cards=cardRepository.findByUser(user.get());
+        List<Card> cards=cardRepository.findByUserAAndEnable(user.get(),true);
         return ResponseEntity.ok(new CustomResponse<>(
                 cards,
                 false,
