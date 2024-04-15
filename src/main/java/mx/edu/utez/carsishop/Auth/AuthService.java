@@ -52,8 +52,27 @@ public class AuthService {
     public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));
         request.setPassword(cryptoService.decrypt(request.getPassword()));
-        authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
-        User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
+        Optional<User> userOpt = userRepository.findByUsername(request.getEmail());
+        if(userOpt.isEmpty()){
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null,
+                    true,
+                    404,
+                    "Correo incorrecto o usuario inexistente", 0),
+                    HttpStatus.NOT_FOUND);
+        }
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
+
+        }catch (Exception e) {
+            return new ResponseEntity<>(new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Contraseña incorrecta", 0),
+                    HttpStatus.BAD_REQUEST);
+        }
+        User user=userOpt.get();
         if (!userRepository.getStatusByEmail(request.getEmail())) {
             return new ResponseEntity<>(new CustomResponse<>(
                     null,
