@@ -10,6 +10,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 
 @RestController
@@ -56,7 +62,7 @@ public class UserController {
     }
 
     @PostMapping("/register-admin")
-    public ResponseEntity<CustomResponse<User>> registerAdmin(@Validated({UserDto.RegisterAdmin.class}) @RequestBody UserDto userDto) {
+    public ResponseEntity<CustomResponse<User>> registerAdmin(@Validated({UserDto.RegisterAdmin.class}) @RequestBody UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return userService.registerAdmin(userDto);
     }
 }
