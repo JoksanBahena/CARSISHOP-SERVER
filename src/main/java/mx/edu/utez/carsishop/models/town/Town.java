@@ -1,11 +1,16 @@
 package mx.edu.utez.carsishop.models.town;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.state.State;
+
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,5 +28,10 @@ public class Town {
 
     @ManyToOne
     @JoinColumn(name="state")
+    @JsonIgnoreProperties("towns")
     private State state;
+
+    @OneToMany(mappedBy = "town")
+    @JsonIgnore
+    private List<Address> addresses;
 }

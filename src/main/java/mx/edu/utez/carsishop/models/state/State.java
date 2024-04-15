@@ -1,10 +1,12 @@
 package mx.edu.utez.carsishop.models.state;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.town.Town;
 
 import java.util.List;
@@ -25,5 +27,10 @@ public class State {
     private String name;
 
     @OneToMany(mappedBy = "state")
+
     private List<Town> towns;
+
+    @OneToMany(mappedBy = "state")
+    @JsonIgnore
+    private List<Address> addresses;
 }
