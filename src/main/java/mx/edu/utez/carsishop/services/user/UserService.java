@@ -6,10 +6,8 @@ import mx.edu.utez.carsishop.models.gender.GenderRepository;
 import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
-import mx.edu.utez.carsishop.utils.CustomResponse;
-import mx.edu.utez.carsishop.utils.PaginationDto;
-import mx.edu.utez.carsishop.utils.UploadImage;
-import mx.edu.utez.carsishop.utils.ValidateTypeFile;
+import mx.edu.utez.carsishop.utils.*;
+import org.apache.commons.codec.digest.Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -19,6 +17,12 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.crypto.BadPaddingException;
+import javax.crypto.IllegalBlockSizeException;
+import javax.crypto.NoSuchPaddingException;
+import java.security.InvalidAlgorithmParameterException;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
@@ -29,6 +33,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     @Autowired
     private GenderRepository genderRepository;
+    private CryptoService cryptoService = new CryptoService();
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -37,7 +42,14 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> registerAdmin(UserDto userDto) {
+    public ResponseEntity<CustomResponse<User>> registerAdmin(UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        userDto.setName(cryptoService.decrypt(userDto.getName()));
+        userDto.setSurname(cryptoService.decrypt(userDto.getSurname()));
+        userDto.setUsername(cryptoService.decrypt(userDto.getUsername()));
+        userDto.setPassword(cryptoService.decrypt(userDto.getPassword()));
+        userDto.setPhone(cryptoService.decrypt(userDto.getPhone()));
+        userDto.setBirthdate(cryptoService.decrypt(userDto.getBirthdate()));
+
         if (this.userRepository.existsUserByUsername(userDto.getUsername())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El nombre de usuario ya se encuentra registrado.", 0), HttpStatus.BAD_REQUEST);
         }
