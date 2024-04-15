@@ -17,7 +17,11 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     Optional<Clothes> findById(Long id);
 
     @Query(
-            value = "SELECT c.* FROM Clothes c JOIN Category cat ON c.category = cat.id WHERE cat.status = 1 AND cat.name = :category ORDER BY desc", nativeQuery = true
+            value = "SELECT c.* \n" +
+                    "FROM Clothes c \n" +
+                    "JOIN Category cat ON c.category = cat.id \n" +
+                    "WHERE cat.status = 1 AND cat.name = ? \n" +
+                    "ORDER BY c.id DESC\n", nativeQuery = true
     )
     List<Clothes> findClothesByCategory(@Param("category") String category);
 
