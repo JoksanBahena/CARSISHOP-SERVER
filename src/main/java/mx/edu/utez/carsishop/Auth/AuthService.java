@@ -52,8 +52,6 @@ public class AuthService {
     public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));
         request.setPassword(cryptoService.decrypt(request.getPassword()));
-        System.out.println(request.getEmail());
-        System.out.println(request.getPassword());
         authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword()));
         User user = userRepository.findByUsername(request.getEmail()).orElseThrow();
         if (!userRepository.getStatusByEmail(request.getEmail())) {
@@ -106,7 +104,7 @@ public class AuthService {
             }
 
             UploadImage uploadImage = new UploadImage();
-            String imgUrl = uploadImage.uploadImage(userDto.getProfilepic(), userDto.getUsername(), "users");
+            String imgUrl = uploadImage.uploadImage(userDto.getProfilepic(), cryptoService.decrypt(userDto.getUsername()), "users");
 
             User userCasted = userDto.castToUser();
             userCasted.setProfilepic(imgUrl);
@@ -174,7 +172,7 @@ public class AuthService {
                     "</html>";
 
             emailDetails = new EmailDetails(
-                    userDto.getUsername(),
+                    cryptoService.decrypt(userDto.getUsername()),
                     "NoReply. Confirma tu cuenta " + " \n\n",
                     body
             );
