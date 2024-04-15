@@ -2,6 +2,7 @@ package mx.edu.utez.carsishop.services.order;
 
 import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.order.OrderDto;
+import mx.edu.utez.carsishop.controllers.order.OrderUpdateStatusDto;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
 import mx.edu.utez.carsishop.models.card.Card;
@@ -15,9 +16,11 @@ import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
 import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCartRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
+import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -53,7 +56,10 @@ public class OrderService {
     @Autowired
     private JwtService jwtService;
 
+    private CryptoService cryptoService = new CryptoService();
 
+
+    @Transactional(rollbackFor = Exception.class)
     public CustomResponse<Order> makeOrder(OrderDto request, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         request.uncrypt();
         Order order = new Order();
@@ -93,6 +99,18 @@ public class OrderService {
             clothOrders.add(clothOrder);
         }
         clothOrderRepository.saveAll(clothOrders);
-        return new CustomResponse<>(order,false,200,"Order created", 1);
+        return new CustomResponse<>(order,false,200,"Pedido Realizado", 1);
+    }
+    @Transactional(rollbackFor = Exception.class)
+    public CustomResponse<Order> updateStatus(OrderUpdateStatusDto updateStatusDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        updateStatusDto.setId(cryptoService.decrypt(updateStatusDto.getId()));
+        updateStatusDto.setStatus(cryptoService.decrypt(updateStatusDto.getStatus()));
+        Optional<Order> order = orderRepository.findById(Long.parseLong(updateStatusDto.getId()));
+        if(order.isEmpty()){
+            return new CustomResponse<>(null,true,400,"Pedido no encontrado", 0);
+        }
+        order.get().setStatus(Order.Status.valueOf(updateStatusDto.getStatus()));
+        orderRepository.save(order.get());
+        return new CustomResponse<>(order.get(),false,200,"Pedido actualizado", 1);
     }
 }
