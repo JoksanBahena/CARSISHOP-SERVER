@@ -145,7 +145,7 @@ public class CardService {
                     0
             ));
         }
-        List<Card> cards=cardRepository.findByUserAAndEnable(user.get(),true);
+        List<Card> cards=cardRepository.findByUserAndEnable(user.get(),true);
         return ResponseEntity.ok(new CustomResponse<>(
                 cards,
                 false,
