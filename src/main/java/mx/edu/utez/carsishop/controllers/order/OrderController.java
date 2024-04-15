@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.controllers.order;
 
+import jakarta.validation.Valid;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.services.order.OrderService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
@@ -33,6 +34,11 @@ public class OrderController {
 
         }
     }
+    @PostMapping("/updateStatus")
+    public ResponseEntity<CustomResponse<Order>> updateStatus(@Valid @RequestBody OrderUpdateStatusDto order) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return ResponseEntity.ok(orderService.updateStatus(order));
+    }
+
 
 
 }

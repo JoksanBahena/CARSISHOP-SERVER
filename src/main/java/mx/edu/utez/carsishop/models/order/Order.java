@@ -1,5 +1,7 @@
 package mx.edu.utez.carsishop.models.order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,17 +31,19 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "card")
+    @JsonIgnoreProperties({"user","owner","cvv","expirationDate"})
     private Card card;
 
     @ManyToOne
     @JoinColumn(name = "user")
+    @JsonIgnore
     private User user;
-
     @ManyToOne
     @JoinColumn(name = "address")
     private Address address;
 
-    @Column(name = "status",nullable = false,length = 10,columnDefinition = "enum('Paid','In_process','On_the_way','Delivered','Canceled','Returned') default 'Paid'")
+    @Column(name = "status",nullable = false,columnDefinition = "enum('Paid','In_process','On_the_way','Delivered','Canceled','Returned') default 'Paid'")
+    @Enumerated(EnumType.STRING)
     private Status status;
 
     @OneToMany(mappedBy = "theorder")
