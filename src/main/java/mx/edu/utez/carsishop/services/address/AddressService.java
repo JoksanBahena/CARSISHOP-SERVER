@@ -66,7 +66,7 @@ public class AddressService {
                     0
             );
         }else {
-            List<Address> addresses=addressRepository.findAllByUser(user.get());
+            List<Address> addresses=addressRepository.findAllByUserAndEnable(user.get(),true);
             for (Address address: addresses) {
                 address.encryptData();
             }
@@ -111,26 +111,28 @@ public class AddressService {
                     null,
                     true,
                     400,
-                    "Address not found",
+                    "Direccion no encontrada",
                     0
             );
         }
         Optional<Order> order=orderRepository.findByAddress(address.get());
-        if(order.isEmpty() || order.get().getStatus().equals("Delivered") || order.get().getStatus().equals("Canceled") || order.get().getStatus().equals("Returned") ){
+        if(order.isEmpty()){
             addressRepository.delete(address.get());
             return new CustomResponse<>(
-                    "Address deleted successfully",
+                    "Direccion eliminada correctamente",
                     false,
                     200,
                     "OK",
                     0
             );
         }else{
+            address.get().setEnable(false);
+            addressRepository.save(address.get());
             return new CustomResponse<>(
-                    "An Order is using this address, can not be deleted",
-                    true,
-                    400,
-                    "Address can not be deleted",
+                    "Direccion deshabilitada correctamente",
+                    false,
+                    200,
+                    "OK",
                     0
             );
         }

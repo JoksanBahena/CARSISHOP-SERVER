@@ -60,6 +60,9 @@ public class Address {
     @Column(name="extnumber",nullable = false, length = 10)
     private String extnumber;
 
+    @Column(name="enable",nullable = false, columnDefinition = "tinyint(1) default 1")
+    private boolean enable;
+
     @ManyToOne
     @JoinColumn(name="user")
     @JsonIgnore

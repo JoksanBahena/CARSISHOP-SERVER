@@ -39,6 +39,10 @@ public class Card {
     @Column(name = "owner",nullable = false,length = 60)
     private String owner;
 
+    //enable
+    @Column(name = "enable",nullable = false,columnDefinition = "tinyint(1) default 1")
+    private boolean enable;
+
     @ManyToOne
     @JoinColumn(name = "user")
     private User user;
