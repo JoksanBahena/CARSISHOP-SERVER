@@ -24,18 +24,28 @@ public class AddressController {
     @Autowired
     private AddressService addressService;
 
-    @GetMapping("/getByUser/{email}")
-    public ResponseEntity<CustomResponse<List<Address>>> getByUser(@PathVariable String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        /*
-        email = desecnptar(email);
-         */
-        return new ResponseEntity<>(addressService.getByUser(email), HttpStatus.OK);
+    @GetMapping("/getByUser")
+    public ResponseEntity<CustomResponse<List<Address>>> getByUser(@RequestHeader("Authorization") String authorizationHeader) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+
+            return new ResponseEntity<>(addressService.getByUser(jwtToken), HttpStatus.OK);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PostMapping("/register")
-    private ResponseEntity<CustomResponse<Address>> register(@RequestBody Address address) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    private ResponseEntity<CustomResponse<Address>> register(@RequestHeader("Authorization") String authorizationHeader, @RequestBody Address address) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         address.decryptData();
-        return new ResponseEntity<>(addressService.register(address), HttpStatus.OK);
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return new ResponseEntity<>(addressService.register(address,jwtToken), HttpStatus.OK);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PutMapping("/update/{id}")

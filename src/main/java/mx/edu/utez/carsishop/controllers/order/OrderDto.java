@@ -20,8 +20,6 @@ import java.security.NoSuchAlgorithmException;
 @Getter
 public class OrderDto {
     @NotNull
-    private String email;
-    @NotNull
     private String address;
     @NotNull
     private String card;
@@ -29,7 +27,6 @@ public class OrderDto {
     private CryptoService cryptoService = new CryptoService();
 
     public void uncrypt() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        this.email = cryptoService.decrypt(this.email);
         this.address = cryptoService.decrypt(this.address);
         this.card = cryptoService.decrypt(this.card);
     }

@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.user;
 
+import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.gender.GenderRepository;
@@ -7,7 +8,6 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.*;
-import org.apache.commons.codec.digest.Crypt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -34,6 +34,8 @@ public class UserService {
     @Autowired
     private GenderRepository genderRepository;
     private CryptoService cryptoService = new CryptoService();
+    @Autowired
+    private JwtService jwtService;
 
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
@@ -161,8 +163,9 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<CustomResponse<User>> getUserInfo(UserDto dto) {
-        Optional<User> user = userRepository.findByUsername(dto.getUsername());
+    public ResponseEntity<CustomResponse<User>> getUserInfo(String jwtToken) {
+        String username= jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user = userRepository.findByUsername(username);
 
         if (!user.isPresent()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.NOT_FOUND.value(), "Usuario no encontrado.", 0), HttpStatus.NOT_FOUND);
@@ -172,8 +175,9 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> updateUserInfo(UserDto userDto) {
-        Optional<User> user = userRepository.findByUsername(userDto.getUsername());
+    public ResponseEntity<CustomResponse<User>> updateUserInfo(UserDto userDto, String jwtToken) {
+        String username= jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user = userRepository.findByUsername(username);
 
         if(!user.isPresent()) {
             return new ResponseEntity<>(
@@ -201,8 +205,9 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> updateProfilePic(UserDto userDto) {
-        Optional<User> user = this.userRepository.findByUsername(userDto.getUsername());
+    public ResponseEntity<CustomResponse<User>> updateProfilePic(UserDto userDto, String jwtToken) {
+        String username= jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user = this.userRepository.findByUsername(username);
 
         if(!user.isPresent()) {
             return new ResponseEntity<>(

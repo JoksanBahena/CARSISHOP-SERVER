@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.clothesCart;
 
+import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.clothesCart.ClothesCartDto;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes.ClothesRepository;
@@ -21,7 +22,6 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -34,13 +34,15 @@ public class ClothesCartService {
     private ShoppingCartRepository shoppingCartRepository;
     @Autowired
     private ClothesRepository clothesRepository;
+    @Autowired
+    private JwtService jwtService;
 
-    private CryptoService cryptoService;
+    private CryptoService cryptoService=new CryptoService();
 
     @Transactional(readOnly = true)
-    public CustomResponse<ShoppingCart> getClothesCartByUser(String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        email=cryptoService.decrypt(email);
-        Optional<User> user=userRepository.findByUsername(email);
+    public CustomResponse<ShoppingCart> getClothesCartByUser(String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String username = jwtService.getUsernameFromToken(token);
+        Optional<User> user=userRepository.findByUsername(username);
         if (user.isPresent()){
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());
             if (shoppingCart.isPresent()){
@@ -51,8 +53,9 @@ public class ClothesCartService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public CustomResponse<ClothesCart> addClothesCart(ClothesCartDto request) {
-        Optional<User> user=userRepository.findByUsername(request.getEmail());
+    public CustomResponse<ClothesCart> addClothesCart(ClothesCartDto request, String jwtToken) {
+        String username = jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user=userRepository.findByUsername(username);
 
         if (user.isPresent()){
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());

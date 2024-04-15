@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.order;
 
+import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.order.OrderDto;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
@@ -8,7 +9,6 @@ import mx.edu.utez.carsishop.models.card.CardRepository;
 import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
 import mx.edu.utez.carsishop.models.clothOrder.ClothOrderRepository;
 import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
-import mx.edu.utez.carsishop.models.clothesCart.ClothesCartRepository;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
 import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
@@ -50,11 +50,15 @@ public class OrderService {
     @Autowired
     private ClothOrderRepository clothOrderRepository;
 
+    @Autowired
+    private JwtService jwtService;
 
-    public CustomResponse<Order> makeOrder(OrderDto request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+
+    public CustomResponse<Order> makeOrder(OrderDto request, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         request.uncrypt();
         Order order = new Order();
-        Optional<User> user = userRepository.findByUsername(request.getEmail());
+        String username=jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user = userRepository.findByUsername(username);
         if(user.isEmpty()){
             return new CustomResponse<>(null,true,400,"Usuario no encontrado", 0);
         }

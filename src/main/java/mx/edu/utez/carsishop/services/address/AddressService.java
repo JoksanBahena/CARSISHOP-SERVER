@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.address;
 
+import mx.edu.utez.carsishop.Jwt.JwtService;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
 import mx.edu.utez.carsishop.models.order.Order;
@@ -29,9 +30,22 @@ public class AddressService {
 
     @Autowired
     private OrderRepository orderRepository;
+    @Autowired
+    private JwtService jwtService;
 
-    public CustomResponse<Address> register(Address address){
-
+    public CustomResponse<Address> register(Address address, String jwtToken){
+        String username=jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user=userRepository.findByUsername(username);
+        if(user.isEmpty()){
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "User does not exists",
+                    0
+            );
+        }
+        address.setUser(user.get());
         return new CustomResponse<>(
                 addressRepository.save(address),
                 false,
@@ -40,8 +54,9 @@ public class AddressService {
                 1
         );
     }
-    public CustomResponse<List<Address>> getByUser(String email) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        Optional<User> user=userRepository.findByUsername(email);
+    public CustomResponse<List<Address>> getByUser(String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String username=jwtService.getUsernameFromToken(jwtToken);
+        Optional<User> user=userRepository.findByUsername(username);
         if(user.isEmpty()){
             return new CustomResponse<>(
                     null,
