@@ -2,7 +2,7 @@ package mx.edu.utez.carsishop.utils;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import mx.edu.utez.carsishop.Config.CloudinaryConfig;
+import mx.edu.utez.carsishop.config.CloudinaryConfig;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;

@@ -7,7 +7,6 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.user.User;
 

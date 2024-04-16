@@ -26,20 +26,17 @@ import org.springframework.web.context.request.async.AsyncRequestTimeoutExceptio
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 import org.springframework.web.servlet.NoHandlerFoundException;
-import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @ControllerAdvice
 public class CustomRestExceptionHandler {
     protected ResponseEntity<Object> handleMethodArgumentNotValid(
-            MethodArgumentNotValidException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
-        List<String> errors = new ArrayList<String>();
+            MethodArgumentNotValidException ex) {
+        List<String> errors = new ArrayList<>();
         for (FieldError error : ex.getBindingResult().getFieldErrors()) {
             errors.add(error.getField() + ": " + error.getDefaultMessage());
         }
@@ -55,8 +52,7 @@ public class CustomRestExceptionHandler {
 
 
     protected ResponseEntity<Object> handleMissingServletRequestParameter(
-            MissingServletRequestParameterException ex, HttpHeaders headers,
-            HttpStatus status, WebRequest request) {
+            MissingServletRequestParameterException ex  ) {
         String error = ex.getParameterName() + " parameter is missing";
 
         ApiError apiError =
@@ -83,7 +79,7 @@ public class CustomRestExceptionHandler {
     public ResponseEntity<Object> handleMethodArgumentTypeMismatch(
             MethodArgumentTypeMismatchException ex, WebRequest request) {
         String error =
-                ex.getName() + " should be of type " + ex.getRequiredType().getName();
+                ex.getName() + " should be of type " + Objects.requireNonNull(ex.getRequiredType()).getName();
 
         ApiError apiError =
                 new ApiError(HttpStatus.BAD_REQUEST, ex.getLocalizedMessage(), error);
@@ -92,7 +88,7 @@ public class CustomRestExceptionHandler {
     }
 
     protected ResponseEntity<Object> handleNoHandlerFoundException(
-            NoHandlerFoundException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+            NoHandlerFoundException ex) {
         String error = "No handler found for " + ex.getHttpMethod() + " " + ex.getRequestURL();
 
         ApiError apiError = new ApiError(HttpStatus.NOT_FOUND, ex.getLocalizedMessage(), error);
@@ -100,15 +96,12 @@ public class CustomRestExceptionHandler {
     }
 
     protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(
-            HttpRequestMethodNotSupportedException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
+            HttpRequestMethodNotSupportedException ex) {
         StringBuilder builder = new StringBuilder();
         builder.append(ex.getMethod());
         builder.append(
                 " method is not supported for this request. Supported methods are ");
-        ex.getSupportedHttpMethods().forEach(t -> builder.append(t + " "));
+        Objects.requireNonNull(ex.getSupportedHttpMethods()).forEach(t -> builder.append(t).append(" "));
 
         ApiError apiError = new ApiError(HttpStatus.METHOD_NOT_ALLOWED,
                 ex.getLocalizedMessage(), builder.toString());
@@ -117,10 +110,7 @@ public class CustomRestExceptionHandler {
     }
 
     protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(
-            HttpMediaTypeNotSupportedException ex,
-            HttpHeaders headers,
-            HttpStatus status,
-            WebRequest request) {
+            HttpMediaTypeNotSupportedException ex) {
         StringBuilder builder = new StringBuilder();
         builder.append(ex.getContentType());
         builder.append(" media type is not supported. Supported media types are ");
@@ -132,77 +122,77 @@ public class CustomRestExceptionHandler {
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleBindException(BindException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleBindException(BindException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleServletRequestBindingException(ServletRequestBindingException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleConversionNotSupported(ConversionNotSupportedException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleConversionNotSupported(ConversionNotSupportedException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpStatus status ) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMessageNotReadable(HttpMessageNotReadableException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleHttpMessageNotWritable(HttpMessageNotWritableException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleAsyncRequestTimeoutException(AsyncRequestTimeoutException ex, HttpHeaders headers, HttpStatus status, WebRequest webRequest) {
+    protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
-    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, Object body, HttpHeaders headers, HttpStatus status, WebRequest request) {
+    protected ResponseEntity<Object> handleExceptionInternal(Exception ex, HttpStatus status) {
         ApiError apiError = new ApiError(
                 status, ex.getCause().getMessage(), ex.getMessage());
         return new ResponseEntity<>(
@@ -210,14 +200,14 @@ public class CustomRestExceptionHandler {
     }
 
     @ExceptionHandler({SQLException.class})
-    protected ResponseEntity<Object> sqlException(SQLException ex, WebRequest request) {
+    protected ResponseEntity<Object> sqlException(SQLException ex) {
         ApiError apiError = new ApiError(HttpStatus.BAD_REQUEST, ex.getSQLState(), ex.getMessage());
         return new ResponseEntity<>(
                 apiError, new HttpHeaders(), apiError.getStatus());
     }
 
     @ExceptionHandler({Exception.class})
-    public ResponseEntity<Object> handleAll(Exception ex, WebRequest request) {
+    public ResponseEntity<Object> handleAll(Exception ex) {
         String errorMessage = (ex.getCause() != null) ? ex.getCause().getMessage() : ex.getMessage();
         ApiError apiError = new ApiError(HttpStatus.INTERNAL_SERVER_ERROR, errorMessage, ex.getMessage());
         return new ResponseEntity<>(apiError, new HttpHeaders(), apiError.getStatus());

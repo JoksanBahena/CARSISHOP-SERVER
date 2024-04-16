@@ -1,6 +1,6 @@
 package mx.edu.utez.carsishop.services.user;
 
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.gender.GenderRepository;
@@ -10,6 +10,7 @@ import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,23 +25,24 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Service
 public class UserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    @Autowired
-    private GenderRepository genderRepository;
+    private final GenderRepository genderRepository;
+    private final JwtService jwtService;
     private CryptoService cryptoService = new CryptoService();
-    @Autowired
-    private JwtService jwtService;
 
     @Autowired
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, GenderRepository genderRepository, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.genderRepository = genderRepository;
+        this.jwtService = jwtService;
     }
 
     @Transactional(rollbackFor = SQLException.class)
@@ -90,76 +92,77 @@ public class UserService {
 
     @Transactional(readOnly = true)
     public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
-        if (paginationDto.getPaginationType().getFilter() == null || paginationDto.getPaginationType().getFilter().isEmpty() ||
-                paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
-                paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()
-        )
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
-
-        if (!(paginationDto.getPaginationType().getFilter().equals("name") && paginationDto.getPaginationType().getSortBy().equals("user_name")) &&
-            !(paginationDto.getPaginationType().getFilter().equals("surname") && paginationDto.getPaginationType().getSortBy().equals("user_surname")) &&
-            !(paginationDto.getPaginationType().getFilter().equals("username") && paginationDto.getPaginationType().getSortBy().equals("username")) &&
-            !(paginationDto.getPaginationType().getFilter().equals("role") && paginationDto.getPaginationType().getSortBy().equals("role"))
-        ) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        ResponseEntity<Object> validationResponse = validatePaginationDto(paginationDto);
+        if (validationResponse != null) {
+            return validationResponse;
         }
 
-        if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
-            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        Map<String, Function<PaginationDto, List<User>>> queryMap = initializeQueryMap();
+        Function<PaginationDto, List<User>> queryFunction = queryMap.get(paginationDto.getPaginationType().getFilter());
+        if (queryFunction == null) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
 
         paginationDto.setValue("%" + paginationDto.getValue() + "%");
         int count = userRepository.searchCount();
-
-        List<User> list;
-        switch (paginationDto.getPaginationType().getFilter()) {
-            case "name":
-                list = userRepository.findAllByNamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "surname":
-                list = userRepository.findAllBySurnamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "username":
-                list = userRepository.findAllByUsernamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "role":
-                list = userRepository.findAllByRolePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-            default:
-                return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
-        }
+        List<User> list = queryFunction.apply(paginationDto);
 
         return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
+    }
+
+    private ResponseEntity<Object> validatePaginationDto(PaginationDto paginationDto) {
+        if (paginationDto.getPaginationType().getFilter() == null || paginationDto.getPaginationType().getFilter().isEmpty() ||
+                paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
+                paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (!Arrays.asList("name", "surname", "username", "role").contains(paginationDto.getPaginationType().getFilter()) ||
+                !Arrays.asList("user_name", "user_surname", "username", "role").contains(paginationDto.getPaginationType().getSortBy())) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (!Arrays.asList("asc", "desc").contains(paginationDto.getPaginationType().getOrder())) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        return null;
+    }
+
+    private Map<String, Function<PaginationDto, List<User>>> initializeQueryMap() {
+        Map<String, Function<PaginationDto, List<User>>> queryMap = new HashMap<>();
+        queryMap.put("name", this::findAllByNamePagination);
+        queryMap.put("surname", this::findAllBySurnamePagination);
+        queryMap.put("username", this::findAllByUsernamePagination);
+        queryMap.put("role", this::findAllByRolePagination);
+        return queryMap;
+    }
+
+    private List<User> findAllByNamePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, userRepository::findAllByNamePagination);
+    }
+
+    private List<User> findAllBySurnamePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, userRepository::findAllBySurnamePagination);
+    }
+
+    private List<User> findAllByUsernamePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, userRepository::findAllByUsernamePagination);
+    }
+
+    private List<User> findAllByRolePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, userRepository::findAllByRolePagination);
+    }
+
+    private List<User> findAllByPagination(PaginationDto paginationDto, BiFunction<String, Pageable, List<User>> queryFunction) {
+        Pageable pageable = PageRequest.of(
+                paginationDto.getPaginationType().getPage(),
+                paginationDto.getPaginationType().getLimit(),
+                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("asc")
+                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
+                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending()
+        );
+        return queryFunction.apply(paginationDto.getValue(), pageable);
     }
 
     @Transactional(readOnly = true)

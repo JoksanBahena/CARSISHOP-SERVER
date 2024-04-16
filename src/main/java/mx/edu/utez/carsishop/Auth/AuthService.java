@@ -1,10 +1,10 @@
-package mx.edu.utez.carsishop.Auth;
+package mx.edu.utez.carsishop.auth;
 
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import mx.edu.utez.carsishop.Jwt.JwtBlackList;
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtBlackList;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
 import mx.edu.utez.carsishop.models.gender.Gender;
@@ -38,9 +38,10 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private GenderRepository genderRepository;
 
+    private static final String IMAGE = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+
+    private GenderRepository genderRepository;
     private final CryptoService cryptoService = new CryptoService();
     private final UserRepository userRepository;
     private final JwtService jwtService;
@@ -48,6 +49,18 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     EmailDetails emailDetails;
+
+
+    @Autowired
+    public AuthService(UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService, GenderRepository genderRepository) {
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
+        this.genderRepository = genderRepository;
+    }
+
 
     public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));
@@ -159,10 +172,9 @@ public class AuthService {
 
             String url = "http://localhost:3000/confirm/";
             String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
-            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
             String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<img src=\"" + IMAGE + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                     "<div>" +
                     "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
                     "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
@@ -236,10 +248,9 @@ public class AuthService {
 
             String url = "http://localhost:3000/reset-pass/";
             String link = " <a href=\"" + url + authResponse.token + "\">Reestablecer contraseña</a> ";
-            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
             String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                    "<img src=\"" + IMAGE + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                     "<div>" +
                     "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
                     "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
@@ -312,7 +323,7 @@ public class AuthService {
                         null,
                         true,
                         400,
-                        "Token inválido",
+                        "Token no válido. Por favor solicita un nuevo enlace",
                         0
                 );
             }
@@ -341,7 +352,7 @@ public class AuthService {
                     null,
                     true,
                     400,
-                    "Token inválido",
+                    "Error al restablecer contraseña. Por favor solicita un nuevo enlace",
                     0
             );
         }
@@ -354,7 +365,7 @@ public class AuthService {
                         null,
                         true,
                         404,
-                        "La cuenta no existe",
+                        "La cuenta no existe.",
                         0
                 );
             }
@@ -374,7 +385,7 @@ public class AuthService {
                         null,
                         true,
                         403,
-                        "Token inválido",
+                        "Token no válido. Por favor solicita un nuevo enlace de confirmación",
                         0
                 );
             }
@@ -393,7 +404,7 @@ public class AuthService {
                     null,
                     true,
                     500,
-                    "Error al confirmar usuario",
+                    "Error al confirmar usuario. Intente de nuevo más tarde.",
                     0
             );
         }
@@ -408,7 +419,7 @@ public class AuthService {
                         null,
                         true,
                         404,
-                        "La cuenta no existe", 0),
+                        "La cuenta no se encuentra registrada dentro del sistema.", 0),
                         HttpStatus.NOT_FOUND);
             }
 
@@ -437,10 +448,9 @@ public class AuthService {
 
                 String url = "http://localhost:3000/confirm/";
                 String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
-                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
 
                 String firma = "<div style=\"display: flex; align-items: center;\">" +
-                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
+                        "<img src=\"" + IMAGE + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
                         "<div>" +
                         "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
                         "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +

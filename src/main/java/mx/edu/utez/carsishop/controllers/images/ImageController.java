@@ -16,8 +16,12 @@ import java.util.List;
 @RequestMapping(path = "/api/images")
 @CrossOrigin(origins = {"*"})
 public class ImageController {
+    private final ImageService imageService;
+
     @Autowired
-    private ImageService imageService;
+    public ImageController(ImageService imageService) {
+        this.imageService = imageService;
+    }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<CustomResponse<String>> deleteImage(@PathVariable Long id) {

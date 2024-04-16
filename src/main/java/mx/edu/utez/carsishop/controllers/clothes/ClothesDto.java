@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.category.Category;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
-import mx.edu.utez.carsishop.models.size.Size;
 import mx.edu.utez.carsishop.models.stock.Stock;
 import mx.edu.utez.carsishop.models.subcategory.Subcategory;
 

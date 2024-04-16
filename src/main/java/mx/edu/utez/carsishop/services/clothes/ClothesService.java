@@ -44,33 +44,32 @@ import java.util.Optional;
 
 @Service
 public class ClothesService {
-    @Autowired
-    private ClothesRepository clothesRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private CategoryRepository categoryRepository;
-    @Autowired
-    private SubcaregoryRepository subcaregoryRepository;
-    @Autowired
-    private StockRepository stockRepository;
-    @Autowired
-    private ImageRepository imageRepository;
+    private final ClothesRepository clothesRepository;
+    private final UserRepository userRepository;
+    private final StockRepository stockRepository;
+    private final CryptoService cryptoService = new CryptoService();
+    private static final String CLOTHE_NOT_FOUND = "La prenda no se encuentra registrada dentro del sistema.";
 
-    private CryptoService cryptoService = new CryptoService();
+    @Autowired
+    public ClothesService(ClothesRepository clothesRepository, UserRepository userRepository, CategoryRepository categoryRepository, SubcaregoryRepository subcaregoryRepository, StockRepository stockRepository, ImageRepository imageRepository) {
+        this.clothesRepository = clothesRepository;
+        this.userRepository = userRepository;
+        this.stockRepository = stockRepository;
+    }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Object> findAll(PaginationDto paginationDto) throws SQLException {
+    public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
         if (paginationDto.getPaginationType().getFilter() == null || paginationDto.getPaginationType().getFilter().isEmpty() ||
                 paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
                 paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()
         )
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
 
-        if (!paginationDto.getPaginationType().getFilter().equals("name") && !paginationDto.getPaginationType().getSortBy().equals("name") &&
-                !paginationDto.getPaginationType().getSortBy().equals("request_status") && !paginationDto.getPaginationType().getSortBy().equals("request_status")
-        )
+        if (!paginationDto.getPaginationType().getFilter().equals("name") &&
+                !paginationDto.getPaginationType().getSortBy().equals("name") &&
+                !paginationDto.getPaginationType().getSortBy().equals("request_status")) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
 
         if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
@@ -131,7 +130,7 @@ public class ClothesService {
     public CustomResponse<Clothes> updateClothesInformation(ClothesUpdateDto clothes) {
         Optional <Clothes> clothesOptional = clothesRepository.findById(clothes.getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
+            return new CustomResponse<>(null, true, 400, CLOTHE_NOT_FOUND, 0);
         }else {
             Clothes clothesToUpdate = clothesOptional.get();
             clothesToUpdate.setName(clothes.getName());
@@ -148,7 +147,7 @@ public class ClothesService {
     public CustomResponse<List<Stock>> updateStock(ClothesStockUpdateDto clothesStockUpdateDto){
         Optional<Clothes> clothesOptional = clothesRepository.findById(clothesStockUpdateDto.getStock().get(0).getId());
         if(clothesOptional.isEmpty()){
-            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
+            return new CustomResponse<>(null, true, 400, CLOTHE_NOT_FOUND, 0);
         }else {
             return new CustomResponse<>(stockRepository.saveAll(clothesStockUpdateDto.getStock()), false, 200, "El stock de la prenda ha sido actualizado correctamente.", 0);
         }
@@ -158,7 +157,7 @@ public class ClothesService {
     public CustomResponse<Clothes> disableCloth(Long id){
         Optional<Clothes> clothesOptional = clothesRepository.findById(id);
         if(clothesOptional.isEmpty()) {
-            return new CustomResponse<>(null, true, 400, "La prenda no se encuentra registrada dentro del sistema.", 0);
+            return new CustomResponse<>(null, true, 400, CLOTHE_NOT_FOUND, 0);
         }
         clothesOptional.get().setStatus(false);
         return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "El estatus de la prenda ha sido actualizado con éxito", 0);
@@ -177,13 +176,16 @@ public class ClothesService {
             );
         }
 
-        return new CustomResponse<Clothes>(
-                this.clothesRepository.findById(id).get(),
+        Optional<Clothes> clothes = this.clothesRepository.findById(id);
+
+        return clothes.map(value -> new CustomResponse<>(
+                value,
                 false,
                 200,
                 "Ok",
                 1
-        );
+        )).orElseGet(() -> new CustomResponse<>(null, true, 400, "No se encontró la prenda", 0));
+
     }
 
     public CustomResponse<List<Clothes>> findByCategory(String category) {

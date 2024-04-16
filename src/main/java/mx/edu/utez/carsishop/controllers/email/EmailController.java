@@ -11,13 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/email")
 public class EmailController {
+    private final EmailService emailService;
+
     @Autowired
-    private EmailService emailService;
+    public EmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping("/sendEmail")
     public String sendEmail(@RequestBody EmailDetails emailDetails) {
-        String result = emailService.sendSimpleMail(emailDetails);
 
-        return result;
+        return emailService.sendSimpleMail(emailDetails);
     }
 }

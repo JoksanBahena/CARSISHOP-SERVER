@@ -5,7 +5,6 @@ import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.services.order.OrderService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,8 +19,12 @@ import java.security.NoSuchAlgorithmException;
 @RequestMapping("/api/order")
 @CrossOrigin({"*"})
 public class OrderController {
+    private final OrderService orderService;
+
     @Autowired
-    private OrderService orderService;
+    public OrderController(OrderService orderService) {
+        this.orderService = orderService;
+    }
 
     @PostMapping("/makeOrder")
     public ResponseEntity<CustomResponse<Order>> makeOrder(@RequestHeader("Authorization") String authorizationHeader,@RequestBody OrderDto request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {

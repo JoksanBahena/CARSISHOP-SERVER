@@ -8,8 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.sql.SQLException;
-
 @RestController
 @RequestMapping(path = "/api/categories")
 @CrossOrigin(origins = {"*"}, methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
@@ -22,22 +20,22 @@ public class CategoryController {
     }
 
     @PostMapping("/find-all")
-    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) throws SQLException {
+    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) {
         return categoryService.findAll(paginationDto);
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@Validated({CategoryDto.Register.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> register(@Validated({CategoryDto.Register.class}) @RequestBody CategoryDto categoryDto) {
         return categoryService.register(categoryDto);
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@Validated({CategoryDto.Update.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> update(@Validated({CategoryDto.Update.class}) @RequestBody CategoryDto categoryDto) {
         return categoryService.update(categoryDto);
     }
 
     @PutMapping("/change-status")
-    public ResponseEntity<Object> changeStatus(@Validated({CategoryDto.ChangeStatus.class}) @RequestBody CategoryDto categoryDto) throws SQLException {
+    public ResponseEntity<Object> changeStatus(@Validated({CategoryDto.ChangeStatus.class}) @RequestBody CategoryDto categoryDto) {
         return categoryService.changeStatus(categoryDto);
     }
 

@@ -19,10 +19,14 @@ import java.util.Optional;
 
 @Service
 public class ImageService {
+    private final ImageRepository imageRepository;
+    private final ClothesRepository clothesRepository;
+
     @Autowired
-    private ImageRepository imageRepository;
-    @Autowired
-    private ClothesRepository clothesRepository;
+    public ImageService(ImageRepository imageRepository, ClothesRepository clothesRepository) {
+        this.imageRepository = imageRepository;
+        this.clothesRepository = clothesRepository;
+    }
 
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<List<Image>> addImages(ClothesImagesDto clothesImagesDto) throws IOException {
@@ -44,23 +48,19 @@ public class ImageService {
         //se suben las imagenes a cloudinary
         UploadImage uploadImage = new UploadImage();
         List<ClothesImagesDto.ImagesAndIndex> images = clothesImagesDto.getImages();
-        for (int i = 0; i < images.size(); i++){
-            if(imagesList.size()>=5){
-                break;
-            }
-            Image image = new Image();
-            if(images.get(i).getIndex()>4 || images.get(i).getIndex()<0){
+        for (int i = 0; i < images.size() && imagesList.size() < 5; i++) {
+            if (images.get(i).getIndex() > 4 || images.get(i).getIndex() < 0) {
                 continue;
             }
-            image.setUrl(uploadImage.uploadImage(images.get(i).getImage(), clothesOptional.get().getName()+"-"+images.get(i).getIndex(), "clothes"));
+
+            Image image = new Image();
+            image.setUrl(uploadImage.uploadImage(images.get(i).getImage(), clothesOptional.get().getName() + "-" + images.get(i).getIndex(), "clothes"));
             image.setClothes(clothesOptional.get());
+
             Optional<Image> imageOptional = imageRepository.findByUrl(image.getUrl());
-            if(imageOptional.isEmpty()){
-                imagesList.add(image);
-            }else {
-                imagesList.add(imageOptional.get());
-            }
+            imagesList.add(imageOptional.orElse(image));
         }
+
         return  new CustomResponse<>(imageRepository.saveAll(imagesList), false, 200, "Images uploaded", imagesList.size());
     }
 
