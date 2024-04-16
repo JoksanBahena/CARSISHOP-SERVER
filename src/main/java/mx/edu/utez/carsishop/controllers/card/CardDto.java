@@ -18,10 +18,8 @@ import java.util.List;
 @Setter
 @Getter
 public class CardDto {
-
-
-    @NotNull(groups = {CardDto.Update.class,CardDto.Delete.class}, message = "El número de tarjeta es obligatorio")
-    private Long id;
+    @NotNull(groups = {CardDto.Update.class, CardDto.Delete.class}, message = "El número de tarjeta es obligatorio")
+    private String id;
     @NotNull(groups = {CardDto.Register.class, CardDto.Update.class}, message = "El número de tarjeta es obligatorio")
     private String number;
     @NotNull(groups = {CardDto.Register.class, CardDto.Update.class}, message = "La fecha de expiración es obligatoria")
@@ -39,12 +37,13 @@ public class CardDto {
         card.setExpirationDate(getExpirationDate());
         card.setCvv(getCvv());
         card.setOwner(getOwner());
+        card.setEnable(true);
         return card;
     }
 
     public Card castToCardtoUpdate() {
         Card card= new Card();
-        card.setId(getId());
+        card.setId(Long.parseLong(getId()));
         card.setNumber(getNumber());
         card.setExpirationDate(getExpirationDate());
         card.setCvv(getCvv());

@@ -11,7 +11,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class AddressDto {
-    @NotNull(groups = {Delete.class}, message = "El id es obligatorio")
+    @NotNull(groups = {Update.class, Delete.class}, message = "El id es obligatorio")
     String id;
     @NotNull(groups = {Register.class, Update.class}, message = "El nombre es obligatorio")
     String name;
@@ -29,7 +29,6 @@ public class AddressDto {
     String intnumber;
     @NotNull(groups = {Register.class, Update.class}, message = "El número exterior es obligatorio")
     String extnumber;
-    @NotNull(groups = {Update.class}, message = "El id del usuario es obligatorio")
     Long user;
     Long order;
 

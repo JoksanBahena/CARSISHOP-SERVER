@@ -113,8 +113,8 @@ public class AddressService {
 
     }
 
-    public CustomResponse<Address> update(Address updatedAddress,long id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        Optional<Address> address=addressRepository.findById(id);
+    public CustomResponse<Address> update(AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<Address> address=addressRepository.findById(Long.parseLong(cryptoService.decrypt(addressDto.getId())));
         if(address.isEmpty()){
             return new CustomResponse<>(
                     null,
@@ -124,8 +124,17 @@ public class AddressService {
                     0
             );
         }
-        updatedAddress.decryptData();
-        updatedAddress.setId(id);
+
+        Address updatedAddress = address.get();
+        updatedAddress.setName(cryptoService.decrypt(addressDto.getName()));
+        updatedAddress.setState(this.stateRepository.findStateByName(addressDto.getState()).get());
+        updatedAddress.setTown(this.townRepository.findTownByName(addressDto.getTown()).get());
+        updatedAddress.setCp(cryptoService.decrypt(addressDto.getCp()));
+        updatedAddress.setSuburb(cryptoService.decrypt(addressDto.getSuburb()));
+        updatedAddress.setStreet(cryptoService.decrypt(addressDto.getStreet()));
+        updatedAddress.setIntnumber(cryptoService.decrypt(addressDto.getIntnumber()));
+        updatedAddress.setExtnumber(cryptoService.decrypt(addressDto.getExtnumber()));
+
         return new CustomResponse<>(
                 addressRepository.save(updatedAddress),
                 false,

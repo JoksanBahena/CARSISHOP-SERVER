@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.card;
 
+import mx.edu.utez.carsishop.controllers.card.CardDto;
 import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
@@ -106,8 +107,8 @@ public class CardService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public ResponseEntity<CustomResponse<String>> delete(Long id) {
-        Optional<Card> cardOptional=cardRepository.findById(id);
+    public ResponseEntity<CustomResponse<String>> delete(CardDto cardDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<Card> cardOptional = cardRepository.findById(Long.parseLong(cryptoService.decrypt(cardDto.getId())));
         if(cardOptional.isEmpty()){
             return ResponseEntity.status(404).body(new CustomResponse<>(
                     null,

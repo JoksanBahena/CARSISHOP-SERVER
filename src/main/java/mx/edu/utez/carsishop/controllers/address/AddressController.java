@@ -53,11 +53,9 @@ public class AddressController {
         }
     }
 
-    @PutMapping("/update/{id}")
-    public ResponseEntity<CustomResponse<Address>> update(@RequestBody Address updatedAddress,@PathVariable String id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-
-        long idLong = Long.parseLong(id);
-        return new ResponseEntity<>(addressService.update(updatedAddress,idLong), HttpStatus.OK);
+    @PutMapping("/update")
+    public ResponseEntity<CustomResponse<Address>> update(@Validated({AddressDto.Update.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        return new ResponseEntity<>(addressService.update(addressDto), HttpStatus.OK);
     }
 
     @PostMapping("/delete")

@@ -39,7 +39,7 @@ public class Card {
     private String owner;
 
     //enable
-    @Column(name = "enable",nullable = false,columnDefinition = "tinyint(1) default 1")
+    @Column(name = "enable",nullable = false, columnDefinition = "tinyint(1) default 1")
     private boolean enable;
 
     @ManyToOne

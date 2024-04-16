@@ -61,8 +61,8 @@ public class CardController {
         }
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<CustomResponse<String>> delete(@RequestBody CardDto cardDto) {
-            return cardService.delete(cardDto.getId());
+    @PostMapping("/delete")
+    public ResponseEntity<CustomResponse<String>> delete(@Validated({CardDto.Delete.class}) @RequestBody CardDto cardDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
+            return cardService.delete(cardDto);
     }
 }
