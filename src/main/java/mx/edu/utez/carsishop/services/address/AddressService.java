@@ -6,6 +6,8 @@ import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
+import mx.edu.utez.carsishop.models.state.StateRepository;
+import mx.edu.utez.carsishop.models.town.TownRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -26,6 +28,7 @@ import java.util.Optional;
 
 @Service
 public class AddressService {
+
     private final AddressRepository addressRepository;
 
     private final UserRepository userRepository;
@@ -44,9 +47,10 @@ public class AddressService {
 
     private CryptoService cryptoService = new CryptoService();
 
-    public CustomResponse<Address> register(Address address, String jwtToken){
+    public CustomResponse<Address> register(AddressDto addressDto, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
         String username=jwtService.getUsernameFromToken(jwtToken);
         Optional<User> user=userRepository.findByUsername(username);
+
         if(user.isEmpty()){
             return new CustomResponse<>(
                     null,
@@ -56,7 +60,19 @@ public class AddressService {
                     0
             );
         }
+
+        Address address= new Address();
+        address.setName(cryptoService.decrypt(addressDto.getName()));
+        address.setState(this.stateRepository.findStateByName(cryptoService.decrypt(addressDto.getState())).get());
+        address.setTown(this.townRepository.findTownByName(cryptoService.decrypt(addressDto.getTown())).get());
+        address.setCp(cryptoService.decrypt(addressDto.getCp()));
+        address.setSuburb(cryptoService.decrypt(addressDto.getSuburb()));
+        address.setStreet(cryptoService.decrypt(addressDto.getStreet()));
+        address.setIntnumber(cryptoService.decrypt(addressDto.getIntnumber()));
+        address.setExtnumber(cryptoService.decrypt(addressDto.getExtnumber()));
+        address.setEnable(true);
         address.setUser(user.get());
+
         return new CustomResponse<>(
                 addressRepository.save(address),
                 false,
@@ -65,6 +81,7 @@ public class AddressService {
                 1
         );
     }
+
     public CustomResponse<List<Address>> getByUser(String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String username=jwtService.getUsernameFromToken(jwtToken);
         Optional<User> user=userRepository.findByUsername(username);

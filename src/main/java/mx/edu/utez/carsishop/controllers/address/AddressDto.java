@@ -16,9 +16,9 @@ public class AddressDto {
     @NotNull(groups = {Register.class, Update.class}, message = "El nombre es obligatorio")
     String name;
     @NotNull(groups = {Register.class, Update.class}, message = "El estado es obligatorio")
-    Long state;
+    String state;
     @NotNull(groups = {Register.class, Update.class}, message = "El municipio es obligatorio")
-    Long town;
+    String town;
     @NotNull(groups = {Register.class, Update.class}, message = "El código postal es obligatorio")
     String cp;
     @NotNull(groups = {Register.class, Update.class}, message = "La colonia es obligatoria")
@@ -29,7 +29,7 @@ public class AddressDto {
     String intnumber;
     @NotNull(groups = {Register.class, Update.class}, message = "El número exterior es obligatorio")
     String extnumber;
-    @NotNull(groups = {Register.class, Update.class}, message = "El id del usuario es obligatorio")
+    @NotNull(groups = {Update.class}, message = "El id del usuario es obligatorio")
     Long user;
     Long order;
 
