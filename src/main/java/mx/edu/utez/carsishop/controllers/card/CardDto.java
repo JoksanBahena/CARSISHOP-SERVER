@@ -30,6 +30,8 @@ public class CardDto {
     private String cvv;
     @NotNull(groups = {CardDto.Register.class, CardDto.Update.class}, message = "El propietario es obligatorio")
     private String owner;
+    @NotNull(groups = {CardDto.Update.class}, message = "El estado de la tarjeta es obligatorio")
+    private boolean enable;
 
     public Card castToCardtoInsert() {
         Card card= new Card();
@@ -47,6 +49,7 @@ public class CardDto {
         card.setExpirationDate(getExpirationDate());
         card.setCvv(getCvv());
         card.setOwner(getOwner());
+        card.setEnable(enable);
         return card;
     }
 
