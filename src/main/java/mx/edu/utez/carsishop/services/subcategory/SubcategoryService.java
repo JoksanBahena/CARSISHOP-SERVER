@@ -31,7 +31,7 @@ public class SubcategoryService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Object> findAll(PaginationDto paginationDto) throws SQLException {
+    public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
         if (paginationDto.getPaginationType().getFilter() == null || paginationDto.getPaginationType().getFilter().isEmpty() ||
                 paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
                 paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()
@@ -48,19 +48,17 @@ public class SubcategoryService {
         int count = subcategoryRepository.searchCount();
 
         List<Subcategory> list;
-        switch (paginationDto.getPaginationType().getFilter()) {
-            case "name":
-                list = subcategoryRepository.findAllByNamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-            default:
-                return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        if (paginationDto.getPaginationType().getFilter().equals("name")) {
+            list = subcategoryRepository.findAllByNamePagination(
+                    paginationDto.getValue(),
+                    PageRequest.of(paginationDto.getPaginationType().getPage(),
+                            paginationDto.getPaginationType().getLimit(),
+                            paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
+                                    ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
+                                    : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
+            );
+        } else {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de subcategorias obtenida correctamente.", count), HttpStatus.OK);

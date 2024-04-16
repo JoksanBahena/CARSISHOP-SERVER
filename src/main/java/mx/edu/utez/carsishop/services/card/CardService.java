@@ -1,6 +1,6 @@
 package mx.edu.utez.carsishop.services.card;
 
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
 import mx.edu.utez.carsishop.models.order.Order;
@@ -17,7 +17,6 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
-import javax.swing.text.html.Option;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
@@ -26,16 +25,24 @@ import java.util.Optional;
 
 @Service
 public class CardService {
-    @Autowired
-    private CardRepository cardRepository;
-    @Autowired
-    private JwtService jwtService;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private OrderRepository orderRepository;
+    private final CardRepository cardRepository;
+    private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    private CryptoService cryptoService=new CryptoService();
+    private final CryptoService cryptoService=new CryptoService();
+    private final OrderRepository orderRepository;
+
+    private static final String USER_NOT_FOUND="Usuario no encontrado";
+    private static final String CARD_NOT_FOUND="Tarjeta no encontrada";
+
+
+    public CardService(CardRepository cardRepository, JwtService jwtService, UserRepository userRepository, OrderRepository orderRepository) {
+        this.cardRepository = cardRepository;
+        this.jwtService = jwtService;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+    }
+
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<CustomResponse<Card>> register(Card card,String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String email=jwtService.getUsernameFromToken(token);
@@ -45,7 +52,7 @@ public class CardService {
                     null,
                     true,
                     401,
-                    "Usuario no encontrado",
+                    USER_NOT_FOUND,
                     0
             ));
         }
@@ -70,7 +77,7 @@ public class CardService {
                     null,
                     true,
                     404,
-                    "Tarjeta no encontrada",
+                    CARD_NOT_FOUND,
                     0
             ));
         }
@@ -81,7 +88,7 @@ public class CardService {
                     null,
                     true,
                     401,
-                    "Usuario no encontrado",
+                    USER_NOT_FOUND,
                     0
             ));
         }
@@ -106,7 +113,7 @@ public class CardService {
                     null,
                     true,
                     404,
-                    "Tarjeta no encontrada",
+                    CARD_NOT_FOUND,
                     0
             ));
         }
@@ -141,7 +148,7 @@ public class CardService {
                     null,
                     true,
                     401,
-                    "Usuario no encontrado",
+                    USER_NOT_FOUND,
                     0
             ));
         }

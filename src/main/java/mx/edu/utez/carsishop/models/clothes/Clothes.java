@@ -1,14 +1,15 @@
 package mx.edu.utez.carsishop.models.clothes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.category.Category;
-import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
-import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
+import mx.edu.utez.carsishop.models.cloth_order.ClothOrder;
+import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
 import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.stock.Stock;
@@ -42,6 +43,7 @@ public class Clothes {
 
     @ManyToOne
     @JoinColumn(name = "seller")
+    @JsonIgnoreProperties({"user"})
     private Seller seller;
 
     @ManyToOne

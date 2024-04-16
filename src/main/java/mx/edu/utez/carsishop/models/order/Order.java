@@ -9,7 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.card.Card;
-import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
+import mx.edu.utez.carsishop.models.cloth_order.ClothOrder;
 import mx.edu.utez.carsishop.models.user.User;
 
 import java.util.Date;
@@ -42,7 +42,7 @@ public class Order {
     @JoinColumn(name = "address")
     private Address address;
 
-    @Column(name = "status",nullable = false,columnDefinition = "enum('Paid','In_process','On_the_way','Delivered','Canceled','Returned') default 'Paid'")
+    @Column(name = "status",nullable = false,columnDefinition = "enum('PAID','IN_PROCESS','ON_THE_WAY','DELIVERED','CANCELED','RETURNED') default 'PAID'")
     @Enumerated(EnumType.STRING)
     private Status status;
 
@@ -50,12 +50,12 @@ public class Order {
     private List<ClothOrder> clothOrders;
 
     public enum Status{
-        Paid,
-        In_process,
-        On_the_way,
-        Delivered,
-        Canceled,
-        Returned
+        PAID,
+        IN_PROCESS,
+        ON_THE_WAY,
+        DELIVERED,
+        CANCELED,
+        RETURNED
     }
 
 }

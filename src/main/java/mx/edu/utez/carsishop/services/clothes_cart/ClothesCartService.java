@@ -1,13 +1,13 @@
-package mx.edu.utez.carsishop.services.clothesCart;
+package mx.edu.utez.carsishop.services.clothes_cart;
 
-import mx.edu.utez.carsishop.Jwt.JwtService;
-import mx.edu.utez.carsishop.controllers.clothesCart.ClothesCartDto;
+import mx.edu.utez.carsishop.jwt.JwtService;
+import mx.edu.utez.carsishop.controllers.clothes_cart.ClothesCartDto;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes.ClothesRepository;
-import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
-import mx.edu.utez.carsishop.models.clothesCart.ClothesCartRepository;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCartRepository;
+import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
+import mx.edu.utez.carsishop.models.clothes_cart.ClothesCartRepository;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCartRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -26,21 +26,23 @@ import java.util.Optional;
 
 @Service
 public class ClothesCartService {
-    @Autowired
-    private ClothesCartRepository clothesCartRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private ShoppingCartRepository shoppingCartRepository;
-    @Autowired
-    private ClothesRepository clothesRepository;
-    @Autowired
-    private JwtService jwtService;
+    private final ClothesCartRepository clothesCartRepository;
+    private final UserRepository userRepository;
+    private final ShoppingCartRepository shoppingCartRepository;
+    private final ClothesRepository clothesRepository;
+    private final JwtService jwtService;
 
-    private CryptoService cryptoService=new CryptoService();
+    @Autowired
+    public ClothesCartService(ClothesCartRepository clothesCartRepository, UserRepository userRepository, ShoppingCartRepository shoppingCartRepository, ClothesRepository clothesRepository, JwtService jwtService) {
+        this.clothesCartRepository = clothesCartRepository;
+        this.userRepository = userRepository;
+        this.shoppingCartRepository = shoppingCartRepository;
+        this.clothesRepository = clothesRepository;
+        this.jwtService = jwtService;
+    }
 
     @Transactional(readOnly = true)
-    public CustomResponse<ShoppingCart> getClothesCartByUser(String token) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public CustomResponse<ShoppingCart> getClothesCartByUser(String token) {
         String username = jwtService.getUsernameFromToken(token);
         Optional<User> user=userRepository.findByUsername(username);
         if (user.isPresent()){
@@ -49,7 +51,7 @@ public class ClothesCartService {
                 return new CustomResponse<>(shoppingCart.get(),false,200,"ok", 1);
             }
         }
-        return new CustomResponse<>(null,true,400,"not found", 0);
+        return new CustomResponse<>(null,true,400,"Carrito no encontrado para dicho usuario.", 0);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -64,7 +66,7 @@ public class ClothesCartService {
 
             Optional<Clothes> clothes=clothesRepository.findById(request.getCloth().getId());
             if (!clothes.isPresent()){
-                return new CustomResponse<>(null,true,400,"cloth not found", 0);
+                return new CustomResponse<>(null,true,400,"Prenda no encontrada", 0);
             }
 
             clothesCart.setClothes(request.getCloth());
@@ -79,7 +81,7 @@ public class ClothesCartService {
             clothesCart.setSize(request.getSize());
             return new CustomResponse<>(clothesCartRepository.save(clothesCart),false,200,"ok", 1);
         }
-        return new CustomResponse<>(null,true,400,"user not found", 0);
+        return new CustomResponse<>(null,true,400,"Usuario no encontrado dentro del sistema", 0);
     }
 
     @Transactional(rollbackFor = Exception.class)
@@ -89,7 +91,7 @@ public class ClothesCartService {
             clothesCartRepository.deleteById(id);
             return new CustomResponse<>("deleted",false,200,"ok", 0);
         }
-        return new CustomResponse<>(null,true,400,"not found", 0);
+        return new CustomResponse<>(null,true,400,"Carrito no encontrado", 0);
     }
     @Transactional(rollbackFor = Exception.class)
     public CustomResponse<ClothesCart> updateClothesCart(Long id, int amount) {
@@ -98,6 +100,6 @@ public class ClothesCartService {
             clothesCart.get().setAmount(amount);
             return new CustomResponse<>(clothesCartRepository.save(clothesCart.get()),false,200,"ok", 1);
         }
-        return new CustomResponse<>(null,true,400,"not found", 0);
+        return new CustomResponse<>(null,true,400,"Error, no se encontró ningun carrito registrado dentro del sistema.", 0);
     }
 }

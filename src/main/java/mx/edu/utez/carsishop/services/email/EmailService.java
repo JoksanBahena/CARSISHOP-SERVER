@@ -4,6 +4,8 @@ import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
 import mx.edu.utez.carsishop.models.email.EmailInterface;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
@@ -13,11 +15,17 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class EmailService implements EmailInterface {
-    @Autowired
-    private JavaMailSender javaMailSender;
+    private final JavaMailSender javaMailSender;
 
     @Value("${spring.mail.username}")
     private String sender;
+
+    private static final Logger logger = LoggerFactory.getLogger(EmailService.class);
+
+    @Autowired
+    public EmailService(JavaMailSender javaMailSender) {
+        this.javaMailSender = javaMailSender;
+    }
 
     public String sendSimpleMail(EmailDetails emailDetails) {
         try {
@@ -46,7 +54,7 @@ public class EmailService implements EmailInterface {
             mimeMessageHelper.setText(emailDetails.getBody(), true);
             javaMailSender.send(mimeMessage);
         }catch (MessagingException e) {
-            System.out.println(e.getMessage());
+            logger.error("Error al enviar el correo: ", e);
         }
     }
 }

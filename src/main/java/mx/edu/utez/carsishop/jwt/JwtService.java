@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Jwt;
+package mx.edu.utez.carsishop.jwt;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

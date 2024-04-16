@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Auth;
+package mx.edu.utez.carsishop.auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-public class ResendConfirmRequest {
-    String email;
+public class ResetPasswordRequest {
+    String newPassword;
+    String confirmNewPassword;
 }

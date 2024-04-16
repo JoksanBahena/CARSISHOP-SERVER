@@ -1,6 +1,6 @@
 package mx.edu.utez.carsishop.services.address;
 
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.address.AddressDto;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
@@ -28,18 +28,22 @@ import java.util.Optional;
 
 @Service
 public class AddressService {
+
+    private final AddressRepository addressRepository;
+
+    private final UserRepository userRepository;
+
+    private final OrderRepository orderRepository;
+    private final JwtService jwtService;
+
     @Autowired
-    private AddressRepository addressRepository;
-    @Autowired
-    private UserRepository userRepository;
-    @Autowired
-    private OrderRepository orderRepository;
-    @Autowired
-    private StateRepository stateRepository;
-    @Autowired
-    private TownRepository townRepository;
-    @Autowired
-    private JwtService jwtService;
+    public AddressService(AddressRepository addressRepository, UserRepository userRepository, OrderRepository orderRepository, JwtService jwtService) {
+        this.addressRepository = addressRepository;
+        this.userRepository = userRepository;
+        this.orderRepository = orderRepository;
+        this.jwtService = jwtService;
+    }
+
 
     private CryptoService cryptoService = new CryptoService();
 
@@ -135,7 +139,7 @@ public class AddressService {
                     null,
                     true,
                     400,
-                    "Direccion no encontrada",
+                    "La dirección no se encuentra registrada en el sistema",
                     0
             );
         }
@@ -143,7 +147,7 @@ public class AddressService {
         if(order.isEmpty()){
             addressRepository.delete(address.get());
             return new CustomResponse<>(
-                    "Direccion eliminada correctamente",
+                    "Dirección eliminada correctamente",
                     false,
                     200,
                     "OK",
@@ -153,12 +157,14 @@ public class AddressService {
             address.get().setEnable(false);
             addressRepository.save(address.get());
             return new CustomResponse<>(
-                    "Direccion deshabilitada correctamente",
-                    false,
-                    200,
-                    "OK",
+                    "Una orden esta asociada a esta dirección, no se puede eliminar",
+                    true,
+                    400,
+                    "Error al eliminar la dirección",
                     0
             );
         }
     }
+
+
 }

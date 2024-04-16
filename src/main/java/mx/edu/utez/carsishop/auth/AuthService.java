@@ -1,10 +1,10 @@
-package mx.edu.utez.carsishop.Auth;
+package mx.edu.utez.carsishop.auth;
 
 
 import io.jsonwebtoken.JwtException;
 import lombok.RequiredArgsConstructor;
-import mx.edu.utez.carsishop.Jwt.JwtBlackList;
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtBlackList;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.email.EmailDetails;
 import mx.edu.utez.carsishop.models.gender.Gender;

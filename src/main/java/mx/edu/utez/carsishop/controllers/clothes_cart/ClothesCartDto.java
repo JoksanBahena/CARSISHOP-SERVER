@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.controllers.clothesCart;
+package mx.edu.utez.carsishop.controllers.clothes_cart;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

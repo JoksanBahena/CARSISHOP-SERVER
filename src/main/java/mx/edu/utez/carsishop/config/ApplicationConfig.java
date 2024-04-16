@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Config;
+package mx.edu.utez.carsishop.config;
 
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.models.user.UserRepository;

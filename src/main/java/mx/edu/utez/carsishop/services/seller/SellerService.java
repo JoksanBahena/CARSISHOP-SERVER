@@ -1,6 +1,5 @@
 package mx.edu.utez.carsishop.services.seller;
 
-import mx.edu.utez.carsishop.models.category.Category;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.sellers.SellerRepository;
 import mx.edu.utez.carsishop.models.sellers.dtos.SellerDto;
@@ -10,6 +9,7 @@ import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,25 +24,56 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 @Service
 public class SellerService {
-    @Autowired
-    private UserRepository userRepository;
+
+    private static final String PENDING = "PENDING";
+    private static final String REJECTED = "REJECTED";
+    private static final String APPROVED = "APPROVED";
+    private final UserRepository userRepository;
+
+    private final SellerRepository sellerRepository;
+    private CryptoService cryptoService = new CryptoService();
 
     @Autowired
-    private SellerRepository sellerRepository;
-    private CryptoService cryptoService = new CryptoService();
+    public SellerService(UserRepository userRepository, SellerRepository sellerRepository) {
+        this.userRepository = userRepository;
+        this.sellerRepository = sellerRepository;
+    }
 
     @Transactional(readOnly = true)
     public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
+        ResponseEntity<Object> validationResponse = validatePaginationDto(paginationDto);
+        if (validationResponse != null) {
+            return validationResponse;
+        }
+
+        Map<String, Function<PaginationDto, List<Seller>>> queryMap = initializeQueryMap();
+        Function<PaginationDto, List<Seller>> queryFunction = queryMap.get(paginationDto.getPaginationType().getFilter());
+        if (queryFunction == null) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        paginationDto.setValue("%" + paginationDto.getValue() + "%");
+        int count = sellerRepository.searchCount();
+        List<Seller> list = queryFunction.apply(paginationDto);
+
+        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
+    }
+
+    private ResponseEntity<Object> validatePaginationDto(PaginationDto paginationDto) {
         if (paginationDto.getPaginationType().getFilter() == null || paginationDto.getPaginationType().getFilter().isEmpty() ||
                 paginationDto.getPaginationType().getSortBy() == null || paginationDto.getPaginationType().getSortBy().isEmpty() ||
-                paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()
-        )
+                paginationDto.getPaginationType().getOrder() == null || paginationDto.getPaginationType().getOrder().isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+        }
 
         if (!(paginationDto.getPaginationType().getFilter().equals("curp") && paginationDto.getPaginationType().getSortBy().equals("curp")) &&
                 !(paginationDto.getPaginationType().getFilter().equals("rfc") && paginationDto.getPaginationType().getSortBy().equals("rfc")) &&
@@ -52,73 +83,52 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc"))
+        if (!paginationDto.getPaginationType().getOrder().equals("asc") && !paginationDto.getPaginationType().getOrder().equals("desc")) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El tipo de orden proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
-
-        paginationDto.setValue("%" + paginationDto.getValue() + "%");
-        int count = sellerRepository.searchCount();
-
-        List<Seller> list;
-        switch (paginationDto.getPaginationType().getFilter()) {
-            case "curp":
-                list = sellerRepository.findAllByCurpPagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "rfc":
-                list = sellerRepository.findAllByRfcPagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "request_status":
-                list = sellerRepository.findAllByRequestStatusPagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "user_name":
-                list = sellerRepository.findAllByUserNamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-
-            case "user_surname":
-                list = sellerRepository.findAllByUserSurnamePagination(
-                        paginationDto.getValue(),
-                        PageRequest.of(paginationDto.getPaginationType().getPage(),
-                                paginationDto.getPaginationType().getLimit(),
-                                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
-                                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
-                                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending())
-                );
-                break;
-            default:
-                return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "El filtro proporcionado es inválido. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
+        return null;
+    }
+
+    private Map<String, Function<PaginationDto, List<Seller>>> initializeQueryMap() {
+        Map<String, Function<PaginationDto, List<Seller>>> queryMap = new HashMap<>();
+        queryMap.put("curp", this::findAllByCurpPagination);
+        queryMap.put("rfc", this::findAllByRfcPagination);
+        queryMap.put("request_status", this::findAllByRequestStatusPagination);
+        queryMap.put("user_name", this::findAllByUserNamePagination);
+        queryMap.put("user_surname", this::findAllByUserSurnamePagination);
+        return queryMap;
+    }
+
+    private List<Seller> findAllByCurpPagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, sellerRepository::findAllByCurpPagination);
+    }
+
+    private List<Seller> findAllByRfcPagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, sellerRepository::findAllByRfcPagination);
+    }
+
+    private List<Seller> findAllByRequestStatusPagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, sellerRepository::findAllByRequestStatusPagination);
+    }
+
+    private List<Seller> findAllByUserNamePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, sellerRepository::findAllByUserNamePagination);
+    }
+
+    private List<Seller> findAllByUserSurnamePagination(PaginationDto paginationDto) {
+        return findAllByPagination(paginationDto, sellerRepository::findAllByUserSurnamePagination);
+    }
+
+    private List<Seller> findAllByPagination(PaginationDto paginationDto, BiFunction<String, Pageable, List<Seller>> queryFunction) {
+        Pageable pageable = PageRequest.of(
+                paginationDto.getPaginationType().getPage(),
+                paginationDto.getPaginationType().getLimit(),
+                paginationDto.getPaginationType().getOrder().equalsIgnoreCase("ASC")
+                        ? Sort.by(paginationDto.getPaginationType().getSortBy()).ascending()
+                        : Sort.by(paginationDto.getPaginationType().getSortBy()).descending()
+        );
+        return queryFunction.apply(paginationDto.getValue(), pageable);
     }
 
     @Transactional(rollbackFor = SQLException.class)
@@ -134,7 +144,7 @@ public class SellerService {
         }
         Optional<User> user = this.userRepository.findByUsername(seller.getUser().getUsername());
         if (user.isEmpty()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
         }
 
         Optional<Seller> sellerPending = this.sellerRepository.findSellerPending(user.get().getId());
@@ -165,7 +175,7 @@ public class SellerService {
             sellerToSave.setUser(seller.getUser());
             sellerToSave.setImage(urlImage);
             sellerToSave.setStatus(true);
-            sellerToSave.setRequest_status("PENDING");
+            sellerToSave.setRequest_status(PENDING);
 
             sellerToSave = this.sellerRepository.save(sellerToSave);
 
@@ -197,12 +207,12 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (!seller.getRequest_status().equals("APPROVED") && !seller.getRequest_status().equals("REJECTED") && !seller.getRequest_status().equals("PENDING")) {
+        if (!seller.getRequest_status().equals(APPROVED) && !seller.getRequest_status().equals(REJECTED) && !seller.getRequest_status().equals(PENDING)) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido", 0), HttpStatus.BAD_REQUEST);
         }
 
         if (!this.userRepository.existsById(seller.getUser().getId())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró este usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
         Seller sellerToUpdate = sellerOptional.get();
@@ -213,14 +223,19 @@ public class SellerService {
 
         sellerToUpdate = this.sellerRepository.save(sellerToUpdate);
 
-        if (seller.getRequest_status().equals("APPROVED")) {
-            User user = this.userRepository.findById(seller.getUser().getId()).get();
+        Optional<User> optionalUser = this.userRepository.findById(sellerToUpdate.getUser().getId());
+        if (optionalUser.isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        User user = optionalUser.get();
+
+        if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
         }
 
-        if (seller.getRequest_status().equals("REJECTED") || seller.getRequest_status().equals("PENDING")) {
-            User user = this.userRepository.findById(seller.getUser().getId()).get();
+        if (seller.getRequest_status().equals(REJECTED) || seller.getRequest_status().equals(PENDING)) {
             user.setRole(Role.CUSTOMER);
             this.userRepository.save(user);
         }

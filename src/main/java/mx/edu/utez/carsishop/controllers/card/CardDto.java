@@ -50,12 +50,12 @@ public class CardDto {
         return card;
     }
 
-    public class Register {
+    public interface Register {
     }
 
-    public class Update {
+    public interface Update {
     }
 
-    public class Delete {
+    public interface Delete {
     }
 }

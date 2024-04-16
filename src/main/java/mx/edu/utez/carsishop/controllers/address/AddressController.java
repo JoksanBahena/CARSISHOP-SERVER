@@ -22,6 +22,8 @@ import java.util.List;
 public class AddressController {
     private final AddressService addressService;
 
+
+    @Autowired
     public AddressController(AddressService addressService) {
         this.addressService = addressService;
     }
@@ -40,6 +42,7 @@ public class AddressController {
 
     @PostMapping("/register")
     public ResponseEntity<CustomResponse<Address>> register(@RequestHeader("Authorization") String authorizationHeader, @Validated({AddressDto.Register.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwtToken = authorizationHeader.substring(7);
             return new ResponseEntity<>(addressService.register(addressDto, jwtToken), HttpStatus.OK);
@@ -51,18 +54,14 @@ public class AddressController {
 
     @PutMapping("/update/{id}")
     public ResponseEntity<CustomResponse<Address>> update(@RequestBody Address updatedAddress,@PathVariable String id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-           /*
-        long idlong = desecnptar(id);
-         */
+
         long idLong = Long.parseLong(id);
         return new ResponseEntity<>(addressService.update(updatedAddress,idLong), HttpStatus.OK);
     }
 
     @DeleteMapping("/delete")
     public ResponseEntity<CustomResponse<String>> delete(@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
-        /*
-        long idlong = desecnptar(id);
-         */
+
         return new ResponseEntity<>(addressService.delete(addressDto), HttpStatus.OK);
     }
 

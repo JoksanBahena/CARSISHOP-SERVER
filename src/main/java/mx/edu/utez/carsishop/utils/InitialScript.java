@@ -1,7 +1,5 @@
 package mx.edu.utez.carsishop.utils;
 
-import mx.edu.utez.carsishop.Auth.AuthService;
-import mx.edu.utez.carsishop.Auth.RegisterRequest;
 import mx.edu.utez.carsishop.models.category.Category;
 import mx.edu.utez.carsishop.models.category.CategoryRepository;
 import mx.edu.utez.carsishop.models.gender.Gender;
@@ -14,6 +12,7 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -29,6 +28,9 @@ public class InitialScript implements CommandLineRunner {
     private final SizeRepository sizeRepository;
     private final CategoryRepository categoryRepository;
     private final SubcaregoryRepository subcaregoryRepository;
+
+    @Value("${ADMIN_PASSWORD}")
+    private String adminPassword;
 
     @Autowired
     public InitialScript(UserRepository userRepository, PasswordEncoder passwordEncoder, GenderRepository genderRepository, SizeRepository sizeRepository, CategoryRepository categoryRepository, SubcaregoryRepository subcaregoryRepository) {
@@ -47,9 +49,9 @@ public class InitialScript implements CommandLineRunner {
         if (!userExist.isPresent()) {
             User user = User.builder()
                     .username("admin@gmail.com")
-                    .password(passwordEncoder.encode( "admin"))
+                    .password(passwordEncoder.encode( adminPassword))
                     .name("admin")
-                    .surname("admin")
+                    .surname("admin valverde")
                     .phone("1234567890")
                     .birthdate("2021-01-01")
                     .status(true)
@@ -61,7 +63,7 @@ public class InitialScript implements CommandLineRunner {
 
         //Gender
         Gender gender = new Gender();
-        Optional<Gender> genderExist = null;
+        Optional<Gender> genderExist;
         genderExist = genderRepository.findByGender("Masculino");
         if (!genderExist.isPresent()) {
             gender.setGender("Masculino");
@@ -76,7 +78,7 @@ public class InitialScript implements CommandLineRunner {
 
         //Size
         Size size = new Size();
-        Optional<Size> sizeExist = null;
+        Optional<Size> sizeExist;
         sizeExist = sizeRepository.findByName("S");
         if (!sizeExist.isPresent()) {
             size.setName("S");
@@ -109,7 +111,7 @@ public class InitialScript implements CommandLineRunner {
 
         //Category
         Category category = new Category();
-        Optional<Category> categoryExist = null;
+        Optional<Category> categoryExist;
 
         categoryExist = categoryRepository.findByName("Hombre");
         if (!categoryExist.isPresent()) {
@@ -134,7 +136,7 @@ public class InitialScript implements CommandLineRunner {
 
         //Subcategory
         Subcategory subcategory = new Subcategory();
-        Optional<Subcategory> subcategoryExist = null;
+        Optional<Subcategory> subcategoryExist;
 
         subcategoryExist = subcaregoryRepository.findByName("Top");
         if (!subcategoryExist.isPresent()) {

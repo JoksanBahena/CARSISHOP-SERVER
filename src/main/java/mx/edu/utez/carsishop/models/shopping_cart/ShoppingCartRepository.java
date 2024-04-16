@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.models.shoppingCart;
+package mx.edu.utez.carsishop.models.shopping_cart;
 
 import mx.edu.utez.carsishop.models.user.User;
 import org.springframework.data.jpa.repository.JpaRepository;

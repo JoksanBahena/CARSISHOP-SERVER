@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Auth;
+package mx.edu.utez.carsishop.auth;
 
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.controllers.user.UserDto;

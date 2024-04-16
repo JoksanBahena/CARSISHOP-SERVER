@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Auth;
+package mx.edu.utez.carsishop.auth;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;

@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Jwt;
+package mx.edu.utez.carsishop.jwt;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -8,13 +8,14 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
 public class JwtBlackList {
-    private static final LoadingCache<String, Boolean> blacklist = CacheBuilder.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS)
-            .build(new CacheLoader<String, Boolean>() {
-                public Boolean load(String token) {
-                    return Boolean.FALSE;
-                }
-            });
+    private static final LoadingCache<String, Boolean> blacklist = CacheBuilder.newBuilder().expireAfterWrite(1, TimeUnit.HOURS).build(new CacheLoader<String, Boolean>() {
+        public Boolean load(String token) {
+            return Boolean.FALSE;
+        }
+    });
+
+    private JwtBlackList() {
+    }
 
     public static boolean isTokenBlacklisted(String token) throws ExecutionException {
         return blacklist.get(token);

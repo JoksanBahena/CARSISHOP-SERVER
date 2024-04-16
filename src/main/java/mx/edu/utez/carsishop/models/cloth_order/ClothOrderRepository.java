@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.models.clothOrder;
+package mx.edu.utez.carsishop.models.cloth_order;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

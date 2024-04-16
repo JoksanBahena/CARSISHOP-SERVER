@@ -11,8 +11,12 @@ import java.util.List;
 
 @Service
 public class StateService {
+    private final StateRepository stateRepository;
+
     @Autowired
-    private StateRepository stateRepository;
+    public StateService(StateRepository stateRepository) {
+        this.stateRepository = stateRepository;
+    }
 
     @Transactional(readOnly = true)
     public CustomResponse<List<State>> findAll(){

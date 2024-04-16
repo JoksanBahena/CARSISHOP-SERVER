@@ -1,7 +1,6 @@
 package mx.edu.utez.carsishop.controllers.clothes;
 
 import mx.edu.utez.carsishop.models.clothes.Clothes;
-import mx.edu.utez.carsishop.models.images.Image;
 import mx.edu.utez.carsishop.services.clothes.ClothesService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.PaginationDto;
@@ -11,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
 import java.sql.SQLException;
 import java.util.List;
 import jakarta.validation.Valid;
@@ -27,11 +25,16 @@ import java.security.NoSuchAlgorithmException;
 @RequestMapping(path = "/api/clothes")
 @CrossOrigin(origins = {"*"})
 public class ClothesController {
+    private final ClothesService clothesService;
+
     @Autowired
-    private ClothesService clothesService;
+    public ClothesController(ClothesService clothesService) {
+        this.clothesService = clothesService;
+    }
+
 
     @PostMapping(path = "/find-all")
-    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) throws SQLException {
+    public ResponseEntity<Object> findAll(@Validated({PaginationDto.StateGet.class}) @RequestBody PaginationDto paginationDto) {
         return clothesService.findAll(paginationDto);
     }
 

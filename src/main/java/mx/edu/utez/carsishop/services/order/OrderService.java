@@ -1,19 +1,19 @@
 package mx.edu.utez.carsishop.services.order;
 
-import mx.edu.utez.carsishop.Jwt.JwtService;
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.controllers.order.OrderDto;
 import mx.edu.utez.carsishop.controllers.order.OrderUpdateStatusDto;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.address.AddressRepository;
 import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
-import mx.edu.utez.carsishop.models.clothOrder.ClothOrder;
-import mx.edu.utez.carsishop.models.clothOrder.ClothOrderRepository;
-import mx.edu.utez.carsishop.models.clothesCart.ClothesCart;
+import mx.edu.utez.carsishop.models.cloth_order.ClothOrder;
+import mx.edu.utez.carsishop.models.cloth_order.ClothOrderRepository;
+import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCartRepository;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCartRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -35,28 +35,32 @@ import java.util.Optional;
 
 @Service
 public class OrderService {
-    @Autowired
-    private OrderRepository orderRepository;
+    private final OrderRepository orderRepository;
+
+    private final UserRepository userRepository;
+
+    private final CardRepository cardRepository;
+
+    private final AddressRepository addressRepository;
+
+    private final ShoppingCartRepository shoppingCartRepository;
+
+    private final ClothOrderRepository clothOrderRepository;
+
+    private final JwtService jwtService;
+
+    private final CryptoService cryptoService = new CryptoService();
 
     @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private CardRepository cardRepository;
-
-    @Autowired
-    private AddressRepository addressRepository;
-
-    @Autowired
-    private ShoppingCartRepository shoppingCartRepository;
-
-    @Autowired
-    private ClothOrderRepository clothOrderRepository;
-
-    @Autowired
-    private JwtService jwtService;
-
-    private CryptoService cryptoService = new CryptoService();
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, CardRepository cardRepository, AddressRepository addressRepository, ShoppingCartRepository shoppingCartRepository, ClothOrderRepository clothOrderRepository, JwtService jwtService) {
+        this.orderRepository = orderRepository;
+        this.userRepository = userRepository;
+        this.cardRepository = cardRepository;
+        this.addressRepository = addressRepository;
+        this.shoppingCartRepository = shoppingCartRepository;
+        this.clothOrderRepository = clothOrderRepository;
+        this.jwtService = jwtService;
+    }
 
 
     @Transactional(rollbackFor = Exception.class)
@@ -86,7 +90,7 @@ public class OrderService {
         order.setUser(user.get());
         order.setCard(card.get());
         order.setAddress(address.get());
-        order.setStatus(Order.Status.Paid);
+        order.setStatus(Order.Status.PAID);
         order= orderRepository.save(order);
         List<ClothesCart> clothesCarts = shoppingCart.get().getClothesCarts();
         List<ClothOrder> clothOrders = new ArrayList<>();

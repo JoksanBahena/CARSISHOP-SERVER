@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.Jwt;
+package mx.edu.utez.carsishop.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.ExpiredJwtException;

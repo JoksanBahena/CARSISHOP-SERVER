@@ -18,8 +18,12 @@ import java.util.List;
 @CrossOrigin({"*"})
 public class StateController {
 
+    private final StateService stateService;
+
     @Autowired
-    private StateService stateService;
+    public StateController(StateService stateService) {
+        this.stateService = stateService;
+    }
 
     @GetMapping("/findAll")
     public ResponseEntity<CustomResponse<List<State>>> findAll(){
