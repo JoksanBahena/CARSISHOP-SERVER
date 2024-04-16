@@ -3,7 +3,6 @@ package mx.edu.utez.carsishop.controllers.address;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.services.address.AddressService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -21,8 +20,11 @@ import java.util.List;
 @RequestMapping("/api/address")
 @CrossOrigin(origins = {"*"})
 public class AddressController {
-    @Autowired
-    private AddressService addressService;
+    private final AddressService addressService;
+
+    public AddressController(AddressService addressService) {
+        this.addressService = addressService;
+    }
 
     @GetMapping("/getByUser")
     public ResponseEntity<CustomResponse<List<Address>>> getByUser(@RequestHeader("Authorization") String authorizationHeader) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {

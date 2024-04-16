@@ -66,6 +66,7 @@ public class AddressService {
         address.setStreet(cryptoService.decrypt(addressDto.getStreet()));
         address.setIntnumber(cryptoService.decrypt(addressDto.getIntnumber()));
         address.setExtnumber(cryptoService.decrypt(addressDto.getExtnumber()));
+        address.setEnable(true);
         address.setUser(user.get());
 
         return new CustomResponse<>(
