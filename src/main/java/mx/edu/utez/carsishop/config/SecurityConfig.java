@@ -32,7 +32,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/captcha/**").permitAll()
                 .requestMatchers("/api/auth/**","/api/captcha/**").permitAll()
                 .requestMatchers("/api/address/**").hasAnyAuthority("CUSTOMER","SELLER")
-                .requestMatchers("/api/card/**","/api/order/makeOrder","/api/clothesCart/**").hasAnyAuthority("CUSTUMER")
+                .requestMatchers("/api/card/**","/api/order/makeOrder","/api/clothesCart/**").hasAnyAuthority("CUSTOMER")
                 .requestMatchers("/api/category/find-all","/api/subcategories/find-all").permitAll()
                 .requestMatchers("/api/category/**","/api/subcategories/**","/api/users/find-all","/api/users/register-admin").hasAnyAuthority("ADMIN")
                 .requestMatchers("/api/clothes/isAccepted","/api/sellers/find-all","/api/sellers/change-status").hasAnyAuthority("ADMIN")
