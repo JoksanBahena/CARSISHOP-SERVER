@@ -13,10 +13,7 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.services.email.EmailService;
-import mx.edu.utez.carsishop.utils.CryptoService;
-import mx.edu.utez.carsishop.utils.CustomResponse;
-import mx.edu.utez.carsishop.utils.UploadImage;
-import mx.edu.utez.carsishop.utils.ValidateTypeFile;
+import mx.edu.utez.carsishop.utils.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +35,9 @@ import java.util.concurrent.ExecutionException;
 @Service
 @RequiredArgsConstructor
 public class AuthService {
-    @Autowired
-    private GenderRepository genderRepository;
-
     private final CryptoService cryptoService = new CryptoService();
+    private final EmailTemplate emailTemplate = new EmailTemplate();
+    private final GenderRepository genderRepository;
     private final UserRepository userRepository;
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
@@ -158,42 +154,22 @@ public class AuthService {
                     .build();
 
             String url = "http://localhost:3000/confirm/";
-            String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
-            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+            String link = getLink(authResponse.token, url, "Confirmar cuenta");
 
-            String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
-                    "<div>" +
-                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
-                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
-                    "</div>" +
-                    "</div>";
-
-
-            String body = "<html>" +
-                    "<head>" +
-                    "<style>" +
-                    "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
-                    "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
-                    "a { color: #002e60; text-decoration: underline; }" +
-                    "</style>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h2>Hola, estimado usuario.</h2>" +
+            String body =
                     "<p>" +
                     "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú puedes ignorar este mensaje." +
                     "</p>" +
                     "<p>" +
                     "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
-                    "</p>" +
-                    firma +
-                    "</body>" +
-                    "</html>";
+                    "</p>";
+
+            String template = emailTemplate.getTemplate(body);
 
             emailDetails = new EmailDetails(
                     cryptoService.decrypt(userDto.getUsername()),
-                    "NoReply. Confirma tu cuenta " + " \n\n",
-                    body
+                    "NoReply. Confirma tu cuenta \n\n",
+                    template
             );
 
             emailService.sendHtmlMail(emailDetails);
@@ -235,28 +211,9 @@ public class AuthService {
                     .build();
 
             String url = "http://localhost:3000/reset-pass/";
-            String link = " <a href=\"" + url + authResponse.token + "\">Reestablecer contraseña</a> ";
-            String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+            String link = getLink(authResponse.token, url, "Reestablecer contraseña");
 
-            String firma = "<div style=\"display: flex; align-items: center;\">" +
-                    "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
-                    "<div>" +
-                    "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
-                    "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
-                    "</div>" +
-                    "</div>";
-
-
-            String body = "<html>" +
-                    "<head>" +
-                    "<style>" +
-                    "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
-                    "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
-                    "a { color: #002e60; text-decoration: underline; }" +
-                    "</style>" +
-                    "</head>" +
-                    "<body>" +
-                    "<h2>Hola, estimado usuario.</h2>" +
+            String body =
                     "<p>" +
                     "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SIOCU. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
                     "</p>" +
@@ -268,15 +225,14 @@ public class AuthService {
                     "</p>" +
                     "<p>" +
                     "Por motivos de seguridad, te recomendamos que elijas una contraseña segura que no hayas utilizado antes y que no compartas tu contraseña con nadie. Si tienes alguna pregunta o necesitas ayuda para restablecer tu contraseña, no dudes en contactarnos." +
-                    "</p>" +
-                    firma +
-                    "</body>" +
-                    "</html>";
+                    "</p>";
+
+            String template = emailTemplate.getTemplate(body);
 
             emailDetails = new EmailDetails(
                     forgotPasswordRequest.getEmail(),
-                    "NoReply. Reestablece tu contraseña " + " \n\n",
-                    body
+                    "NoReply. Reestablece tu contraseña \n\n",
+                    template
             );
             emailService.sendHtmlMail(emailDetails);
 
@@ -312,7 +268,7 @@ public class AuthService {
                         null,
                         true,
                         400,
-                        "Token inválido",
+                        "Token inválido.",
                         0
                 );
             }
@@ -374,7 +330,7 @@ public class AuthService {
                         null,
                         true,
                         403,
-                        "Token inválido",
+                        "Token inválido. Por favor, solicita un nuevo enlace de confirmación",
                         0
                 );
             }
@@ -436,42 +392,22 @@ public class AuthService {
                         .build();
 
                 String url = "http://localhost:3000/confirm/";
-                String link = " <a href=\"" + url + authResponse.token + "\">Confirmar cuenta</a> ";
-                String img = "https://res.cloudinary.com/sigsa/image/upload/v1681795223/sccul/logo/logo_ydzl8i.png";
+                String link = getLink(authResponse.token, url, "Confirmar cuenta");
 
-                String firma = "<div style=\"display: flex; align-items: center;\">" +
-                        "<img src=\"" + img + "\" alt=\"Logo Carishop\" width=\"100\" height=\"100\" style=\"margin-right: 20px;\">" +
-                        "<div>" +
-                        "<h3 style=\"font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60;\">CarsiShop</h3>" +
-                        "<p style=\"font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60;\">carsi.shop24@gmail.com</p>" +
-                        "</div>" +
-                        "</div>";
-
-
-                String body = "<html>" +
-                        "<head>" +
-                        "<style>" +
-                        "h2 { font-family: Arial, sans-serif; font-size: 24px; line-height: 1.2; color: #002e60; }" +
-                        "p { font-family: Arial, sans-serif; font-size: 16px; line-height: 1.5; color: #002e60; }" +
-                        "a { color: #002e60; text-decoration: underline; }" +
-                        "</style>" +
-                        "</head>" +
-                        "<body>" +
-                        "<h2>Hola, estimado usuario.</h2>" +
+                String body =
                         "<p>" +
                         "Hemos recibido una solicitud para activar tu cuenta. Si no has sido tú, puedes ignorar este mensaje." +
                         "</p>" +
                         "<p>" +
                         "Para activar tu cuenta, haz clic en el siguiente enlace:" + link +
-                        "</p>" +
-                        firma +
-                        "</body>" +
-                        "</html>";
+                        "</p>";
+
+                String template = emailTemplate.getTemplate(body);
 
                 emailDetails = new EmailDetails(
                         resendConfirmRequest.getEmail(),
-                        "NoReply. Confirma tu cuenta " + " \n\n",
-                        body
+                        "NoReply. Confirma tu cuenta \n\n",
+                        template
                 );
                 emailService.sendHtmlMail(emailDetails);
 
@@ -497,5 +433,9 @@ public class AuthService {
                     "Error al reenviar correo de confirmación", 0),
                     HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    private String getLink(String token, String url, String message) {
+        return " <a href=\"" + url + token + "\">"+message+"</a> ";
     }
 }

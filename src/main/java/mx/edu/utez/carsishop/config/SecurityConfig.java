@@ -2,6 +2,7 @@ package mx.edu.utez.carsishop.config;
 
 import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.jwt.JwtAuthenticationFilter;
+import mx.edu.utez.carsishop.models.user.Role;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
@@ -31,14 +32,14 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/captcha/**").permitAll()
                 .requestMatchers("/api/auth/**","/api/captcha/**").permitAll()
-                .requestMatchers("/api/address/**").hasAnyAuthority("CUSTOMER","SELLER")
-                .requestMatchers("/api/card/**","/api/order/makeOrder","/api/clothesCart/**").hasAnyAuthority("CUSTOMER")
+                .requestMatchers("/api/address/**").hasAnyAuthority(Role.CUSTOMER.name(),Role.ADMIN.name())
+                .requestMatchers("/api/card/**","/api/order/makeOrder","/api/clothesCart/**").hasAnyAuthority(Role.CUSTOMER.name(),Role.ADMIN.name())
                 .requestMatchers("/api/category/find-all","/api/subcategories/find-all").permitAll()
-                .requestMatchers("/api/category/**","/api/subcategories/**","/api/users/find-all","/api/users/register-admin").hasAnyAuthority("ADMIN")
-                .requestMatchers("/api/clothes/isAccepted","/api/sellers/find-all","/api/sellers/change-status").hasAnyAuthority("ADMIN")
+                .requestMatchers("/api/category/**","/api/subcategories/**","/api/users/find-all","/api/users/register-admin").hasAnyAuthority(Role.ADMIN.name())
+                .requestMatchers("/api/clothes/isAccepted","/api/sellers/find-all","/api/sellers/change-status").hasAnyAuthority(Role.ADMIN.name())
                 .requestMatchers("/api/clothes/find-all","/api/clothes/getOne/**","/api/clothes/getByCategory/**","/api/clothes/getByCategoryAndSubcategory/**","/api/clothes/getAllClothesOrderedByPrice").permitAll()
-                .requestMatchers("/api/images/**","/api/clothes/create","/api/clothes/update","/api/clothes/update/stock","/api/clothes/disable/**").hasAnyAuthority("SELLER")
-                .requestMatchers("/api/order/updateStatus","/api/sellers/").hasAnyAuthority("SELLER","ADMIN")
+                .requestMatchers("/api/images/**","/api/clothes/create","/api/clothes/update","/api/clothes/update/stock","/api/clothes/disable/**").hasAnyAuthority(Role.SELLER.name())
+                .requestMatchers("/api/order/updateStatus","/api/sellers/").hasAnyAuthority(Role.SELLER.name(),Role.ADMIN.name())
                 .anyRequest().authenticated()
                 )
             .sessionManagement(sessionManager->

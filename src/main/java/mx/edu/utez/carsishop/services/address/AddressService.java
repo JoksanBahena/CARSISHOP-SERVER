@@ -28,8 +28,8 @@ import java.util.Optional;
 
 @Service
 public class AddressService {
-
-    private final AddressRepository addressRepository;
+    @Autowired
+    private AddressRepository addressRepository;
 
     private final UserRepository userRepository;
 
@@ -67,8 +67,8 @@ public class AddressService {
 
         Address address= new Address();
         address.setName(cryptoService.decrypt(addressDto.getName()));
-        address.setState(this.stateRepository.findStateByName(cryptoService.decrypt(addressDto.getState())).get());
-        address.setTown(this.townRepository.findTownByName(cryptoService.decrypt(addressDto.getTown())).get());
+        address.setState(this.stateRepository.findStateByName(addressDto.getState()).get());
+        address.setTown(this.townRepository.findTownByName(addressDto.getTown()).get());
         address.setCp(cryptoService.decrypt(addressDto.getCp()));
         address.setSuburb(cryptoService.decrypt(addressDto.getSuburb()));
         address.setStreet(cryptoService.decrypt(addressDto.getStreet()));
@@ -135,9 +135,8 @@ public class AddressService {
         );
     }
 
-    @Transactional(rollbackFor = SQLException.class)
     public CustomResponse<String> delete(AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        Optional<Address> address=addressRepository.findById(Long.parseLong(cryptoService.decrypt(addressDto.getId())));
+        Optional<Address> address = this.addressRepository.findById(Long.parseLong(cryptoService.decrypt(addressDto.getId())));
         if(address.isEmpty()){
             return new CustomResponse<>(
                     null,

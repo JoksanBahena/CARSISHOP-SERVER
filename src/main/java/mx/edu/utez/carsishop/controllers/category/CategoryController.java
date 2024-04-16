@@ -24,6 +24,11 @@ public class CategoryController {
         return categoryService.findAll(paginationDto);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Object> findAll() {
+        return categoryService.findAllWithoutPagination();
+    }
+
     @PostMapping("/")
     public ResponseEntity<Object> register(@Validated({CategoryDto.Register.class}) @RequestBody CategoryDto categoryDto) {
         return categoryService.register(categoryDto);

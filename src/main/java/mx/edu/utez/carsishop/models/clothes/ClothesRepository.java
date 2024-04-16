@@ -15,13 +15,15 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     Optional<Clothes> findById(Long id);
 
     @Query(
-            value = "SELECT c.* \n" +
-                    "FROM Clothes c \n" +
-                    "JOIN Category cat ON c.category = cat.id \n" +
-                    "WHERE cat.status = 1 AND cat.name = ? \n" +
-                    "ORDER BY c.id DESC\n", nativeQuery = true
+            value = """
+            SELECT c.*
+            FROM Clothes c
+            JOIN Category cat ON c.category = cat.id
+            WHERE cat.status = 1 AND cat.name = ?1
+            ORDER BY c.id DESC
+            """, nativeQuery = true
     )
-    List<Clothes> findClothesByCategory(@Param("category") String category);
+        List<Clothes> findClothesByCategory(@Param("category") String category);
 
     @Query(
             value = "SELECT c.* FROM Clothes c JOIN Category cat ON c.category = cat.id JOIN Subcategory sub ON c.subcategory = sub.id WHERE cat.status = 1 AND cat.name = :category AND sub.name = :subcategory ORDER BY desc", nativeQuery = true
