@@ -22,35 +22,42 @@ import java.util.List;
 @RequestMapping("/api/card")
 @CrossOrigin(origins = {"*"})
 public class CardController {
+
+    private static final  String MSG_ERROR = "No se pudo acceder al token";
+    private static final String BEARER = "Bearer ";
+    private final CardService cardService;
+
     @Autowired
-    private CardService cardService;
+    public CardController(CardService cardService) {
+        this.cardService = cardService;
+    }
 
     @PostMapping("/register")
     public ResponseEntity<CustomResponse<Card>> insertCard(@Validated({CardDto.Register.class}) @RequestBody CardDto cardDto,@RequestHeader("Authorization") String authorizationHeader) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER)) {
             String jwtToken = authorizationHeader.substring(7);
             return cardService.register(cardDto.castToCardtoInsert(), jwtToken);
         } else {
-            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"No se pudo acceder al token",1));
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400, MSG_ERROR,1));
         }
     }
 
     @PutMapping("/update")
     public ResponseEntity<CustomResponse<Card>> updateCard(@Validated({CardDto.Update.class}) @RequestBody CardDto cardDto,@RequestHeader("Authorization") String authorizationHeader) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER)) {
             String jwtToken = authorizationHeader.substring(7);
             return cardService.update(cardDto.castToCardtoUpdate(), jwtToken);
         } else {
-            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"No se pudo acceder al token",1));
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400, MSG_ERROR,1));
         }
     }
     @GetMapping("/get")
     public ResponseEntity<CustomResponse<List<Card>>> getCard(@RequestHeader("Authorization") String authorizationHeader) {
-        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER)) {
             String jwtToken = authorizationHeader.substring(7);
             return cardService.getCardsByUser(jwtToken);
         } else {
-            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"No se pudo acceder al token",1));
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400, MSG_ERROR,1));
         }
     }
 

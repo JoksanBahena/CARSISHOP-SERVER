@@ -15,13 +15,17 @@ import java.util.Map;
 
 @Service
 public class CaptchaService {
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
 
     @Value("${FRIENDLYCAPTCHA.CAPTCHAKEY}")
     private String captchaKey;
     @Value("${FRIENDLYCAPTCHA.SITEKEY}")
     private String siteKey;
+
+    @Autowired
+    public CaptchaService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public CaptchaResponse verifyCaptcha(String solution) {
         String url = "https://api.friendlycaptcha.com/api/v1/siteverify";

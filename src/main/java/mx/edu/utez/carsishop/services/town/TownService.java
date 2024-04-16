@@ -11,8 +11,12 @@ import java.util.List;
 
 @Service
 public class TownService {
+    private final TownRepository townRepository;
+
     @Autowired
-    private TownRepository townRepository;
+    public TownService(TownRepository townRepository) {
+        this.townRepository = townRepository;
+    }
 
     @Transactional(readOnly = true)
     public CustomResponse<List<Town>> findAll(){

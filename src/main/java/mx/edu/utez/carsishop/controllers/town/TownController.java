@@ -17,8 +17,12 @@ import java.util.List;
 @RequestMapping("/api/town")
 @CrossOrigin({"*"})
 public class TownController {
+    private final TownService townService;
+
     @Autowired
-    private TownService townService;
+    public TownController(TownService townService) {
+        this.townService = townService;
+    }
 
     @GetMapping("/findAll")
     public ResponseEntity<CustomResponse<List<Town>>> findAll(){

@@ -9,8 +9,12 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin({"*"})
 @RequestMapping("/api/captcha")
 public class CaptchaController {
+    private final CaptchaService captchaService;
+
     @Autowired
-    private CaptchaService captchaService;
+    public CaptchaController(CaptchaService captchaService) {
+        this.captchaService = captchaService;
+    }
 
     @PostMapping("/verifyCaptcha")
     public CaptchaResponse verifyCaptcha(@RequestParam("solution") String solution) {

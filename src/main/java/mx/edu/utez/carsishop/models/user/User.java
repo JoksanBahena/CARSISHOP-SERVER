@@ -12,7 +12,7 @@ import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.models.gender.Gender;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.sellers.Seller;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

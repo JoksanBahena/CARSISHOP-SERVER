@@ -1,4 +1,4 @@
-package mx.edu.utez.carsishop.models.clothesCart;
+package mx.edu.utez.carsishop.models.clothes_cart;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -6,10 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import mx.edu.utez.carsishop.models.clothes.Clothes;
-import mx.edu.utez.carsishop.models.shoppingCart.ShoppingCart;
+import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.models.size.Size;
-
-import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
