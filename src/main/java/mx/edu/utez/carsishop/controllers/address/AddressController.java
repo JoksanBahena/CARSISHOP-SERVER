@@ -60,9 +60,8 @@ public class AddressController {
         return new ResponseEntity<>(addressService.update(updatedAddress,idLong), HttpStatus.OK);
     }
 
-    @DeleteMapping("/delete")
+    @PostMapping("/delete")
     public ResponseEntity<CustomResponse<String>> delete(@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{
-
         return new ResponseEntity<>(addressService.delete(addressDto), HttpStatus.OK);
     }
 
