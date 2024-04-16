@@ -59,6 +59,7 @@ public class User implements UserDetails {
     private Seller seller;
 
     @OneToMany(mappedBy = "user")
+    @JsonIgnore
     private List<Card> cards;
 
     @OneToMany(mappedBy = "user")

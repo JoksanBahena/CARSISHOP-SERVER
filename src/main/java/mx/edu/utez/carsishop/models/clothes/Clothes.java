@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.models.clothes;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -42,6 +43,7 @@ public class Clothes {
 
     @ManyToOne
     @JoinColumn(name = "seller")
+    @JsonIgnoreProperties({"user"})
     private Seller seller;
 
     @ManyToOne
