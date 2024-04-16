@@ -35,13 +35,17 @@ public class AddressService {
 
     private final OrderRepository orderRepository;
     private final JwtService jwtService;
+    private final StateRepository stateRepository;
+    private final TownRepository townRepository;
 
     @Autowired
-    public AddressService(AddressRepository addressRepository, UserRepository userRepository, OrderRepository orderRepository, JwtService jwtService) {
+    public AddressService(AddressRepository addressRepository, UserRepository userRepository, OrderRepository orderRepository, JwtService jwtService, StateRepository stateRepository, TownRepository townRepository) {
         this.addressRepository = addressRepository;
         this.userRepository = userRepository;
         this.orderRepository = orderRepository;
         this.jwtService = jwtService;
+        this.stateRepository = stateRepository;
+        this.townRepository = townRepository;
     }
 
 

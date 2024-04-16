@@ -3,6 +3,7 @@ package mx.edu.utez.carsishop.controllers.address;
 import mx.edu.utez.carsishop.models.address.Address;
 import mx.edu.utez.carsishop.services.address.AddressService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
