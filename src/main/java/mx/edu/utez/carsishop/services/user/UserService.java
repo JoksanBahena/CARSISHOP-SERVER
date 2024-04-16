@@ -37,6 +37,8 @@ public class UserService {
     private final JwtService jwtService;
     private CryptoService cryptoService = new CryptoService();
 
+    private static final String USERNAME = "username";
+
     @Autowired
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, GenderRepository genderRepository, JwtService jwtService) {
         this.userRepository = userRepository;
@@ -117,8 +119,8 @@ public class UserService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado y paginación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (!Arrays.asList("name", "surname", "username", "role").contains(paginationDto.getPaginationType().getFilter()) ||
-                !Arrays.asList("user_name", "user_surname", "username", "role").contains(paginationDto.getPaginationType().getSortBy())) {
+        if (!Arrays.asList("name", "surname", USERNAME, "role").contains(paginationDto.getPaginationType().getFilter()) ||
+                !Arrays.asList("user_name", "user_surname", USERNAME, "role").contains(paginationDto.getPaginationType().getSortBy())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
@@ -133,7 +135,7 @@ public class UserService {
         Map<String, Function<PaginationDto, List<User>>> queryMap = new HashMap<>();
         queryMap.put("name", this::findAllByNamePagination);
         queryMap.put("surname", this::findAllBySurnamePagination);
-        queryMap.put("username", this::findAllByUsernamePagination);
+        queryMap.put(USERNAME, this::findAllByUsernamePagination);
         queryMap.put("role", this::findAllByRolePagination);
         return queryMap;
     }

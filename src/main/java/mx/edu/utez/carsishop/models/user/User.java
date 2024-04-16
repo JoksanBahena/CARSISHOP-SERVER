@@ -43,9 +43,7 @@ public class User implements UserDetails {
     @Column(name = "status", columnDefinition = "boolean default true")
     private boolean status;
 
-    // NOSONAR
     @ManyToOne
-    @JoinColumn(name="gender")
     private Gender gender;
 
     @Column(name = "password",nullable = false)
@@ -55,27 +53,22 @@ public class User implements UserDetails {
     @Column(name = "profilepic")
     private String profilepic;
 
-    // NOSONAR
     @OneToOne(mappedBy = "user")
     @JsonIgnoreProperties("user")
     private Seller seller;
 
-    // NOSONAR
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Card> cards;
 
-    // NOSONAR
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Address> addresses;
 
-    // NOSONAR
     @OneToMany(mappedBy = "user")
     @JsonIgnore
     private List<Order> orders;
 
-    // NOSONAR
     @OneToOne(mappedBy = "user")
     private ShoppingCart shoppingCart;
 

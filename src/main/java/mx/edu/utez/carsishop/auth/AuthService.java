@@ -33,7 +33,6 @@ import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
 @Service
-@RequiredArgsConstructor
 public class AuthService {
     private final CryptoService cryptoService = new CryptoService();
     private final EmailTemplate emailTemplate = new EmailTemplate();
@@ -44,6 +43,16 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final EmailService emailService;
     EmailDetails emailDetails;
+
+    @Autowired
+    public AuthService(GenderRepository genderRepository, UserRepository userRepository, JwtService jwtService, PasswordEncoder passwordEncoder, AuthenticationManager authenticationManager, EmailService emailService) {
+        this.genderRepository = genderRepository;
+        this.userRepository = userRepository;
+        this.jwtService = jwtService;
+        this.passwordEncoder = passwordEncoder;
+        this.authenticationManager = authenticationManager;
+        this.emailService = emailService;
+    }
 
     public ResponseEntity<Object> login(LoginRequest request) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException  {
         request.setEmail(cryptoService.decrypt(request.getEmail()));

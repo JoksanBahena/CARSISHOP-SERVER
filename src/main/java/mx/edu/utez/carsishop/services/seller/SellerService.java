@@ -37,6 +37,9 @@ public class SellerService {
     private static final String PENDING = "PENDING";
     private static final String REJECTED = "REJECTED";
     private static final String APPROVED = "APPROVED";
+    private static final String REQUEST_STATUS = "request_status";
+    private static final String USER_NAME = "user_name";
+    private static final String USER_SURNAME = "user_surname";
     private final UserRepository userRepository;
 
     private final SellerRepository sellerRepository;
@@ -77,9 +80,9 @@ public class SellerService {
 
         if (!(paginationDto.getPaginationType().getFilter().equals("curp") && paginationDto.getPaginationType().getSortBy().equals("curp")) &&
                 !(paginationDto.getPaginationType().getFilter().equals("rfc") && paginationDto.getPaginationType().getSortBy().equals("rfc")) &&
-                !(paginationDto.getPaginationType().getFilter().equals("request_status") && paginationDto.getPaginationType().getSortBy().equals("request_status")) &&
-                !(paginationDto.getPaginationType().getFilter().equals("user_name") && paginationDto.getPaginationType().getSortBy().equals("user_name")) &&
-                !(paginationDto.getPaginationType().getFilter().equals("user_surname") && paginationDto.getPaginationType().getSortBy().equals("user_surname"))) {
+                !(paginationDto.getPaginationType().getFilter().equals(REQUEST_STATUS) && paginationDto.getPaginationType().getSortBy().equals(REQUEST_STATUS)) &&
+                !(paginationDto.getPaginationType().getFilter().equals(USER_NAME) && paginationDto.getPaginationType().getSortBy().equals(USER_NAME)) &&
+                !(paginationDto.getPaginationType().getFilter().equals(USER_SURNAME) && paginationDto.getPaginationType().getSortBy().equals(USER_SURNAME))) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado u ordenación proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
         }
 
@@ -94,9 +97,9 @@ public class SellerService {
         Map<String, Function<PaginationDto, List<Seller>>> queryMap = new HashMap<>();
         queryMap.put("curp", this::findAllByCurpPagination);
         queryMap.put("rfc", this::findAllByRfcPagination);
-        queryMap.put("request_status", this::findAllByRequestStatusPagination);
-        queryMap.put("user_name", this::findAllByUserNamePagination);
-        queryMap.put("user_surname", this::findAllByUserSurnamePagination);
+        queryMap.put(REQUEST_STATUS, this::findAllByRequestStatusPagination);
+        queryMap.put(USER_NAME, this::findAllByUserNamePagination);
+        queryMap.put(USER_SURNAME, this::findAllByUserSurnamePagination);
         return queryMap;
     }
 

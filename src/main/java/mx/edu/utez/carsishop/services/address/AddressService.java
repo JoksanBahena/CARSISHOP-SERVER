@@ -28,8 +28,7 @@ import java.util.Optional;
 
 @Service
 public class AddressService {
-    @Autowired
-    private AddressRepository addressRepository;
+    private final AddressRepository addressRepository;
 
     private final UserRepository userRepository;
 

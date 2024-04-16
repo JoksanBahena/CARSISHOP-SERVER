@@ -1,7 +1,5 @@
 package mx.edu.utez.carsishop.controllers.card;
 
-import jakarta.persistence.Entity;
-import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.services.card.CardService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
