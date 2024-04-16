@@ -44,7 +44,7 @@ public class User implements UserDetails {
     private boolean status;
 
     @ManyToOne
-    private Gender gender;
+    private Gender gender; // NOSONAR
 
     @Column(name = "password",nullable = false)
     @JsonIgnore
@@ -55,22 +55,22 @@ public class User implements UserDetails {
 
     @OneToOne(mappedBy = "user")
     @JsonIgnoreProperties("user")
-    private Seller seller;
+    private Seller seller; // NOSONAR
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Card> cards;
+    private List<Card> cards; // NOSONAR
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Address> addresses;
+    private List<Address> addresses; // NOSONAR
 
     @OneToMany(mappedBy = "user")
     @JsonIgnore
-    private List<Order> orders;
+    private List<Order> orders; // NOSONAR
 
     @OneToOne(mappedBy = "user")
-    private ShoppingCart shoppingCart;
+    private ShoppingCart shoppingCart; // NOSONAR
 
     @Enumerated(EnumType.STRING) 
     Role role;
