@@ -64,6 +64,12 @@ public class SubcategoryService {
         return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de subcategorias obtenida correctamente.", count), HttpStatus.OK);
     }
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<Object> findAllWithoutPagination() {
+        List<Subcategory> list = subcategoryRepository.findAll();
+        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de subcategorias obtenida correctamente.", list.size()), HttpStatus.OK);
+    }
+
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<Object> register(SubcategoryDto dto) {
 

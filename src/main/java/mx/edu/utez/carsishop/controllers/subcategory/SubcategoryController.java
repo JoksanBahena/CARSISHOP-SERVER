@@ -25,6 +25,11 @@ public class SubcategoryController {
         return subcategoryService.findAll(paginationDto);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<Object> findAll() {
+        return subcategoryService.findAllWithoutPagination();
+    }
+
     @PostMapping("/")
     public ResponseEntity<Object> register(@Validated({SubcategoryDto.Register.class}) @RequestBody SubcategoryDto subcategoryDto) {
         return subcategoryService.register(subcategoryDto);

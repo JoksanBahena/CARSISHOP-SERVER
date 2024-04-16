@@ -62,6 +62,12 @@ public class CategoryService {
         return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
     }
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<Object> findAllWithoutPagination() {
+        List<Category> list = categoryRepository.findAll();
+        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", list.size()), HttpStatus.OK);
+    }
+
     @Transactional(rollbackFor = {SQLException.class})
     public ResponseEntity<Object> register(CategoryDto dto) {
 
