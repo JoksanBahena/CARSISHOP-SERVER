@@ -83,7 +83,7 @@ public class UserService {
         user.setGender(gender.get());
         user.setBirthdate(userDto.getBirthdate());
         user.setRole(Role.ADMIN);
-        user.setStatus(false);
+        user.setStatus(true);
 
         user = this.userRepository.save(user);
 
