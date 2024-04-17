@@ -44,7 +44,7 @@ public class OrderController {
     }
 
     @PostMapping("/getOrders")
-    public ResponseEntity<CustomResponse<List<Order>>> getOrders(@RequestHeader("Authorization") String authorizationHeader) {
+    public ResponseEntity<CustomResponse<Order>> getOrders(@RequestHeader("Authorization") String authorizationHeader) {
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwtToken = authorizationHeader.substring(7);
             return ResponseEntity.ok(orderService.getOrders(jwtToken));
