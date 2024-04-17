@@ -40,6 +40,12 @@ public class AddressController {
 
         }
     }
+    @PostMapping("/getById")
+    public ResponseEntity<CustomResponse<Address>> getById(@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+
+            return new ResponseEntity<>(addressService.getById(addressDto.getId()), HttpStatus.OK);
+
+    }
 
     @PostMapping("/register")
     public ResponseEntity<CustomResponse<Address>> register(@RequestHeader("Authorization") String authorizationHeader, @Validated({AddressDto.Register.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {

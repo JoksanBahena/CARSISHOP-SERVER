@@ -178,4 +178,23 @@ public class AddressService {
     }
 
 
+    public CustomResponse<Address> getById(String id) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<Address> address = this.addressRepository.findById(Long.parseLong(cryptoService.decrypt(id)));
+        if(address.isEmpty()){
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "La dirección no se encuentra registrada en el sistema",
+                    0
+            );
+        }
+        return new CustomResponse<>(
+                address.get(),
+                false,
+                200,
+                "OK",
+                1
+        );
+    }
 }
