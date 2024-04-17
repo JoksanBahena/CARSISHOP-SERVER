@@ -93,7 +93,7 @@ public class UserService {
     }
 
     @Transactional(readOnly = true)
-    public ResponseEntity<Object> findAll(PaginationDto paginationDto) {
+    public ResponseEntity<Object> findAll(PaginationDto paginationDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         ResponseEntity<Object> validationResponse = validatePaginationDto(paginationDto);
         if (validationResponse != null) {
             return validationResponse;
@@ -108,6 +108,13 @@ public class UserService {
         paginationDto.setValue("%" + paginationDto.getValue() + "%");
         int count = userRepository.searchCount();
         List<User> list = queryFunction.apply(paginationDto);
+        for (User user : list) {
+            user.setName(cryptoService.encrypt(user.getName()));
+            user.setSurname(cryptoService.encrypt(user.getSurname()));
+            user.setUsername(cryptoService.encrypt(user.getUsername()));
+            user.setPhone(cryptoService.encrypt(user.getPhone()));
+            user.setBirthdate(cryptoService.encrypt(user.getBirthdate()));
+        }
 
         return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de categorías obtenida correctamente.", count), HttpStatus.OK);
     }
