@@ -10,7 +10,6 @@ import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -163,4 +162,34 @@ public class CardService {
         ));
     }
 
+    public ResponseEntity<CustomResponse<Card>> getCardById(CardDto cardDto, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<User> user=userRepository.findByUsername(jwtService.getUsernameFromToken(jwtToken));
+        if(user.isEmpty()){
+            return ResponseEntity.status(401).body(new CustomResponse<>(
+                    null,
+                    true,
+                    401,
+                    USER_NOT_FOUND,
+                    0
+            ));
+        }
+        Optional<Card> cardOptional = cardRepository.findByIdAndUser(Long.parseLong(cryptoService.decrypt(cardDto.getId())),user.get());
+        if(cardOptional.isEmpty()){
+            return ResponseEntity.status(404).body(new CustomResponse<>(
+                    null,
+                    true,
+                    404,
+                    CARD_NOT_FOUND,
+                    0
+            ));
+        }
+
+        return ResponseEntity.ok(new CustomResponse<>(
+                cardOptional.get(),
+                false,
+                200,
+                "OK",
+                1
+        ));
+    }
 }
