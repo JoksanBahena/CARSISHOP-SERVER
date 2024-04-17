@@ -14,11 +14,11 @@ import mx.edu.utez.carsishop.models.size.Size;
 @Getter
 public class ClothesCartDto {
 
-    @NotNull
+    @NotNull(message = "El id de la prenda es obligatorio")
     private Clothes cloth;
-    @NotNull
+    @NotNull(message = "La cantidad es obligatoria")
     private int amount;
-    @NotNull
+    @NotNull(message = "El tamaño es obligatorio")
     private Size size;
 
 

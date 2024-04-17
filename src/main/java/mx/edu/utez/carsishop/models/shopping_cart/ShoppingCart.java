@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.shopping_cart;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -23,6 +24,7 @@ public class ShoppingCart {
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "user",referencedColumnName = "id")
+    @JsonIgnoreProperties({"shoppingCart"})
     private User user;
 
     @OneToMany(mappedBy = "shoppingCart")

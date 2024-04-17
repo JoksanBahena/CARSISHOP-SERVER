@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.clothes_cart;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class ClothesCart {
 
     @ManyToOne
     @JoinColumn(name = "shoppingCart")
+    @JsonIgnore
     private ShoppingCart shoppingCart;
 
     @ManyToOne

@@ -43,7 +43,6 @@ public class Clothes {
 
     @ManyToOne
     @JoinColumn(name = "seller")
-    @JsonIgnoreProperties({"user"})
     private Seller seller;
 
     @ManyToOne
