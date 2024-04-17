@@ -73,7 +73,7 @@ public class AuthService {
             return new ResponseEntity<>(new CustomResponse<>(
                     null,
                     true,
-                    400,
+                    401,
                     "Contraseña incorrecta", 0),
                     HttpStatus.BAD_REQUEST);
         }

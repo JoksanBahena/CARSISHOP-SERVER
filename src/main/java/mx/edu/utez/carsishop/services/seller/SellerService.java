@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.services.seller;
 
+import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.sellers.SellerRepository;
 import mx.edu.utez.carsishop.models.sellers.dtos.SellerDto;
@@ -43,12 +44,14 @@ public class SellerService {
     private final UserRepository userRepository;
 
     private final SellerRepository sellerRepository;
+    private final JwtService jwtService;
     private CryptoService cryptoService = new CryptoService();
 
     @Autowired
-    public SellerService(UserRepository userRepository, SellerRepository sellerRepository) {
+    public SellerService(UserRepository userRepository, SellerRepository sellerRepository, JwtService jwtService) {
         this.userRepository = userRepository;
         this.sellerRepository = sellerRepository;
+        this.jwtService = jwtService;
     }
 
     @Transactional(readOnly = true)
@@ -135,7 +138,8 @@ public class SellerService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<Object> register(SellerDto seller) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<Object> register(SellerDto seller, String jwtToken) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String username= jwtService.getUsernameFromToken(jwtToken);
         seller.setRfc(cryptoService.decrypt(seller.getRfc()));
         seller.setCurp(cryptoService.decrypt(seller.getCurp()));
         if (this.sellerRepository.existsByCurp(seller.getCurp())) {
@@ -145,7 +149,7 @@ public class SellerService {
         if (this.sellerRepository.existsByRfc(seller.getRfc())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
-        Optional<User> user = this.userRepository.findByUsername(seller.getUser().getUsername());
+        Optional<User> user = this.userRepository.findByUsername(username);
         if (user.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
         }
@@ -175,7 +179,7 @@ public class SellerService {
             Seller sellerToSave = new Seller();
             sellerToSave.setCurp(seller.getCurp());
             sellerToSave.setRfc(seller.getRfc());
-            sellerToSave.setUser(seller.getUser());
+            sellerToSave.setUser(user.get());
             sellerToSave.setImage(urlImage);
             sellerToSave.setStatus(true);
             sellerToSave.setRequest_status(PENDING);
@@ -192,7 +196,8 @@ public class SellerService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<Object> update(SellerDto seller) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<Object> update(SellerDto seller, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        String username= jwtService.getUsernameFromToken(jwtToken);
 
         Optional<Seller> sellerOptional = this.sellerRepository.findById(seller.getId());
 
@@ -213,8 +218,8 @@ public class SellerService {
         if (!seller.getRequest_status().equals(APPROVED) && !seller.getRequest_status().equals(REJECTED) && !seller.getRequest_status().equals(PENDING)) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido", 0), HttpStatus.BAD_REQUEST);
         }
-
-        if (!this.userRepository.existsById(seller.getUser().getId())) {
+        Optional<User> useropt = this.userRepository.findByUsername(username);
+        if (useropt.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró este usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
@@ -222,16 +227,15 @@ public class SellerService {
         sellerToUpdate.setCurp(cryptoService.decrypt( seller.getCurp()));
         sellerToUpdate.setRfc(cryptoService.decrypt(seller.getRfc()));
         sellerToUpdate.setRequest_status(seller.getRequest_status());
-        sellerToUpdate.setUser(seller.getUser());
+        sellerToUpdate.setUser(useropt.get());
 
         sellerToUpdate = this.sellerRepository.save(sellerToUpdate);
 
-        Optional<User> optionalUser = this.userRepository.findById(sellerToUpdate.getUser().getId());
-        if (optionalUser.isEmpty()) {
+        if (useropt.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
-        User user = optionalUser.get();
+        User user = useropt.get();
 
         if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);

@@ -3,8 +3,10 @@ package mx.edu.utez.carsishop.controllers.seller;
 
 import mx.edu.utez.carsishop.models.sellers.dtos.SellerDto;
 import mx.edu.utez.carsishop.services.seller.SellerService;
+import mx.edu.utez.carsishop.utils.CustomResponse;
 import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -35,13 +37,25 @@ public class SellerController {
     }
 
     @PostMapping("/")
-    public ResponseEntity<Object> register(@Validated({SellerDto.Register.class}) @ModelAttribute SellerDto sellerDto) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        return sellerService.register(sellerDto);
+    public ResponseEntity<Object> register(@RequestHeader("Authorization") String authorizationHeader,@Validated({SellerDto.Register.class}) @ModelAttribute SellerDto sellerDto) throws IOException, InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return sellerService.register(sellerDto,jwtToken);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PutMapping("/")
-    public ResponseEntity<Object> update(@Validated({SellerDto.Update.class}) @ModelAttribute SellerDto sellerDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        return sellerService.update(sellerDto);
+    public ResponseEntity<Object> update(@RequestHeader("Authorization") String authorizationHeader,@Validated({SellerDto.Update.class}) @ModelAttribute SellerDto sellerDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return sellerService.update(sellerDto,jwtToken);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+
+        }
     }
 
     @PutMapping("/change-status")
