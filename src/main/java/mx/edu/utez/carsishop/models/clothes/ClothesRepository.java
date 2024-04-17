@@ -49,5 +49,7 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     @Query(value = "SELECT c FROM Clothes c JOIN Category cat ON c.category.id = cat.id WHERE UPPER(cat.name) LIKE UPPER(?1) AND UPPER(c.request_status) LIKE UPPER(?2)")
     List<Clothes> findAllByCategoryAndRequestStatusPagination(String category, String requestStatus);
 
+    List<Clothes> findAllBySellerId(Long id);
+
 
 }
