@@ -292,5 +292,11 @@ public class ClothesService {
 
     }
 
+    @Transactional(readOnly = true)
+    public ResponseEntity<Object> findAllBySeller(ClothesDto clothesDto) {
+        List<Clothes> clothes = clothesRepository.findAllBySellerId(clothesDto.getSellerId());
+        return new ResponseEntity<>(new CustomResponse<>(clothes, false, HttpStatus.OK.value(), "Lista de productos obtenida correctamente.", clothes.size()), HttpStatus.OK);
+    }
+
 
 }

@@ -58,6 +58,16 @@ public class CardController {
             return ResponseEntity.ok(new CustomResponse<>(null,true,400, MSG_ERROR,1));
         }
     }
+    @PostMapping("/getById")
+    public ResponseEntity<CustomResponse<Card>> getCardByID(@RequestHeader("Authorization") String authorizationHeader,@Validated({CardDto.Delete.class}) @RequestBody CardDto cardDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith(BEARER)) {
+            String jwtToken = authorizationHeader.substring(7);
+            return cardService.getCardById(cardDto, jwtToken);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400, MSG_ERROR,1));
+        }
+
+    }
 
     @PostMapping("/delete")
     public ResponseEntity<CustomResponse<String>> delete(@Validated({CardDto.Delete.class}) @RequestBody CardDto cardDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException{

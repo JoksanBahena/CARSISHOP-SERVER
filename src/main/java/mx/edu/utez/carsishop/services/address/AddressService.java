@@ -14,7 +14,6 @@ import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import javax.crypto.BadPaddingException;
 import javax.crypto.IllegalBlockSizeException;
@@ -22,7 +21,6 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Optional;
 
@@ -178,4 +176,36 @@ public class AddressService {
     }
 
 
+    public CustomResponse<Address> getById(String id, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        Optional<User> user=userRepository.findByUsername(jwtService.getUsernameFromToken(jwtToken));
+        if(user.isEmpty()){
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "Usuario no encontrado",
+                    0
+            );
+        }
+        Optional<Address> address = this.addressRepository.findByIdAndUser(Long.parseLong(cryptoService.decrypt(id)),user.get());
+
+        if(address.isEmpty()){
+            return new CustomResponse<>(
+                    null,
+                    true,
+                    400,
+                    "La dirección no se encuentra registrada en el sistema",
+                    0
+            );
+        }
+
+        address.get().encryptData();
+        return new CustomResponse<>(
+                address.get(),
+                false,
+                200,
+                "OK",
+                1
+        );
+    }
 }

@@ -33,6 +33,8 @@ public class ClothesDto {
     private Subcategory subcategory;
     @NotNull(groups = {ChangeIsAccepted.class}, message = "El estado es obligatorio")
     private String request_status;
+    @NotNull(groups = {FindAllBySeller.class}, message = "El id del vendedor es obligatorio")
+    private long sellerId;
 
 
     public Clothes castToClothes(){
@@ -53,4 +55,6 @@ public class ClothesDto {
     public interface FindAllByCategoryAndName{
 
     }
+
+    public interface FindAllBySeller{}
 }

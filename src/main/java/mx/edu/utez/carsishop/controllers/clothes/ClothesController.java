@@ -86,4 +86,9 @@ public class ClothesController {
         return clothesService.findAllByNameAndRequestStatus(clothesDto);
     }
 
+    @PostMapping("/findAllBySeller")
+    public ResponseEntity<Object> findAllBySeller(@Validated({ClothesDto.FindAllBySeller.class}) @RequestBody ClothesDto clothesDto) {
+        return clothesService.findAllBySeller(clothesDto);
+    }
+
 }

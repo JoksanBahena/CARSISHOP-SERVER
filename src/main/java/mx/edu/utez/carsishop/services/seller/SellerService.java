@@ -8,6 +8,7 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.*;
+import org.checkerframework.checker.nullness.Opt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -25,10 +26,7 @@ import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
@@ -149,9 +147,25 @@ public class SellerService {
         if (this.sellerRepository.existsByRfc(seller.getRfc())) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
+
+        Optional<User> userJwt = this.userRepository.findByUsername(username);
+
         Optional<User> user = this.userRepository.findByUsername(username);
+
         if (user.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (userJwt.isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario del token registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (!Objects.equals(userJwt.get().getId(), user.get().getId())) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No puedes registrar un vendedor para otro usuario", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (user.get().getRole().equals(Role.SELLER)) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No puedes registrar un vendedor si ya eres un vendedor", 0), HttpStatus.BAD_REQUEST);
         }
 
         Optional<Seller> sellerPending = this.sellerRepository.findSellerPending(user.get().getId());
@@ -199,6 +213,10 @@ public class SellerService {
     public ResponseEntity<Object> update(SellerDto seller, String jwtToken) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         String username= jwtService.getUsernameFromToken(jwtToken);
 
+        if (seller.getId() == null) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El id del vendedor no puede ser nulo", 0), HttpStatus.BAD_REQUEST);
+        }
+
         Optional<Seller> sellerOptional = this.sellerRepository.findById(seller.getId());
 
         seller.setRequest_status(seller.getRequest_status().toUpperCase());
@@ -218,36 +236,45 @@ public class SellerService {
         if (!seller.getRequest_status().equals(APPROVED) && !seller.getRequest_status().equals(REJECTED) && !seller.getRequest_status().equals(PENDING)) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido", 0), HttpStatus.BAD_REQUEST);
         }
-        Optional<User> useropt = this.userRepository.findByUsername(username);
-        if (useropt.isEmpty()) {
+        Optional<User> userJwt = this.userRepository.findByUsername(username);
+        Optional<User> userOpt = this.userRepository.findById(sellerOptional.get().getUser().getId());
+
+        if (userOpt.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró este usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (userJwt.isEmpty()) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario del token registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        if (userJwt.get().getRole() != Role.ADMIN) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No tienes permisos para realizar esta acción", 0), HttpStatus.BAD_REQUEST);
         }
 
         Seller sellerToUpdate = sellerOptional.get();
         sellerToUpdate.setCurp(cryptoService.decrypt( seller.getCurp()));
         sellerToUpdate.setRfc(cryptoService.decrypt(seller.getRfc()));
         sellerToUpdate.setRequest_status(seller.getRequest_status());
-        sellerToUpdate.setUser(useropt.get());
+        sellerToUpdate.setUser(userOpt.get());
 
         sellerToUpdate = this.sellerRepository.save(sellerToUpdate);
 
-        if (useropt.isEmpty()) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
-        }
-
-        User user = useropt.get();
+        User user = userOpt.get();
 
         if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
+            return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor aprovado correctamente", 1), HttpStatus.OK);
         }
 
         if (seller.getRequest_status().equals(REJECTED) || seller.getRequest_status().equals(PENDING)) {
             user.setRole(Role.CUSTOMER);
             this.userRepository.save(user);
+            return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor rechazo correctamente", 1), HttpStatus.OK);
         }
 
-        return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor actualizado correctamente", 1), HttpStatus.OK);
+        return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "Error al actualizar el vendedor", 0), HttpStatus.BAD_REQUEST);
+
     }
 
     public ResponseEntity<Object> changeStatus(SellerDto seller) {

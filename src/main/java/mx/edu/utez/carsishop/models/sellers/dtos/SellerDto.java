@@ -25,7 +25,6 @@ public class SellerDto {
     @NotNull(groups = {Register.class}, message = "La imagen del vendedor no puede ser nula.")
     private MultipartFile image;
 
-
     public interface Register {
     }
 
