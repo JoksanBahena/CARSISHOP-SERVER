@@ -148,13 +148,9 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El RFC ya se encuentra registrado en el sistema", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (seller.getUser().getId() == null) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El id del usuario no puede ser nulo", 0), HttpStatus.BAD_REQUEST);
-        }
-
         Optional<User> userJwt = this.userRepository.findByUsername(username);
 
-        Optional<User> user = this.userRepository.findById(seller.getUser().getId());
+        Optional<User> user = this.userRepository.findByUsername(username);
 
         if (user.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
@@ -221,10 +217,6 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El id del vendedor no puede ser nulo", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (seller.getUser().getId() == null) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El id del usuario del vendedor no puede ser nulo", 0), HttpStatus.BAD_REQUEST);
-        }
-
         Optional<Seller> sellerOptional = this.sellerRepository.findById(seller.getId());
 
         seller.setRequest_status(seller.getRequest_status().toUpperCase());
@@ -245,7 +237,7 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "El estatus de la solicitud es inválido", 0), HttpStatus.BAD_REQUEST);
         }
         Optional<User> userJwt = this.userRepository.findByUsername(username);
-        Optional<User> userOpt = this.userRepository.findById(seller.getUser().getId());
+        Optional<User> userOpt = this.userRepository.findById(sellerOptional.get().getUser().getId());
 
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró este usuario registrado dentro del sistema", 0), HttpStatus.BAD_REQUEST);
@@ -255,8 +247,8 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario del token registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (!Objects.equals(userJwt.get().getId(), userOpt.get().getId())) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No puedes actualizar un vendedor para otro usuario", 0), HttpStatus.BAD_REQUEST);
+        if (userJwt.get().getRole() != Role.ADMIN) {
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No tienes permisos para realizar esta acción", 0), HttpStatus.BAD_REQUEST);
         }
 
         Seller sellerToUpdate = sellerOptional.get();
