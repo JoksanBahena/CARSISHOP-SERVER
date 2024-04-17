@@ -247,10 +247,6 @@ public class SellerService {
             return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No se encontró al usuario del token registrado dentro del sistema.", 0), HttpStatus.BAD_REQUEST);
         }
 
-        if (userJwt.get().getRole() != Role.ADMIN) {
-            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "No tienes permisos para realizar esta acción", 0), HttpStatus.BAD_REQUEST);
-        }
-
         Seller sellerToUpdate = sellerOptional.get();
         sellerToUpdate.setCurp(cryptoService.decrypt( seller.getCurp()));
         sellerToUpdate.setRfc(cryptoService.decrypt(seller.getRfc()));

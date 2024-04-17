@@ -45,11 +45,12 @@ public class InitialScript implements CommandLineRunner {
     @Override
     public void run(String... args)  {
 
+        // User creation
         Optional<User> userExist = userRepository.findByUsername("admin@gmail.com");
         if (!userExist.isPresent()) {
             User user = User.builder()
                     .username("admin@gmail.com")
-                    .password(passwordEncoder.encode( adminPassword))
+                    .password(passwordEncoder.encode(adminPassword))
                     .name("admin")
                     .surname("admin valverde")
                     .phone("1234567890")
@@ -61,122 +62,66 @@ public class InitialScript implements CommandLineRunner {
             userRepository.saveAndFlush(user);
         }
 
-        //Gender
-        Gender gender = new Gender();
-        Optional<Gender> genderExist;
+        // Gender
+        saveGender("Masculino");
+        saveGender("Femenino");
+        saveGender("Otro");
 
-        genderExist = genderRepository.findByGender("Masculino");
-        if (!genderExist.isPresent()) {
-            gender.setGender("Masculino");
-            gender.setId(1);
+        // Size
+        saveSize("S");
+        saveSize("M");
+        saveSize("L");
+        saveSize("XL");
+        saveSize("XXL");
+
+        // Category
+        saveCategory("Hombre");
+        saveCategory("Mujer");
+        saveCategory("Niño");
+
+        // Subcategory
+        saveSubcategory("Top");
+        saveSubcategory("Bottom");
+        saveSubcategory("Shoes");
+        saveSubcategory("Accesories");
+    }
+
+    private void saveGender(String genderName) {
+        Optional<Gender> genderExist = genderRepository.findByGender(genderName);
+        if (genderExist.isEmpty()) {
+            Gender gender = new Gender();
+            gender.setGender(genderName);
             genderRepository.saveAndFlush(gender);
         }
+    }
 
-        genderExist = genderRepository.findByGender("Femenino");
-        if (!genderExist.isPresent()){
-            gender.setGender("Femenino");
-            gender.setId(2);
-            genderRepository.saveAndFlush(gender);
-        }
-
-        genderExist = genderRepository.findByGender("Otro");
-        if (!genderExist.isPresent()) {
-            gender.setGender("Otro");
-            gender.setId(3);
-            genderRepository.saveAndFlush(gender);
-        }
-
-        //Size
-        Size size = new Size();
-        Optional<Size> sizeExist;
-        sizeExist = sizeRepository.findByName("S");
-        if (!sizeExist.isPresent()) {
-            size.setName("S");
+    private void saveSize(String sizeName) {
+        Optional<Size> sizeExist = sizeRepository.findByName(sizeName);
+        if (sizeExist.isEmpty()) {
+            Size size = new Size();
+            size.setName(sizeName);
             sizeRepository.saveAndFlush(size);
         }
+    }
 
-        sizeExist = sizeRepository.findByName("M");
-        if (!sizeExist.isPresent()) {
-            size.setName("M");
-            sizeRepository.saveAndFlush(size);
-        }
-
-        sizeExist = sizeRepository.findByName("L");
-        if (!sizeExist.isPresent()) {
-            size.setName("L");
-            sizeRepository.saveAndFlush(size);
-        }
-
-        sizeExist = sizeRepository.findByName("XL");
-        if (!sizeExist.isPresent()) {
-            size.setName("XL");
-            sizeRepository.saveAndFlush(size);
-        }
-
-        sizeExist = sizeRepository.findByName("XXL");
-        if (!sizeExist.isPresent()) {
-            size.setName("XXL");
-            sizeRepository.saveAndFlush(size);
-        }
-
-        //Category
-        Category category = new Category();
-        Optional<Category> categoryExist;
-
-        categoryExist = categoryRepository.findByName("Hombre");
-        if (!categoryExist.isPresent()) {
-            category.setStatus(true);
-            category.setName("Hombre");
-            categoryRepository.saveAndFlush(category);
-        }
-
-        categoryExist = categoryRepository.findByName("Mujer");
-        if (!categoryExist.isPresent()) {
-            category.setStatus(true);
-            category.setName("Mujer");
-            categoryRepository.saveAndFlush(category);
-        }
-
-        categoryExist = categoryRepository.findByName("Niño");
-        if (!categoryExist.isPresent()) {
-            category.setName("Niño");
+    private void saveCategory(String categoryName) {
+        Optional<Category> categoryExist = categoryRepository.findByName(categoryName);
+        if (categoryExist.isEmpty()) {
+            Category category = new Category();
+            category.setName(categoryName);
             category.setStatus(true);
             categoryRepository.saveAndFlush(category);
         }
+    }
 
-        //Subcategory
-        Subcategory subcategory = new Subcategory();
-        Optional<Subcategory> subcategoryExist;
-
-        subcategoryExist = subcaregoryRepository.findByName("Top");
-        if (!subcategoryExist.isPresent()) {
-            subcategory.setName("Top");
+    private void saveSubcategory(String subcategoryName) {
+        Optional<Subcategory> subcategoryExist = subcaregoryRepository.findByName(subcategoryName);
+        if (subcategoryExist.isEmpty()) {
+            Subcategory subcategory = new Subcategory();
+            subcategory.setName(subcategoryName);
             subcategory.setStatus(true);
             subcaregoryRepository.saveAndFlush(subcategory);
         }
-
-        subcategoryExist = subcaregoryRepository.findByName("Bottom");
-        if (!subcategoryExist.isPresent()) {
-            subcategory.setName("Bottom");
-            subcategory.setStatus(true);
-            subcaregoryRepository.saveAndFlush(subcategory);
-        }
-
-        subcategoryExist = subcaregoryRepository.findByName("Shoes");
-        if (!subcategoryExist.isPresent()) {
-            subcategory.setStatus(true);
-            subcategory.setName("Shoes");
-            subcaregoryRepository.saveAndFlush(subcategory);
-        }
-
-        subcategoryExist = subcaregoryRepository.findByName("Accesories");
-        if (!subcategoryExist.isPresent()) {
-            subcategory.setStatus(true);
-            subcategory.setName("Accesories");
-            subcaregoryRepository.saveAndFlush(subcategory);
-        }
-
-
     }
 
 }
