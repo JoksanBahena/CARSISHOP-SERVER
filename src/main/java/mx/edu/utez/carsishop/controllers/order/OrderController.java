@@ -14,6 +14,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/order")
@@ -40,6 +41,16 @@ public class OrderController {
     @PostMapping("/updateStatus")
     public ResponseEntity<CustomResponse<Order>> updateStatus(@Valid @RequestBody OrderUpdateStatusDto order) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return ResponseEntity.ok(orderService.updateStatus(order));
+    }
+
+    @PostMapping("/getOrders")
+    public ResponseEntity<CustomResponse<List<Order>>> getOrders(@RequestHeader("Authorization") String authorizationHeader) {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return ResponseEntity.ok(orderService.getOrders(jwtToken));
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
+        }
     }
 
 
