@@ -41,9 +41,14 @@ public class AddressController {
         }
     }
     @PostMapping("/getById")
-    public ResponseEntity<CustomResponse<Address>> getById(@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<CustomResponse<Address>> getById(@RequestHeader("Authorization") String authorizationHeader,@Validated({AddressDto.Delete.class}) @RequestBody AddressDto addressDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+        if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+            String jwtToken = authorizationHeader.substring(7);
+            return new ResponseEntity<>(addressService.getById(addressDto.getId(),jwtToken), HttpStatus.OK);
+        } else {
+            return ResponseEntity.ok(new CustomResponse<>(null,true,400,"Error al obtener el token",1));
 
-            return new ResponseEntity<>(addressService.getById(addressDto.getId()), HttpStatus.OK);
+        }
 
     }
 
