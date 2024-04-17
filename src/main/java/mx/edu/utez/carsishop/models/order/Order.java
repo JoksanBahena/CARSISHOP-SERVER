@@ -31,13 +31,14 @@ public class Order {
 
     @ManyToOne
     @JoinColumn(name = "card")
-    @JsonIgnoreProperties({"user","owner","cvv","expirationDate"})
+    @JsonIgnoreProperties({"user","number","cvv","expirationDate"})
     private Card card;
 
     @ManyToOne
     @JoinColumn(name = "user")
     @JsonIgnore
     private User user;
+
     @ManyToOne
     @JoinColumn(name = "address")
     private Address address;
@@ -57,5 +58,4 @@ public class Order {
         CANCELED,
         RETURNED
     }
-
 }

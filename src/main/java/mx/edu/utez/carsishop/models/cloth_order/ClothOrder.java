@@ -1,5 +1,6 @@
 package mx.edu.utez.carsishop.models.cloth_order;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,6 +23,7 @@ public class ClothOrder {
 
     @ManyToOne
     @JoinColumn(name = "theorder")
+    @JsonIgnore
     private Order theorder;
 
     @ManyToOne

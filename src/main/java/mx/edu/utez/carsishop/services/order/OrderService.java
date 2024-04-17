@@ -118,13 +118,13 @@ public class OrderService {
         return new CustomResponse<>(order.get(),false,200,"Pedido actualizado", 1);
     }
 
-    public CustomResponse<List<Order>> getOrders(String jwtToken) {
+    public CustomResponse<Order> getOrders(String jwtToken) {
         String username=jwtService.getUsernameFromToken(jwtToken);
         Optional<User> user=userRepository.findByUsername(username);
         if(user.isEmpty()){
             return new CustomResponse<>(null,true,400,"Usuario no encontrado", 0);
         }
-        List<Order> orders = orderRepository.findByUser(user.get());
-        return new CustomResponse<>(orders,false,200,"Pedidos encontrados", orders.size());
+        Order order = orderRepository.findByUser(user.get().getId());
+        return new CustomResponse<>(order,false,200,"Pedidos encontrados", 1);
     }
 }
