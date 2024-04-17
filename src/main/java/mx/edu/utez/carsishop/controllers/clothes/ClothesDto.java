@@ -19,7 +19,7 @@ import java.util.List;
 public class ClothesDto {
     @NotNull(groups = {ChangeIsAccepted.class}, message = "El id es obligatorio")
     private long id;
-    @NotNull(message = "El nombre es obligatorio")
+    @NotNull(groups = {FindAllByCategoryAndName.class}, message = "El nombre es obligatorio")
     private String name;
     @NotNull(message = "La descripción es obligatoria")
     private String description;
@@ -27,7 +27,7 @@ public class ClothesDto {
     private List<Stock> stock;
     @NotNull(message = "El email del vendedor es obligatorio")
     private String sellerEmail;
-    @NotNull(message = "La talla es obligatoria")
+    @NotNull(groups = {FindAllByCategoryAndName.class}, message = "La talla es obligatoria")
     private Category category;
     @NotNull(message = "La subcategoría es obligatoria")
     private Subcategory subcategory;
@@ -47,6 +47,10 @@ public class ClothesDto {
     }
 
     public interface ChangeIsAccepted{
+
+    }
+
+    public interface FindAllByCategoryAndName{
 
     }
 }

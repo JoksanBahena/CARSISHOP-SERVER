@@ -64,15 +64,25 @@ public class InitialScript implements CommandLineRunner {
         //Gender
         Gender gender = new Gender();
         Optional<Gender> genderExist;
+
         genderExist = genderRepository.findByGender("Masculino");
         if (!genderExist.isPresent()) {
             gender.setGender("Masculino");
+            gender.setId(1);
             genderRepository.saveAndFlush(gender);
         }
 
         genderExist = genderRepository.findByGender("Femenino");
         if (!genderExist.isPresent()){
             gender.setGender("Femenino");
+            gender.setId(2);
+            genderRepository.saveAndFlush(gender);
+        }
+
+        genderExist = genderRepository.findByGender("Otro");
+        if (!genderExist.isPresent()) {
+            gender.setGender("Otro");
+            gender.setId(3);
             genderRepository.saveAndFlush(gender);
         }
 

@@ -44,4 +44,10 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
     //isAccepted
     @Query(value = "SELECT c FROM Clothes c WHERE UPPER(c.request_status) LIKE UPPER(?1)")
     List<Clothes> findAllByRequestStatusPagination(String value, Pageable offset);
+
+    //findAllByCategoryAndRequestStatus
+    @Query(value = "SELECT c FROM Clothes c JOIN Category cat ON c.category.id = cat.id WHERE UPPER(cat.name) LIKE UPPER(?1) AND UPPER(c.request_status) LIKE UPPER(?2)")
+    List<Clothes> findAllByCategoryAndRequestStatusPagination(String category, String requestStatus);
+
+
 }

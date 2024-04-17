@@ -39,7 +39,7 @@ public class SecurityConfig {
                 .requestMatchers("/api/clothes/isAccepted","/api/sellers/find-all","/api/sellers/change-status").hasAnyAuthority(Role.ADMIN.name())
                 .requestMatchers("/api/clothes/find-all","/api/clothes/getOne/**","/api/clothes/getByCategory/**","/api/clothes/getByCategoryAndSubcategory/**","/api/clothes/getAllClothesOrderedByPrice").permitAll()
                 .requestMatchers("/api/images/**","/api/clothes/create","/api/clothes/update","/api/clothes/update/stock","/api/clothes/disable/**").hasAnyAuthority(Role.SELLER.name())
-                .requestMatchers("/api/order/updateStatus","/api/sellers/").hasAnyAuthority(Role.SELLER.name(),Role.ADMIN.name())
+                .requestMatchers("/api/order/updateStatus","/api/sellers/").hasAnyAuthority(Role.SELLER.name(),Role.CUSTOMER.name(),Role.ADMIN.name())
                   .requestMatchers("api/categories/all","/api/subcategories/all").hasAnyAuthority(Role.ADMIN.name(), Role.SELLER.name(), Role.CUSTOMER.name())
                   .anyRequest().authenticated()
                 )

@@ -274,6 +274,23 @@ public class ClothesService {
         return new ResponseEntity<>(new CustomResponse<>(clothes.get(), false, HttpStatus.OK.value(), message, 1), HttpStatus.OK);
 
     }
+    @Transactional(readOnly = true)
+    public ResponseEntity<Object> findAllByNameAndRequestStatus (ClothesDto clothesDto) {
+
+        if (clothesDto.getName() == null || clothesDto.getName().isEmpty() || clothesDto.getRequest_status() == null || clothesDto.getRequest_status().isEmpty())
+            return new ResponseEntity<>(new CustomResponse<>(null, true, HttpStatus.BAD_REQUEST.value(), "Los datos de filtrado proporcionados son inválidos. Por favor, verifica y envía la solicitud nuevamente.", 0), HttpStatus.BAD_REQUEST);
+
+        clothesDto.setName("%" + clothesDto.getName() + "%");
+        clothesDto.setRequest_status(clothesDto.getRequest_status().toUpperCase());
+
+        List<Clothes> list = clothesRepository.findAllByCategoryAndRequestStatusPagination(
+                clothesDto.getName(),
+                clothesDto.getRequest_status()
+        );
+
+        return new ResponseEntity<>(new CustomResponse<>(list, false, HttpStatus.OK.value(), "Lista de productos obtenida correctamente.", list.size()), HttpStatus.OK);
+
+    }
 
 
 }
