@@ -9,9 +9,11 @@ import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
 import mx.edu.utez.carsishop.models.cloth_order.ClothOrder;
 import mx.edu.utez.carsishop.models.cloth_order.ClothOrderRepository;
+import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
+import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCartRepository;
 import mx.edu.utez.carsishop.models.user.User;
@@ -19,6 +21,8 @@ import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -28,10 +32,7 @@ import javax.crypto.NoSuchPaddingException;
 import java.security.InvalidAlgorithmParameterException;
 import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class OrderService {
@@ -126,5 +127,31 @@ public class OrderService {
         }
         Order order = orderRepository.findByUser(user.get().getId());
         return new CustomResponse<>(order,false,200,"Pedidos encontrados", 1);
+    }
+
+    @Transactional(readOnly = true)
+    public ResponseEntity<Object> getOrdersBySeller(){
+        List<Order> allOrders = orderRepository.findAll(); // Obtener todas las órdenes
+
+        Map<Seller, List<Order>> salesBySeller = new HashMap<>(); // Mapa para almacenar las ventas por vendedor
+
+        for (Order order : allOrders) {
+            List<ClothOrder> clothOrders = order.getClothOrders(); // Obtener la lista de órdenes de ropa de cada orden
+
+            for (ClothOrder clothOrder : clothOrders) {
+                // Obtener la prenda asociada a la orden de ropa
+                Clothes clothes = clothOrder.getClothes();
+
+                // Obtener el vendedor de la prenda
+                Seller seller = clothes.getSeller(); // Suponiendo que hay un método "getSeller()" en el modelo Clothes
+
+                // Agregar la orden a la lista correspondiente al vendedor en el mapa
+                List<Order> sales = salesBySeller.getOrDefault(seller, new ArrayList<>());
+                sales.add(order);
+                salesBySeller.put(seller, sales);
+            }
+        }
+
+        return new ResponseEntity<>(new CustomResponse<>(salesBySeller, false, HttpStatus.OK.value(), "Ventas por vendedor obtenidas correctamente.", salesBySeller.size()), HttpStatus.OK);
     }
 }

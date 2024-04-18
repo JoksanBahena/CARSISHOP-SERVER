@@ -53,6 +53,9 @@ public class OrderController {
         }
     }
 
-
+    @GetMapping("/getOrdersBySeller")
+    public ResponseEntity<Object> getOrdersBySeller(){
+        return orderService.getOrdersBySeller();
+    }
 
 }
