@@ -55,9 +55,9 @@ public class SellerService {
 
     @Value("${TWILIO_ACCOUNT_SID}")
     String sid;
-    @Value("${TWILIO_AUTH_TOKEN}")
+    @Value("${TWILIO_ACCOUNT_TOKEN}")
     String tokenTw;
-    @Value("${TWILIO_NUMBER}")
+    @Value("${TWILIO_ACCOUNT_PHONE}")
     String phoneNumber;
 
     @Autowired
@@ -276,12 +276,25 @@ public class SellerService {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
 
+            Twilio.init(sid, tokenTw);
+
+            Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
+                    new PhoneNumber(phoneNumber),
+                    "Hola "+user.getName()+" "+user.getSurname()+", tu solicitud de vendedor ha sido aprobada, ahora puedes vender en nuestra plataforma"
+            ).create();
+
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor aprovado correctamente", 1), HttpStatus.OK);
         }
 
         if (seller.getRequest_status().equals(REJECTED) || seller.getRequest_status().equals(PENDING)) {
             user.setRole(Role.CUSTOMER);
             this.userRepository.save(user);
+            Twilio.init(sid, tokenTw);
+
+            Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
+                    new PhoneNumber(phoneNumber),
+                    "Hola "+user.getName()+" "+user.getSurname()+", tu solicitud de vendedor ha sido rechazada"
+            ).create();
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor rechazo correctamente", 1), HttpStatus.OK);
         }
 
