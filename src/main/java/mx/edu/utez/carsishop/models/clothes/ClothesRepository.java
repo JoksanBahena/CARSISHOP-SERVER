@@ -19,7 +19,7 @@ public interface ClothesRepository extends JpaRepository<Clothes, Long> {
             SELECT c.*
             FROM Clothes c
             JOIN Category cat ON c.category = cat.id
-            WHERE cat.status = 1 AND cat.name = ?1
+            WHERE cat.status = 1 AND cat.name = ?1 AND c.request_status = 'APPROVED'
             ORDER BY c.id DESC
             """, nativeQuery = true
     )
