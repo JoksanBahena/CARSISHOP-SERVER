@@ -68,11 +68,11 @@ public class InitialScript implements CommandLineRunner {
         saveGender("Otro");
 
         // Size
+        saveSize("XS");
         saveSize("S");
         saveSize("M");
         saveSize("L");
         saveSize("XL");
-        saveSize("XXL");
 
         // Category
         saveCategory("Hombre");
@@ -81,9 +81,9 @@ public class InitialScript implements CommandLineRunner {
 
         // Subcategory
         saveSubcategory("Top");
-        saveSubcategory("Bottom");
-        saveSubcategory("Shoes");
-        saveSubcategory("Accesories");
+        saveSubcategory("Camisa");
+        saveSubcategory("Chamarra");
+        saveSubcategory("Accesorios");
     }
 
     private void saveGender(String genderName) {

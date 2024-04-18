@@ -1,5 +1,9 @@
 package mx.edu.utez.carsishop.services.seller;
 
+import com.twilio.Twilio;
+import com.twilio.rest.api.v2010.account.Message;
+import com.twilio.type.PhoneNumber;
+import lombok.AllArgsConstructor;
 import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.models.sellers.Seller;
 import mx.edu.utez.carsishop.models.sellers.SellerRepository;
@@ -8,8 +12,9 @@ import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.*;
-import org.checkerframework.checker.nullness.Opt;
+import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -30,6 +35,7 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+@AllArgsConstructor
 @Service
 public class SellerService {
 
@@ -44,6 +50,15 @@ public class SellerService {
     private final SellerRepository sellerRepository;
     private final JwtService jwtService;
     private CryptoService cryptoService = new CryptoService();
+
+    private final Logger logger = org.slf4j.LoggerFactory.getLogger(SellerService.class);
+
+    @Value("${TWILIO_ACCOUNT_SID}")
+    String sid;
+    @Value("${TWILIO_AUTH_TOKEN}")
+    String tokenTw;
+    @Value("${TWILIO_NUMBER}")
+    String phoneNumber;
 
     @Autowired
     public SellerService(UserRepository userRepository, SellerRepository sellerRepository, JwtService jwtService) {
@@ -260,6 +275,7 @@ public class SellerService {
         if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
+
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor aprovado correctamente", 1), HttpStatus.OK);
         }
 

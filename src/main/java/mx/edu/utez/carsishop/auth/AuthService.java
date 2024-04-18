@@ -219,12 +219,12 @@ public class AuthService {
                     .token(jwtService.getToken(user))
                     .build();
 
-            String url = "http://localhost:3000/reset-pass/";
+            String url = "http://localhost:3000/reset-password/";
             String link = getLink(authResponse.token, url, "Reestablecer contraseña");
 
             String body =
                     "<p>" +
-                    "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en SIOCU. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
+                    "Hemos recibido una solicitud para restablecer la contraseña de tu cuenta en CarsiShop. Si no has solicitado el restablecimiento de contraseña, puedes ignorar este mensaje." +
                     "</p>" +
                     "<p>" +
                     "Para restablecer tu contraseña, haz clic en el siguiente enlace:" + link +
