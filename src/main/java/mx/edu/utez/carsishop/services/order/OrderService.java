@@ -9,11 +9,15 @@ import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.models.card.CardRepository;
 import mx.edu.utez.carsishop.models.cloth_order.ClothOrder;
 import mx.edu.utez.carsishop.models.cloth_order.ClothOrderRepository;
+import mx.edu.utez.carsishop.models.clothes.Clothes;
 import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
+import mx.edu.utez.carsishop.models.clothes_cart.ClothesCartRepository;
 import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.models.order.OrderRepository;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCartRepository;
+import mx.edu.utez.carsishop.models.stock.Stock;
+import mx.edu.utez.carsishop.models.stock.StockRepository;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CryptoService;
@@ -51,8 +55,12 @@ public class OrderService {
 
     private final CryptoService cryptoService = new CryptoService();
 
+    private final StockRepository stockRepository;
+
+    private final ClothesCartRepository clothesCartRepository;
+
     @Autowired
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, CardRepository cardRepository, AddressRepository addressRepository, ShoppingCartRepository shoppingCartRepository, ClothOrderRepository clothOrderRepository, JwtService jwtService) {
+    public OrderService(OrderRepository orderRepository, UserRepository userRepository, CardRepository cardRepository, AddressRepository addressRepository, ShoppingCartRepository shoppingCartRepository, ClothOrderRepository clothOrderRepository, JwtService jwtService, StockRepository stockRepository, ClothesCartRepository clothesCartRepository) {
         this.orderRepository = orderRepository;
         this.userRepository = userRepository;
         this.cardRepository = cardRepository;
@@ -60,6 +68,8 @@ public class OrderService {
         this.shoppingCartRepository = shoppingCartRepository;
         this.clothOrderRepository = clothOrderRepository;
         this.jwtService = jwtService;
+        this.stockRepository = stockRepository;
+        this.clothesCartRepository = clothesCartRepository;
     }
 
 
@@ -72,7 +82,6 @@ public class OrderService {
         if(user.isEmpty()){
             return new CustomResponse<>(null,true,400,"Usuario no encontrado", 0);
         }
-
 
         Optional<Card> card = cardRepository.findById((Long.parseLong(request.getCard())));
         if(card.isEmpty()){
@@ -94,15 +103,33 @@ public class OrderService {
         order= orderRepository.save(order);
         List<ClothesCart> clothesCarts = shoppingCart.get().getClothesCarts();
         List<ClothOrder> clothOrders = new ArrayList<>();
+        List<Stock> postStock = new ArrayList<>();
         for (ClothesCart clothesCart: clothesCarts) {
             ClothOrder clothOrder = new ClothOrder();
-            clothOrder.setClothes(clothesCart.getClothes());
+            Clothes clothes= clothesCart.getClothes();
+            int amount = clothesCart.getAmount();
+            for (Stock stock: clothes.getStock()) {
+                if(stock.getSize().equals(clothesCart.getSize())){
+                    if(stock.getQuantity()<amount){
+                        return new CustomResponse<>(null,true,400,"No hay suficiente stock para tu compra", 0);
+
+                    }else{
+                        stock.setQuantity(stock.getQuantity()-amount);
+                        postStock.add(stock);
+                    }
+                    break;
+                }
+            }
+            clothOrder.setClothes(clothes);
             clothOrder.setAmount(clothesCart.getAmount());
             clothOrder.setSize(clothesCart.getSize());
             clothOrder.setTheorder(order);
             clothOrders.add(clothOrder);
+            clothesCartRepository.delete(clothesCart);
         }
+        stockRepository.saveAll(postStock);
         clothOrderRepository.saveAll(clothOrders);
+
         return new CustomResponse<>(order,false,200,"Pedido Realizado", 1);
     }
     @Transactional(rollbackFor = Exception.class)
