@@ -1,8 +1,5 @@
 package mx.edu.utez.carsishop.services.seller;
 
-import com.twilio.Twilio;
-import com.twilio.rest.api.v2010.account.Message;
-import com.twilio.type.PhoneNumber;
 import lombok.AllArgsConstructor;
 import mx.edu.utez.carsishop.jwt.JwtService;
 import mx.edu.utez.carsishop.models.sellers.Seller;
@@ -11,10 +8,10 @@ import mx.edu.utez.carsishop.models.sellers.dtos.SellerDto;
 import mx.edu.utez.carsishop.models.user.Role;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
+import mx.edu.utez.carsishop.services.twilio.TwilioService;
 import mx.edu.utez.carsishop.utils.*;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -46,6 +43,7 @@ public class SellerService {
     private static final String USER_NAME = "user_name";
     private static final String USER_SURNAME = "user_surname";
     private final UserRepository userRepository;
+    private final TwilioService twilioService;
 
     private final SellerRepository sellerRepository;
     private final JwtService jwtService;
@@ -53,16 +51,10 @@ public class SellerService {
 
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(SellerService.class);
 
-    @Value("${TWILIO_ACCOUNT_SID}")
-    String sid;
-    @Value("${TWILIO_ACCOUNT_TOKEN}")
-    String tokenTw;
-    @Value("${TWILIO_ACCOUNT_PHONE}")
-    String phoneNumber;
-
     @Autowired
-    public SellerService(UserRepository userRepository, SellerRepository sellerRepository, JwtService jwtService) {
+    public SellerService(UserRepository userRepository, TwilioService twilioService, SellerRepository sellerRepository, JwtService jwtService) {
         this.userRepository = userRepository;
+        this.twilioService = twilioService;
         this.sellerRepository = sellerRepository;
         this.jwtService = jwtService;
     }
@@ -275,13 +267,7 @@ public class SellerService {
         if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
-
-            Twilio.init(sid, tokenTw);
-
-            Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
-                    new PhoneNumber(phoneNumber),
-                    "Hola "+user.getName()+" "+user.getSurname()+", tu solicitud de vendedor ha sido aprobada, ahora puedes vender en nuestra plataforma"
-            ).create();
+            twilioService.sendSMS("Se ha aceptado tu solicitud, ahora eres un vendedor en Carsishop");
 
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor aprovado correctamente", 1), HttpStatus.OK);
         }
@@ -289,12 +275,7 @@ public class SellerService {
         if (seller.getRequest_status().equals(REJECTED) || seller.getRequest_status().equals(PENDING)) {
             user.setRole(Role.CUSTOMER);
             this.userRepository.save(user);
-            Twilio.init(sid, tokenTw);
-
-            Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
-                    new PhoneNumber(phoneNumber),
-                    "Hola "+user.getName()+" "+user.getSurname()+", tu solicitud de vendedor ha sido rechazada"
-            ).create();
+            twilioService.sendSMS("Se ha rechazado tu solicitud de vendedor en Carsishop");
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor rechazo correctamente", 1), HttpStatus.OK);
         }
 
