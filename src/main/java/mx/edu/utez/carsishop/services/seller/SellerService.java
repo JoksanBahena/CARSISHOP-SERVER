@@ -267,7 +267,12 @@ public class SellerService {
         if (seller.getRequest_status().equals(APPROVED)) {
             user.setRole(Role.SELLER);
             this.userRepository.save(user);
-            twilioService.sendSMS("Se ha aceptado tu solicitud, ahora eres un vendedor en Carsishop");
+            try {
+                twilioService.sendSMS("Se ha aceptado tu solicitud, ahora eres un vendedor en Carsishop");
+
+            }catch (Exception e){
+                logger.error("Error al enviar mensaje de aprobación", e);
+            }
 
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor aprovado correctamente", 1), HttpStatus.OK);
         }
@@ -275,7 +280,11 @@ public class SellerService {
         if (seller.getRequest_status().equals(REJECTED) || seller.getRequest_status().equals(PENDING)) {
             user.setRole(Role.CUSTOMER);
             this.userRepository.save(user);
-            twilioService.sendSMS("Se ha rechazado tu solicitud de vendedor en Carsishop");
+            try {
+                twilioService.sendSMS("Se ha rechazado tu solicitud de vendedor en Carsishop");
+
+            }catch (Exception e){
+                logger.error("Error al enviar mensaje de rechazo", e);}
             return new ResponseEntity<>(new CustomResponse<>(sellerToUpdate, false, 200, "Vendedor rechazo correctamente", 1), HttpStatus.OK);
         }
 
