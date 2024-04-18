@@ -1,10 +1,12 @@
 package mx.edu.utez.carsishop.controllers.clothes_cart;
+import mx.edu.utez.carsishop.controllers.card.CardDto;
 import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.services.clothes_cart.ClothesCartService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -33,7 +35,7 @@ public class ClothesCartController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<CustomResponse<ClothesCart>> addClothesCart(@RequestHeader("Authorization") String authorizationHeader,@RequestBody ClothesCartDto request){
+    public ResponseEntity<CustomResponse<ClothesCart>> addClothesCart(@RequestHeader("Authorization") String authorizationHeader,@Validated({ClothesCartDto.Register.class})@RequestBody ClothesCartDto request){
         if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
             String jwtToken = authorizationHeader.substring(7);
 
@@ -44,13 +46,13 @@ public class ClothesCartController {
         }
     }
 
-    @DeleteMapping("/delete")
-    public ResponseEntity<CustomResponse<String>> deleteClothesCart(@RequestBody Long id){
-        return ResponseEntity.ok(clothesCartService.deleteClothesCart(id));
+    @PostMapping("/delete")
+    public ResponseEntity<CustomResponse<String>> deleteClothesCart(@Validated({ClothesCartDto.Delete.class})@RequestBody ClothesCartDto request){
+        return ResponseEntity.ok(clothesCartService.deleteClothesCart(request));
     }
 
-    @PutMapping("/update/{id}/{amount}")
-    public ResponseEntity<CustomResponse<ClothesCart>> updateClothesCart(@PathVariable Long id, @PathVariable int amount){
-        return ResponseEntity.ok(clothesCartService.updateClothesCart(id, amount));
+    @PostMapping("/update")
+    public ResponseEntity<CustomResponse<ClothesCart>> updateClothesCart(@Validated({ClothesCartDto.Update.class}) @RequestBody ClothesCartDto request){
+        return ResponseEntity.ok(clothesCartService.updateClothesCart(request));
     }
 }

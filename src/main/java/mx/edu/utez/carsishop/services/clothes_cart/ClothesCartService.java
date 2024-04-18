@@ -8,20 +8,14 @@ import mx.edu.utez.carsishop.models.clothes_cart.ClothesCart;
 import mx.edu.utez.carsishop.models.clothes_cart.ClothesCartRepository;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCartRepository;
+import mx.edu.utez.carsishop.models.stock.Stock;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
-import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.crypto.BadPaddingException;
-import javax.crypto.IllegalBlockSizeException;
-import javax.crypto.NoSuchPaddingException;
-import java.security.InvalidAlgorithmParameterException;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.Optional;
 
 @Service
@@ -62,13 +56,19 @@ public class ClothesCartService {
         if (user.isPresent()){
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());
             ClothesCart clothesCart=new ClothesCart();
-            clothesCart.setAmount(request.getAmount());
 
             Optional<Clothes> clothes=clothesRepository.findById(request.getCloth().getId());
             if (!clothes.isPresent()){
                 return new CustomResponse<>(null,true,400,"Prenda no encontrada", 0);
             }
-
+            for (Stock stock:clothes.get().getStock()){
+                if (stock.getSize().equals(request.getSize())){
+                    if (stock.getQuantity()<request.getAmount()){
+                        return new CustomResponse<>(null,true,400,"No hay suficiente stock", 0);
+                    }
+                }
+            }
+            clothesCart.setAmount(request.getAmount());
             clothesCart.setClothes(request.getCloth());
             if(shoppingCart.isPresent()){
                 clothesCart.setShoppingCart(shoppingCart.get());
@@ -85,7 +85,8 @@ public class ClothesCartService {
     }
 
     @Transactional(rollbackFor = Exception.class)
-    public CustomResponse<String> deleteClothesCart(Long id) {
+    public CustomResponse<String> deleteClothesCart(ClothesCartDto clothesCartDto) {
+        long id = clothesCartDto.getId();
         Optional<ClothesCart> clothesCart=clothesCartRepository.findById(id);
         if (clothesCart.isPresent()){
             clothesCartRepository.deleteById(id);
@@ -94,7 +95,9 @@ public class ClothesCartService {
         return new CustomResponse<>(null,true,400,"Carrito no encontrado", 0);
     }
     @Transactional(rollbackFor = Exception.class)
-    public CustomResponse<ClothesCart> updateClothesCart(Long id, int amount) {
+    public CustomResponse<ClothesCart> updateClothesCart(ClothesCartDto request) {
+        Long id=request.getId();
+        int amount=request.getAmount();
         Optional<ClothesCart> clothesCart=clothesCartRepository.findById(id);
         if (clothesCart.isPresent()){
             clothesCart.get().setAmount(amount);

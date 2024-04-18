@@ -70,6 +70,7 @@ public class User implements UserDetails {
     private List<Order> orders; // NOSONAR
 
     @OneToOne(mappedBy = "user")
+    @JsonIgnore
     private ShoppingCart shoppingCart; // NOSONAR
 
     @Enumerated(EnumType.STRING) 
