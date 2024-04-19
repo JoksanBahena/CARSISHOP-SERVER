@@ -107,7 +107,8 @@ public class CardService {
 
     @Transactional(rollbackFor = Exception.class)
     public ResponseEntity<CustomResponse<String>> delete(CardDto cardDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
-        Optional<Card> cardOptional = cardRepository.findById(Long.parseLong(cryptoService.decrypt(cardDto.getId())));
+        long id = Long.parseLong(cryptoService.decrypt(cardDto.getId()));
+        Optional<Card> cardOptional = cardRepository.findById(id);
         if(cardOptional.isEmpty()){
             return ResponseEntity.status(404).body(new CustomResponse<>(
                     null,
@@ -117,18 +118,7 @@ public class CardService {
                     0
             ));
         }
-        Optional<Order> order=orderRepository.findByCard(cardOptional.get());
-        if (order.isPresent()){
-            cardOptional.get().setEnable(false);
-            cardRepository.save(cardOptional.get());
-            return ResponseEntity.status(400).body(new CustomResponse<>(
-                    null,
-                    true,
-                    400,
-                    "Tarjeta inabilitada por que tiene ordenes asociadas",
-                    0
-            ));
-        }
+
         cardRepository.delete(cardOptional.get());
         return ResponseEntity.ok(new CustomResponse<>(
                 "Tarjeta eliminada Correctamente",

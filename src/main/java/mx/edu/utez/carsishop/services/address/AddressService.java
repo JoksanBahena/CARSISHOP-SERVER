@@ -152,8 +152,7 @@ public class AddressService {
                     0
             );
         }
-        Optional<Order> order=orderRepository.findByAddress(address.get());
-        if(order.isEmpty()){
+
             addressRepository.delete(address.get());
             return new CustomResponse<>(
                     "Dirección eliminada correctamente",
@@ -162,17 +161,7 @@ public class AddressService {
                     "OK",
                     0
             );
-        }else{
-            address.get().setEnable(false);
-            addressRepository.save(address.get());
-            return new CustomResponse<>(
-                    "Una orden esta asociada a esta dirección, no se puede eliminar",
-                    true,
-                    400,
-                    "Error al eliminar la dirección",
-                    0
-            );
-        }
+
     }
 
 
