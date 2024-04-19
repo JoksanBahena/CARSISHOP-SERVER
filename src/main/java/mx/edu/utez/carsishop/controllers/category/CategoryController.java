@@ -4,12 +4,13 @@ import mx.edu.utez.carsishop.models.category.dtos.CategoryDto;
 import mx.edu.utez.carsishop.services.category.CategoryService;
 import mx.edu.utez.carsishop.utils.PaginationDto;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping(path = "/api/categories")
+@RequestMapping(path = "/api/categories", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = {"*"}, methods = {RequestMethod.POST, RequestMethod.GET, RequestMethod.PUT})
 public class CategoryController {
     private final CategoryService categoryService;

@@ -5,12 +5,13 @@ import mx.edu.utez.carsishop.models.shopping_cart.ShoppingCart;
 import mx.edu.utez.carsishop.services.clothes_cart.ClothesCartService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/clothesCart")
+@RequestMapping(path="/api/clothesCart", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin({"*"})
 public class ClothesCartController {
 
