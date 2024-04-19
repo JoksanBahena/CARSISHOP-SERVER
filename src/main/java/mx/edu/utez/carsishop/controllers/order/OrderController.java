@@ -7,6 +7,7 @@ import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.crypto.BadPaddingException;
@@ -57,6 +58,11 @@ public class OrderController {
     @GetMapping("/getOrdersBySeller")
     public ResponseEntity<Object> getOrdersBySeller(){
         return orderService.getOrdersBySeller();
+    }
+
+    @PostMapping("/confirm-order")
+    public ResponseEntity<Object> confirmOrder(@Validated({OrderDto.PayOrder.class}) @RequestBody OrderDto orderDto){
+        return orderService.confirmOrder(orderDto);
     }
 
 }

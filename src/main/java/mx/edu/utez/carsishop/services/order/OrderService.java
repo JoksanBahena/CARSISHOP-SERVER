@@ -100,6 +100,7 @@ public class OrderService {
         order.setCard(card.get());
         order.setAddress(address.get());
         order.setStatus(Order.Status.PAID);
+        order.setPaid(false);
         order= orderRepository.save(order);
         List<ClothesCart> clothesCarts = shoppingCart.get().getClothesCarts();
         List<ClothOrder> clothOrders = new ArrayList<>();
@@ -179,5 +180,24 @@ public class OrderService {
         }
 
         return new ResponseEntity<>(new CustomResponse<>(salesBySeller, false, HttpStatus.OK.value(), "Ventas por vendedor obtenidas correctamente.", salesBySeller.size()), HttpStatus.OK);
+    }
+
+    //paid order
+    @Transactional(rollbackFor = Exception.class)
+    public ResponseEntity<Object> confirmOrder(OrderDto orderDto) {
+        Optional<Order> order = orderRepository.findById(orderDto.getId());
+
+        if (order.isEmpty()){
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 404, "La orden no se encuentra registrada dentro del sistema", 0), HttpStatus.NOT_FOUND);
+        }
+
+        if (order.get().isPaid()){
+            return new ResponseEntity<>(new CustomResponse<>(null, true, 400, "La orden ya ha sido pagada", 0), HttpStatus.BAD_REQUEST);
+        }
+
+        order.get().setPaid(true);
+        orderRepository.save(order.get());
+
+        return new ResponseEntity<>(new CustomResponse<>(order.get(), false, 200, "Orden pagada correctamente", 1), HttpStatus.OK);
     }
 }

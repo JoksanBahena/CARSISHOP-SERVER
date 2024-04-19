@@ -23,30 +23,30 @@ public class SecurityConfig {
     private final AuthenticationProvider authProvider;
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
-    {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http.cors().and()
-            .csrf(AbstractHttpConfigurer::disable)
-            .authorizeHttpRequests(authRequest ->
-              authRequest
-                .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/captcha/**").permitAll()
-                .requestMatchers("/api/auth/**","/api/captcha/**").permitAll()
-                .requestMatchers("/api/address/**","/api/twilio/**").hasAnyAuthority(Role.SELLER.name(),Role.CUSTOMER.name(),Role.ADMIN.name())
-                .requestMatchers("/api/card/**","/api/order/makeOrder","/api/order/getOrders","/api/clothesCart/**").hasAnyAuthority(Role.SELLER.name(),Role.CUSTOMER.name())
-                .requestMatchers("/api/category/find-all","/api/subcategories/find-all","api/categories/all","/api/subcategories/all").permitAll()
-                .requestMatchers("/api/category/**","/api/subcategories/**","/api/users/find-all","/api/users/register-admin").hasAnyAuthority(Role.ADMIN.name())
-                .requestMatchers("/api/clothes/isAccepted","/api/sellers/find-all","/api/sellers/change-status").hasAnyAuthority(Role.ADMIN.name())
-                .requestMatchers("/api/clothes/find-all","/api/clothes/getOne/**","/api/clothes/getByCategory/**","/api/clothes/getByCategoryAndSubcategory/**","/api/clothes/getAllClothesOrderedByPrice").permitAll()
-                .requestMatchers("/api/images/**","/api/clothes/create","/api/clothes/update","/api/clothes/update/stock","/api/clothes/disable/**").hasAnyAuthority(Role.SELLER.name())
-                .requestMatchers("/api/order/updateStatus","/api/sellers/").hasAnyAuthority(Role.SELLER.name(),Role.CUSTOMER.name(),Role.ADMIN.name())
-                  .anyRequest().authenticated()
+                .csrf(AbstractHttpConfigurer::disable)
+                .authorizeHttpRequests(authRequest ->
+                        authRequest
+                                .requestMatchers("/api/auth/**").permitAll()
+                                .requestMatchers("/api/captcha/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/api/captcha/**").permitAll()
+                                .requestMatchers("/api/address/**", "/api/twilio/**").hasAnyAuthority(Role.SELLER.name(), Role.CUSTOMER.name(), Role.ADMIN.name())
+                                .requestMatchers("/api/card/**", "/api/order/makeOrder", "/api/order/getOrders", "api/order/confirm-order", "/api/clothesCart/**").hasAnyAuthority(Role.SELLER.name(), Role.CUSTOMER.name())
+                                .requestMatchers("/api/category/find-all", "/api/subcategories/find-all", "api/categories/all", "/api/subcategories/all").permitAll()
+                                .requestMatchers("/api/category/**", "/api/subcategories/**", "/api/users/find-all", "/api/users/register-admin").hasAnyAuthority(Role.ADMIN.name())
+                                .requestMatchers("/api/clothes/isAccepted", "/api/sellers/find-all", "/api/sellers/change-status").hasAnyAuthority(Role.ADMIN.name())
+                                .requestMatchers("/api/clothes/find-all", "/api/clothes/getOne/**", "/api/clothes/getByCategory/**", "/api/clothes/getByCategoryAndSubcategory/**", "/api/clothes/getAllClothesOrderedByPrice").permitAll()
+                                .requestMatchers("/api/images/**", "/api/clothes/create", "/api/clothes/update", "/api/clothes/update/stock", "/api/clothes/disable/**").hasAnyAuthority(Role.SELLER.name())
+                                .requestMatchers("/api/order/updateStatus", "/api/sellers/").hasAnyAuthority(Role.SELLER.name(), Role.CUSTOMER.name(), Role.ADMIN.name())
+                                .requestMatchers("api/payment/**").hasAnyAuthority(Role.SELLER.name(), Role.CUSTOMER.name(), Role.ADMIN.name())
+                                .anyRequest().authenticated()
                 )
-            .sessionManagement(sessionManager->
-                sessionManager
-                  .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .authenticationProvider(authProvider)
-            .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-            .build();
+                .sessionManagement(sessionManager ->
+                        sessionManager
+                                .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authenticationProvider(authProvider)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .build();
     }
 }

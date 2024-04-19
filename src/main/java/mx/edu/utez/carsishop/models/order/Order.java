@@ -50,6 +50,9 @@ public class Order {
     @OneToMany(mappedBy = "theorder")
     private List<ClothOrder> clothOrders;
 
+    @Column(name = "paid",nullable = false,columnDefinition = "boolean default false")
+    private boolean paid;
+
     public enum Status{
         PAID,
         IN_PROCESS,

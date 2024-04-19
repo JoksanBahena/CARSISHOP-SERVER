@@ -19,6 +19,9 @@ import java.security.NoSuchAlgorithmException;
 @Setter
 @Getter
 public class OrderDto {
+    @NotNull(groups = {PayOrder.class}, message = "El id es obligatorio")
+    private long id;
+
     @NotNull
     private String address;
     @NotNull
@@ -29,5 +32,8 @@ public class OrderDto {
     public void uncrypt() throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         this.address = cryptoService.decrypt(this.address);
         this.card = cryptoService.decrypt(this.card);
+    }
+
+    public interface PayOrder {
     }
 }

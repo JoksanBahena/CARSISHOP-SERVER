@@ -70,7 +70,7 @@ public class  UserController {
     }
 
     @PostMapping("/register-admin")
-    public ResponseEntity<CustomResponse<User>> registerAdmin(@Validated({UserDto.RegisterAdmin.class}) @RequestBody UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<Object> registerAdmin(@Validated({UserDto.RegisterAdmin.class}) @RequestBody UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
         return userService.registerAdmin(userDto);
     }
 }

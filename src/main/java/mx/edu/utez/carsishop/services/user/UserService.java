@@ -48,7 +48,9 @@ public class UserService {
     }
 
     @Transactional(rollbackFor = SQLException.class)
-    public ResponseEntity<CustomResponse<User>> registerAdmin(UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+    public ResponseEntity<Object> registerAdmin(UserDto userDto) throws InvalidAlgorithmParameterException, NoSuchPaddingException, IllegalBlockSizeException, NoSuchAlgorithmException, BadPaddingException, InvalidKeyException {
+
+
         userDto.setName(cryptoService.decrypt(userDto.getName()));
         userDto.setSurname(cryptoService.decrypt(userDto.getSurname()));
         userDto.setUsername(cryptoService.decrypt(userDto.getUsername()));

@@ -10,13 +10,20 @@ import java.util.List;
 import java.util.Optional;
 
 public interface OrderRepository extends JpaRepository<Order, Long> {
+    @Query(
+            value = "SELECT * FROM theorder WHERE address = ?1 AND paid = true ORDER BY at DESC LIMIT 1",
+            nativeQuery = true
+    )
     Optional<Order> findByAddress(Address address);
-    Optional<Order> findByCard(Card card);
-
-    //List<Order> findByUser(User user);
 
     @Query(
-            value = "SELECT * FROM theorder WHERE user = ? ORDER BY at DESC LIMIT 1",
+            value = "SELECT * FROM theorder WHERE card = ?1 AND paid = true ORDER BY at DESC LIMIT 1",
+            nativeQuery = true
+    )
+    Optional<Order> findByCard(Card card);
+
+    @Query(
+            value = "SELECT * FROM theorder WHERE user = ? and paid = true ORDER BY at DESC LIMIT 1",
             nativeQuery = true
     )
     Order findByUser(Long idUser);
