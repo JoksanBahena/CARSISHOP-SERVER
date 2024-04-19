@@ -4,6 +4,7 @@ import mx.edu.utez.carsishop.models.card.Card;
 import mx.edu.utez.carsishop.services.card.CardService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -17,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/card")
+@RequestMapping(path = "/api/card", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = {"*"})
 public class CardController {
 

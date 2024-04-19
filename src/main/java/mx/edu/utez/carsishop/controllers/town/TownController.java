@@ -5,6 +5,7 @@ import mx.edu.utez.carsishop.services.town.TownService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -14,7 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/town")
+@RequestMapping(path="/api/town", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin({"*"})
 public class TownController {
     private final TownService townService;

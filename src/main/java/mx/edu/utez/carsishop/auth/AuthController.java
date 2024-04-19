@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import mx.edu.utez.carsishop.controllers.user.UserDto;
 import mx.edu.utez.carsishop.utils.CryptoService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -15,7 +16,7 @@ import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 
 @RestController
-@RequestMapping("/api/auth")
+@RequestMapping(path="/api/auth", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin(origins = {"*"})
 @RequiredArgsConstructor
 public class AuthController {

@@ -5,6 +5,7 @@ import mx.edu.utez.carsishop.models.order.Order;
 import mx.edu.utez.carsishop.services.order.OrderService;
 import mx.edu.utez.carsishop.utils.CustomResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,7 +18,7 @@ import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/order")
+@RequestMapping(path="/api/order", produces = MediaType.APPLICATION_JSON_VALUE)
 @CrossOrigin({"*"})
 public class OrderController {
     private final OrderService orderService;

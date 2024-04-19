@@ -1,6 +1,7 @@
 package mx.edu.utez.carsishop.services.twilio;
 
 import com.twilio.Twilio;
+import com.twilio.exception.ApiException;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
 import org.springframework.beans.factory.annotation.Value;
@@ -16,13 +17,18 @@ public class TwilioService {
     @Value("${TWILIO_ACCOUNT_PHONE}")
     String phoneNumber;
 
-    public void sendSMS(String msj)  {
-        Twilio.init(sid, tokenTw);
+    public boolean sendSMS(String msj)  {
+        try {
+            Twilio.init(sid, tokenTw);
 
-        Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
-                new PhoneNumber(phoneNumber),
-                msj
-        ).create();
-
+            Message.creator(new PhoneNumber("whatsapp:+5217774239270"),
+                    new PhoneNumber(phoneNumber),
+                    msj
+            ).create();
+            return true;
+        }catch (ApiException e){
+            e.printStackTrace();
+            return false;
+        }
     }
 }
