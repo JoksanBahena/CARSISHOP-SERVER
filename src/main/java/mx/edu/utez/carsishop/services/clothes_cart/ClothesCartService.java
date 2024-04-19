@@ -12,6 +12,7 @@ import mx.edu.utez.carsishop.models.stock.Stock;
 import mx.edu.utez.carsishop.models.user.User;
 import mx.edu.utez.carsishop.models.user.UserRepository;
 import mx.edu.utez.carsishop.utils.CustomResponse;
+import org.checkerframework.checker.nullness.Opt;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,7 +53,9 @@ public class ClothesCartService {
     public CustomResponse<ClothesCart> addClothesCart(ClothesCartDto request, String jwtToken) {
         String username = jwtService.getUsernameFromToken(jwtToken);
         Optional<User> user=userRepository.findByUsername(username);
-
+        if(request.getAmount()<1){
+            return new CustomResponse<>(null,true,400,"La cantidad de prendas debe ser mayor a 0", 0);
+        }
         if (user.isPresent()){
             Optional<ShoppingCart> shoppingCart=shoppingCartRepository.findByUser(user.get());
             ClothesCart clothesCart=new ClothesCart();
@@ -68,8 +71,6 @@ public class ClothesCartService {
                     }
                 }
             }
-            clothesCart.setAmount(request.getAmount());
-            clothesCart.setClothes(request.getCloth());
             if(shoppingCart.isPresent()){
                 clothesCart.setShoppingCart(shoppingCart.get());
             }else{
@@ -78,7 +79,17 @@ public class ClothesCartService {
                 shoppingCartRepository.save(newShoppingCart);
                 clothesCart.setShoppingCart(newShoppingCart);
             }
+            Optional<ClothesCart> clothesCartOptional=clothesCartRepository.findByShoppingCartAndClothesAndSize(clothesCart.getShoppingCart(),request.getCloth(),request.getSize());
+            if(clothesCartOptional.isPresent()){
+                clothesCart=clothesCartOptional.get();
+                clothesCart.setAmount(clothesCart.getAmount()+request.getAmount());
+                return new CustomResponse<>(clothesCartRepository.save(clothesCart),false,200,"ok", 1);
+            }
+            clothesCart.setAmount(request.getAmount());
+            clothesCart.setClothes(request.getCloth());
+
             clothesCart.setSize(request.getSize());
+
             return new CustomResponse<>(clothesCartRepository.save(clothesCart),false,200,"ok", 1);
         }
         return new CustomResponse<>(null,true,400,"Usuario no encontrado dentro del sistema", 0);
