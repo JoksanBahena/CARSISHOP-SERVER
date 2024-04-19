@@ -159,7 +159,7 @@ public class ClothesService {
         if(clothesOptional.isEmpty()) {
             return new CustomResponse<>(null, true, 400, CLOTHE_NOT_FOUND, 0);
         }
-        clothesOptional.get().setStatus(false);
+        clothesOptional.get().setStatus(!clothesOptional.get().isStatus());
         return new CustomResponse<>(clothesRepository.save(clothesOptional.get()), false, 200, "El estatus de la prenda ha sido actualizado con éxito", 0);
     }
 
